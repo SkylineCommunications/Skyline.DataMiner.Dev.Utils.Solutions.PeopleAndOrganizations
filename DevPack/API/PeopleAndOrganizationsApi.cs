@@ -4,7 +4,8 @@
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
-    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
 
     /// <summary>
     /// Provides the main entry point for interacting with the People and Organizations API.
@@ -14,23 +15,40 @@
         private readonly IConnection connection;
 
         private readonly InstalledAppPackageCache installedAppPackages;
+		private readonly DomHelpers domHelpers;
 
-        private ILogger logger;
+		private readonly Lazy<IOrganizationsRepository> lazyOrganizationsRepository;
+		private readonly Lazy<IPeopleRepository> lazyPeopleRepository;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PeopleAndOrganizationsApi"/> class.
-        /// </summary>
-        /// <param name="connection">The connection to use for API operations.</param>
-        public PeopleAndOrganizationsApi(IConnection connection)
+		private ILogger logger;
+
+        internal PeopleAndOrganizationsApi(IConnection connection)
         {
             this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
             this.logger = new NullLogger();
 
             installedAppPackages = new InstalledAppPackageCache(connection);
-        }
 
-        /// <inheritdoc/>
-        public bool IsInstalled(out string version)
+			domHelpers = new DomHelpers(connection);
+
+			lazyOrganizationsRepository = new Lazy<IOrganizationsRepository>(() => new OrganizationsRepository(this));
+			lazyPeopleRepository = new Lazy<IPeopleRepository>(() => new PeopleRepository(this));
+		}
+
+		/// <inheritdoc/>
+		public IOrganizationsRepository Organizations => lazyOrganizationsRepository.Value;
+
+		/// <inheritdoc/>
+		public IPeopleRepository People => lazyPeopleRepository.Value;
+
+		internal IConnection Connection => connection;
+
+		internal ILogger Logger => logger;
+
+		internal DomHelpers DomHelpers => domHelpers;
+
+		/// <inheritdoc/>
+		public bool IsInstalled(out string version)
         {
             var isInstalled = installedAppPackages.IsInstalled("SLC-S-MediaOps", out var installedAppInfo);
             version = isInstalled ? installedAppInfo?.AppInfo?.Version : null;

@@ -7,13 +7,23 @@
     /// </summary>
     public interface IPeopleAndOrganizationsApi
     {
-        /// <summary>
-        /// Determines whether the People and Organizations application is installed on the DataMiner System.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if the application is installed; otherwise, <c>false</c>.
-        /// </returns>
-        bool IsInstalled();
+		/// <summary>
+		/// Gets the repository for managing organizations.
+		/// </summary>
+		IOrganizationsRepository Organizations { get; }
+
+		/// <summary>
+		/// Gets the repository for managing people.
+		/// </summary>
+		IPeopleRepository People { get; }
+
+		/// <summary>
+		/// Determines whether the People and Organizations application is installed on the DataMiner System.
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if the application is installed; otherwise, <c>false</c>.
+		/// </returns>
+		bool IsInstalled();
 
         /// <summary>
         /// Determines whether the People and Organizations application is installed on the DataMiner System.
