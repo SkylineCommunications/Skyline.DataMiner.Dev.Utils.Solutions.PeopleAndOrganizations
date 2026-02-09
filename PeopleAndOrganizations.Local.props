@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Local Developer Configuration - DO NOT COMMIT TO GIT -->
+  
+  <PropertyGroup>
+    <!-- Enable local development mode -->
+    <PeopleAndOrganizationsLocalDevMode>true</PeopleAndOrganizationsLocalDevMode>
+    
+    <!-- Output paths -->
+    <PeopleAndOrganizationsNuGetOutputPath>C:\Skyline_Data\MyNugets</PeopleAndOrganizationsNuGetOutputPath>
+    
+    <!-- Single shared version for all P&O projects -->
+    <PeopleAndOrganizationsVersion>1.0.1.2</PeopleAndOrganizationsVersion>
+  </PropertyGroup>
+</Project>

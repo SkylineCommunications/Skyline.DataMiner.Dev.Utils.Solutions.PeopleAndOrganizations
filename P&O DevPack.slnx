@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="DevPack/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
+  <Project Path="DevPack.Automation/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Automation.csproj" Id="b47f4dfe-7c8d-48f8-8853-295265ebfb4c" />
+  <Project Path="DevPack.GQI/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.GQI.csproj" Id="3264093f-912b-4a83-95ef-d38db96c4402" />
+  <Project Path="DevPack.Protocol/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol.csproj" Id="95cb9011-15c6-4438-a9c9-7312ebc91bc9" />
+</Solution>

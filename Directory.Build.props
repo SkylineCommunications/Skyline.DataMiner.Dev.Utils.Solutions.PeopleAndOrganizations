@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Import local developer configuration if it exists -->
+  <PropertyGroup>
+    <PeopleAndOrganizationsLocalPropsFile>$(MSBuildThisFileDirectory)PeopleAndOrganizations.Local.props</PeopleAndOrganizationsLocalPropsFile>
+    <PeopleAndOrganizationsHasLocalConfig Condition="Exists('$(PeopleAndOrganizationsLocalPropsFile)')">true</PeopleAndOrganizationsHasLocalConfig>
+    <PeopleAndOrganizationsHasLocalConfig Condition="'$(PeopleAndOrganizationsHasLocalConfig)' == ''">false</PeopleAndOrganizationsHasLocalConfig>
+  </PropertyGroup>
+  
+  <!-- Import local configuration -->
+  <Import Project="$(PeopleAndOrganizationsLocalPropsFile)" Condition="$(PeopleAndOrganizationsHasLocalConfig)" />
+  
+  <!-- Default values if local config doesn't exist -->
+  <PropertyGroup Condition="'$(PeopleAndOrganizationsHasLocalConfig)' != 'true'">
+    <PeopleAndOrganizationsLocalDevMode>false</PeopleAndOrganizationsLocalDevMode>
+    <PeopleAndOrganizationsVersion>1.0.1-alpha1</PeopleAndOrganizationsVersion>
+  </PropertyGroup>	
+<ItemGroup>
+	<SonarQubeSetting Include="sonar.cpd.exclusions">
+		<Value>**/*</Value>
+	</SonarQubeSetting>
+</ItemGroup>
+</Project>
