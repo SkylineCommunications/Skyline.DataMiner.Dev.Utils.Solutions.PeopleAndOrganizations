@@ -23,7 +23,7 @@
                 throw new ArgumentNullException(nameof(protocol));
             }
 
-            return new PeopleAndOrganizationsApi(protocol.GetUserConnection());
+            return protocol.GetUserConnection().GetPeopleAndOrganizationsApi();
         }
     }
 }
