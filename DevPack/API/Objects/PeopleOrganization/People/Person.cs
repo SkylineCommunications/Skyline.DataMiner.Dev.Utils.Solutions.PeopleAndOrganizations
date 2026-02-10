@@ -18,14 +18,9 @@
         }
 
         /// <summary>
-        /// Gets or sets the name of the person.
+        /// Gets or sets the full name of the person.
         /// </summary>
         public override string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the profile image of the person.
-        /// </summary>
-        public string ProfileImage { get; set; }
 
         /// <summary>
         /// Gets os sets the Organization ID of the person.
@@ -37,7 +32,6 @@
             this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
             Name = instance.PeopleInformation.FullName;
-            ProfileImage = instance.PeopleInformation.ProfileImage;
             OrganizationId = instance.Organization.OrganizationId;
         }
     }

@@ -22,17 +22,11 @@
         /// </summary>
         public override string Name { get; set; }
 
-        /// <summary>
-        /// Gets or sets the icon of the organization.
-        /// </summary>
-        public string IconImage { get; set; }
-
         private void ParseInstance(StoragePeopleAndOrganizations.OrganizationsInstance instance)
         {
             this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
             Name = instance.OrganizationInformation.OrganizationName;
-            IconImage = instance.OrganizationInformation.Icon;
         }
     }
 }
