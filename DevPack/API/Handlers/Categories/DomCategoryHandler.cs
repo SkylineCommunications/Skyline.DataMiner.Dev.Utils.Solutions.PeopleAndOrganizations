@@ -375,6 +375,8 @@
 					Id = category.Id,
 					OrganizationIds = organizations.Select(x => x.Id).ToList(),
 				};
+
+				ReportError(category.Id, error);
 			}
 		}
 
