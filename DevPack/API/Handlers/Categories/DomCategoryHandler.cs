@@ -358,13 +358,13 @@
 
 			var organizationsImplementingCategories = api.Organizations.Read(filter);
 
-			var OrganizationsByCategoryId = organizationsImplementingCategories
+			var organizationsByCategoryId = organizationsImplementingCategories
 				.GroupBy(x => x.CategoryId)
 				.ToDictionary(x => x.Key, x => x.ToList());
 
 			foreach (var category in apiCategories)
 			{
-				if (!OrganizationsByCategoryId.TryGetValue(category.Id, out var organizations))
+				if (!organizationsByCategoryId.TryGetValue(category.Id, out var organizations))
 				{
 					continue;
 				}
