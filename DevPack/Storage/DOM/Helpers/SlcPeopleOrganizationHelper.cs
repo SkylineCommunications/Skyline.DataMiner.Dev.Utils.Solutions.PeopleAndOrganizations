@@ -176,6 +176,56 @@
 				x => GetRoleIterator(x));
 		}
 
+		public IEnumerable<CategoryInstance> GetCategories(FilterElement<DomInstance> filter)
+		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return GetCategoryIterator(filter);
+		}
+
+		public IEnumerable<CategoryInstance> GetCategories(IEnumerable<Guid> ids)
+		{
+			if (ids == null)
+			{
+				throw new ArgumentNullException(nameof(ids));
+			}
+
+			if (!ids.Any())
+			{
+				return Enumerable.Empty<CategoryInstance>();
+			}
+
+			FilterElement<DomInstance> filter(Guid id) =>
+				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Category.Id)
+				.AND(DomInstanceExposers.Id.Equal(id));
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				ids.Distinct(),
+				x => filter(x),
+				x => GetCategoryIterator(x));
+		}
+
+		public IEnumerable<CategoryInstance> GetCategories<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException(nameof(values));
+			}
+
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				values.Distinct(),
+				x => filter(x),
+				x => GetCategoryIterator(x));
+		}
+
 		public IEnumerable<DomInstance> GetPeopleOrganizationInstances(IEnumerable<Guid> ids)
 		{
 			if (ids == null)
@@ -210,6 +260,22 @@
 			return InstanceFactory.CreateInstances(pages, instance => new RoleInstance(instance));
 		}
 
+		internal IEnumerable<IEnumerable<CategoryInstance>> GetCategoriesPaged(FilterElement<DomInstance> paramFilter, int pageSize)
+		{
+			if (paramFilter == null)
+			{
+				throw new ArgumentNullException(nameof(paramFilter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize));
+			}
+
+			var pages = DomHelper.DomInstances.ReadPaged(paramFilter, pageSize);
+			return InstanceFactory.CreateInstances(pages, instance => new CategoryInstance(instance));
+		}
+
 		private IEnumerable<OrganizationsInstance> GetOrganizationIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new OrganizationsInstance(instance));
@@ -223,6 +289,11 @@
 		private IEnumerable<RoleInstance> GetRoleIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new RoleInstance(instance));
+		}
+
+		private IEnumerable<CategoryInstance> GetCategoryIterator(FilterElement<DomInstance> filter)
+		{
+			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new CategoryInstance(instance));
 		}
 	}
 }
