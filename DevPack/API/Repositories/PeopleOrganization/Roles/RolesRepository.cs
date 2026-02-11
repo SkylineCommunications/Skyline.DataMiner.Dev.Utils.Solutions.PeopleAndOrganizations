@@ -63,7 +63,7 @@
 		{
 			if (oToCreate == null)
 			{
-				throw new ArgumentNullException(nameof(ApiObject));
+				throw new ArgumentNullException(nameof(oToCreate));
 			}
 
 			if (!oToCreate.IsNew)

@@ -92,10 +92,10 @@
 				.Select(x => new DomRole(x.Instance))
 				.ToList();
 
-			CreateOrUpdate(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
-		private void CreateOrUpdate(ICollection<DomRole> domRoles)
+		private void CreateOrUpdateDom(ICollection<DomRole> domRoles)
 		{
 			if (domRoles == null)
 			{
