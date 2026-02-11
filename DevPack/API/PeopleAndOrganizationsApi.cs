@@ -1,24 +1,25 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
-    using System;
+	using System;
 
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
 
-    /// <summary>
-    /// Provides the main entry point for interacting with the People and Organizations API.
-    /// </summary>
-    public class PeopleAndOrganizationsApi : IPeopleAndOrganizationsApi
-    {
-        private readonly IConnection connection;
+	/// <summary>
+	/// Provides the main entry point for interacting with the People and Organizations API.
+	/// </summary>
+	public class PeopleAndOrganizationsApi : IPeopleAndOrganizationsApi
+	{
+		private readonly IConnection connection;
 
         private readonly InstalledAppPackageCache installedAppPackages;
 		private readonly DomHelpers domHelpers;
 
 		private readonly Lazy<IOrganizationsRepository> lazyOrganizationsRepository;
 		private readonly Lazy<IPeopleRepository> lazyPeopleRepository;
+		private readonly Lazy<PeopleAndOrganizations.Tools.LockManager> lazyLockManager;
 
 		private ILogger logger;
 
@@ -33,6 +34,7 @@
 
 			lazyOrganizationsRepository = new Lazy<IOrganizationsRepository>(() => new OrganizationsRepository(this));
 			lazyPeopleRepository = new Lazy<IPeopleRepository>(() => new PeopleRepository(this));
+			lazyLockManager = new Lazy<PeopleAndOrganizations.Tools.LockManager>(() => new PeopleAndOrganizations.Tools.LockManager(this));
 		}
 
 		/// <inheritdoc/>
@@ -41,11 +43,15 @@
 		/// <inheritdoc/>
 		public IPeopleRepository People => lazyPeopleRepository.Value;
 
+		internal static readonly int DefaultPageSize = 200;
+
 		internal IConnection Connection => connection;
 
 		internal ILogger Logger => logger;
 
 		internal DomHelpers DomHelpers => domHelpers;
+
+		internal PeopleAndOrganizations.Tools.LockManager LockManager => lazyLockManager.Value;
 
 		/// <inheritdoc/>
 		public bool IsInstalled(out string version)
