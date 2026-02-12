@@ -1,0 +1,29 @@
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseVSTest>true</UseVSTest>
+		<RootNamespace>RT_PeopleAndOrganizations</RootNamespace>
+		<UserSecretsId>a90db3b8-1e54-4851-8b42-cca25278bee8</UserSecretsId>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.1" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.5.11.1" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DevPack\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
+	</ItemGroup>
+
+</Project>

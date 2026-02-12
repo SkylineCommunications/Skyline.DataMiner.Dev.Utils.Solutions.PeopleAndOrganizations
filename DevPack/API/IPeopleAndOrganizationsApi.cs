@@ -18,6 +18,21 @@
 		IPeopleRepository People { get; }
 
 		/// <summary>
+		/// Gets the repository for managing experience.
+		/// </summary>
+		IExperienceRepository Experience { get; }
+
+		/// <summary>
+		/// Gets the repository for managing categories.
+		/// </summary>
+		ICategoriesRepository Categories { get; }
+
+		/// <summary>
+		/// Gets the repository for managing roles.
+		/// </summary>
+		IRolesRepository Roles { get; }
+
+		/// <summary>
 		/// Determines whether the People and Organizations application is installed on the DataMiner System.
 		/// </summary>
 		/// <returns>

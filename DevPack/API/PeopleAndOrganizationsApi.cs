@@ -19,6 +19,9 @@
 
 		private readonly Lazy<IOrganizationsRepository> lazyOrganizationsRepository;
 		private readonly Lazy<IPeopleRepository> lazyPeopleRepository;
+		private readonly Lazy<IExperienceRepository> lazyExperienceRepository;
+		private readonly Lazy<ICategoriesRepository> lazyCategoriesRepository;
+		private readonly Lazy<IRolesRepository> lazyRolesRepository;
 		private readonly Lazy<PeopleAndOrganizations.Tools.LockManager> lazyLockManager;
 
 		private ILogger logger;
@@ -34,6 +37,9 @@
 
 			lazyOrganizationsRepository = new Lazy<IOrganizationsRepository>(() => new OrganizationsRepository(this));
 			lazyPeopleRepository = new Lazy<IPeopleRepository>(() => new PeopleRepository(this));
+			lazyExperienceRepository = new Lazy<IExperienceRepository>(() => new ExperienceRepository(this));
+			lazyCategoriesRepository = new Lazy<ICategoriesRepository>(() => new CategoriesRepository(this));
+			lazyRolesRepository = new Lazy<IRolesRepository>(() => new RolesRepository(this));
 			lazyLockManager = new Lazy<PeopleAndOrganizations.Tools.LockManager>(() => new PeopleAndOrganizations.Tools.LockManager(this));
 		}
 
@@ -42,6 +48,15 @@
 
 		/// <inheritdoc/>
 		public IPeopleRepository People => lazyPeopleRepository.Value;
+
+		/// <inheritdoc/>
+		public IExperienceRepository Experience => lazyExperienceRepository.Value;
+
+		/// <inheritdoc/>
+		public ICategoriesRepository Categories => lazyCategoriesRepository.Value;
+
+		/// <inheritdoc/>
+		public IRolesRepository Roles => lazyRolesRepository.Value;
 
 		internal static readonly int DefaultPageSize = 200;
 
