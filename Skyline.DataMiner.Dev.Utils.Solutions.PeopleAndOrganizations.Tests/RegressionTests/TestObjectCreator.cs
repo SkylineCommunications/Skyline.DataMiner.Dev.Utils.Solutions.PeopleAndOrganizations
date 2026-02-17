@@ -56,12 +56,24 @@
 
 		private void ExperienceCleanup()
 		{
+			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
 
+			Api.Experience.Delete(experience.ToArray());
 		}
 
-		private void CategoriesCleanup() { }
+		private void CategoriesCleanup()
+		{
+			var categories = Api.Categories.Read(createdCategoryIds.ToArray());
 
-		private void RolesCleanup() { }
+			Api.Categories.Delete(categories.ToArray());
+		}
+
+		private void RolesCleanup()
+		{
+			var roles = Api.Roles.Read(createdRoleIds.ToArray());
+
+			Api.Roles.Delete(roles.ToArray());
+		}
 
 		public Experience CreateExperience(Experience experience)
 		{
