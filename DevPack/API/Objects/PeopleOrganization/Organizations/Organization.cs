@@ -2,7 +2,9 @@
 {
     using System;
 
-    using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
+
+	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
 
     /// <summary>
     /// Represents an organization in People and Organizations.
@@ -27,6 +29,11 @@
 		/// Gets or sets the ID of the category associated with the organization.
 		/// </summary>
 		public Guid CategoryId { get; set; }
+
+		/// <summary>
+		/// Gets the state of the organization.
+		/// </summary>
+		public OrganizationState State { get; private set; }
 
 		internal StoragePeopleAndOrganizations.OrganizationsInstance OriginalInstance => originalInstance;
 
@@ -78,6 +85,9 @@
 
             Name = instance.OrganizationInformation.OrganizationName;
 			CategoryId = instance.OrganizationInformation.Category ?? Guid.Empty;
-        }
+
+			State = EnumExtensions.MapEnum< StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum, OrganizationState>(instance.Status);
+
+		}
     }
 }

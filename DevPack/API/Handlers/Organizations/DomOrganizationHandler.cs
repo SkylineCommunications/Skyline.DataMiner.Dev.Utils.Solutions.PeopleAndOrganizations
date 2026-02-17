@@ -2,20 +2,14 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
-
-	using static Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections;
 
 	using domOrganization = Storage.DOM.SlcPeople_Organizations.OrganizationsInstance;
 
@@ -34,7 +28,33 @@
 			handler.CreateOrUpdate(apiOrganizations);
 
 			result = new DomInstanceBulkOperationResult<domOrganization>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
 
+		internal static bool TryActivate(PeopleAndOrganizationsApi api, ICollection<Organization> apiOrganizations, out DomInstanceBulkOperationResult<domOrganization> result)
+		{
+			var handler = new DomOrganizationHandler(api);
+			handler.TransitionToActiveFromDraft(apiOrganizations);
+
+			result = new DomInstanceBulkOperationResult<domOrganization>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
+
+		internal static bool TryDeprecate(PeopleAndOrganizationsApi api, ICollection<Organization> apiOrganizations, out DomInstanceBulkOperationResult<domOrganization> result)
+		{
+			var handler = new DomOrganizationHandler(api);
+			handler.TransitionToDeprecated(apiOrganizations);
+
+			result = new DomInstanceBulkOperationResult<domOrganization>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
+
+		internal static bool TryDelete(PeopleAndOrganizationsApi api, ICollection<Organization> apiOrganizations, out DomInstanceBulkOperationResult<domOrganization> result)
+		{
+			var handler = new DomOrganizationHandler(api);
+			handler.Delete(apiOrganizations);
+
+			result = new DomInstanceBulkOperationResult<domOrganization>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
 			return !result.HasFailures;
 		}
 
@@ -119,6 +139,127 @@
 			ReportSuccess(domResult.SuccessfulItems.Select(x => new domOrganization(x)));
 		}
 
+		private void TransitionToActiveFromDraft(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			ValidateStateForActiveFromDraftAction(apiOrganizations);
+
+			var toTransition = apiOrganizations.Where(IsValid).ToList();
+			foreach (var organization in toTransition)
+			{
+				try
+				{
+					var transitionedInstance = api.DomHelpers.SlcPeopleOrganizationHelper.DomHelper.DomInstances.DoStatusTransition(organization.OriginalInstance.ID, SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Transitions.Draft_To_Active);
+					ReportSuccess(new domOrganization(transitionedInstance));
+				}
+				catch (Exception ex)
+				{
+					ReportError(organization.Id, new PeopleAndOrganizationsErrorData() { ErrorMessage = ex.ToString() });
+				}
+			}
+		}
+
+		private void TransitionToDeprecated(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			ValidateStateForDeprecateAction(apiOrganizations);
+			ValidateOrganizationsAreNotInUse(apiOrganizations.Where(IsValid).ToArray());
+
+			var toTransition = apiOrganizations.Where(IsValid).ToList();
+			foreach (var organization in toTransition)
+			{
+				try
+				{
+					var transitionedInstance = api.DomHelpers.SlcPeopleOrganizationHelper.DomHelper.DomInstances.DoStatusTransition(organization.OriginalInstance.ID, SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Transitions.Active_To_Deprecated);
+					ReportSuccess(new domOrganization(transitionedInstance));
+				}
+				catch (Exception ex)
+				{
+					ReportError(organization.Id, new PeopleAndOrganizationsErrorData() { ErrorMessage = ex.ToString() });
+				}
+			}
+		}
+
+		private void Delete(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			var newOrganizations = apiOrganizations.Where(x => x.IsNew).ToList();
+			newOrganizations.ForEach(x =>
+			{
+				var error = new OrganizationInvalidStateError
+				{
+					ErrorMessage = $"An organization that was not saved cannot be removed.",
+					Id = x.Id,
+				};
+
+				ReportError(x.Id, error);
+			});
+
+			apiOrganizations = apiOrganizations.Except(newOrganizations).ToList();
+
+			ValidateStateForDeleteAction(apiOrganizations);
+
+			var toDelete = apiOrganizations.Where(IsValid).ToList();
+			var lockResult = api.LockManager.LockAndExecute(toDelete, DeleteLocked);
+			ReportError(lockResult);
+		}
+
+		private void DeleteLocked(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Any(x => !IsValid(x)))
+			{
+				throw new ArgumentException($"Not all provided organizations are valid", nameof(apiOrganizations));
+			}
+
+			var toDelete = apiOrganizations.Select(x => x.OriginalInstance.ToInstance()).ToList();
+			api.DomHelpers.SlcPeopleOrganizationHelper.DomHelper.DomInstances.TryDeleteInBatches(toDelete, out var domResult);
+
+			foreach (var id in domResult.UnsuccessfulIds)
+			{
+				ReportError(id.Id);
+
+				if (domResult.TraceDataPerItem.TryGetValue(id, out var traceData))
+				{
+					var peopleOrganizationsTraceData = new PeopleAndOrganizationsTraceData();
+					peopleOrganizationsTraceData.Add(new PeopleAndOrganizationsErrorData() { ErrorMessage = traceData.ToString() });
+				}
+			}
+
+			ReportSuccess(toDelete.Where(x => domResult.SuccessfulIds.Contains(x.ID)).Select(x => new domOrganization(x)));
+		}
+
 		private void ValidateIdsNotInUse(ICollection<Organization> apiOrganizations)
 		{
 			if (apiOrganizations == null)
@@ -167,6 +308,75 @@
 				};
 
 				ReportError(foundInstance.ID.Id, error);
+			}
+		}
+
+		private void ValidateStateForActiveFromDraftAction(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var Organization in apiOrganizations.Where(x => x.State != OrganizationState.Draft))
+			{
+				var error = new OrganizationInvalidStateError
+				{
+					ErrorMessage = "Not allowed to activate an organization that is not in Draft state.",
+					Id = Organization.Id,
+				};
+				ReportError(Organization.Id, error);
+			}
+		}
+
+		private void ValidateStateForDeprecateAction(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var Organization in apiOrganizations.Where(x => x.State != OrganizationState.Active))
+			{
+				var error = new OrganizationInvalidStateError
+				{
+					ErrorMessage = "Not allowed to deprecate an organization that is not in Active state.",
+					Id = Organization.Id,
+				};
+				ReportError(Organization.Id, error);
+			}
+		}
+
+		private void ValidateStateForDeleteAction(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var Organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Deprecated }.Contains(x.State)))
+			{
+				var error = new OrganizationInvalidStateError
+				{
+					ErrorMessage = "Not allowed to delete an organization that is not in Draft or Deprecated state.",
+					Id = Organization.Id,
+				};
+				ReportError(Organization.Id, error);
 			}
 		}
 
@@ -270,6 +480,46 @@
 					ErrorMessage = "Name is already in use.",
 					Id = organization.Id,
 					Name = organization.Name,
+				};
+
+				ReportError(organization.Id, error);
+			}
+		}
+
+		private void ValidateOrganizationsAreNotInUse(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			var filter = new ORFilterElement<Person>(apiOrganizations
+				.Select(x => PersonExposers.OrganizationId.Equal(x.Id))
+				.ToArray());
+
+			var peopleImplementingOrganizations = api.People.Read(filter);
+
+			var peopleByOrganizationId = peopleImplementingOrganizations
+				.GroupBy(x => x.OrganizationId)
+				.ToDictionary(x => x.Key, x => x.ToList());
+
+			foreach (var organization in apiOrganizations)
+			{
+				if (!peopleByOrganizationId.TryGetValue(organization.Id, out var people))
+				{
+					continue;
+				}
+
+				var error = new OrganizationInUseError
+				{
+					ErrorMessage = $"Organization '{organization.Name}' is in use by {people.Count} person/people.",
+					Id = organization.Id,
+					PeopleIds = people.Select(x => x.Id).ToList(),
 				};
 
 				ReportError(organization.Id, error);
