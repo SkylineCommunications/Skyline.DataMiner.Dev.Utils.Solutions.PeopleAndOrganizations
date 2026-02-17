@@ -15,6 +15,7 @@
 		{
 			[OrganizationExposers.Id.fieldName] = HandleGuid,
 			[OrganizationExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName), comparer, (string)value),
+			[OrganizationExposers.CategoryId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Category), comparer, (Guid)value),
 		};
 
 		protected override Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> Handlers => handlers;

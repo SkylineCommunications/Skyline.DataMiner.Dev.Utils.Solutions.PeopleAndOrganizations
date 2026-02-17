@@ -18,5 +18,10 @@
 		/// Gets an exposer for the <see cref="Organization.Name"/> property.
 		/// </summary>
 		public static readonly Exposer<Organization, string> Name = new Exposer<Organization, string>((obj) => obj.Name, "Name");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Organization.CategoryId"/> property.
+		/// </summary>
+		public static readonly Exposer<Organization, Guid> CategoryId = new Exposer<Organization, Guid>((obj) => obj.CategoryId, "CategoryId");
 	}
 }

@@ -22,11 +22,17 @@
         /// </summary>
         public override string Name { get; set; }
 
+		/// <summary>
+		/// Gets or sets the ID of the category associated with the organization.
+		/// </summary>
+		public Guid CategoryId { get; set; }
+
         private void ParseInstance(StoragePeopleAndOrganizations.OrganizationsInstance instance)
         {
             this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
             Name = instance.OrganizationInformation.OrganizationName;
+			CategoryId = instance.OrganizationInformation.Category ?? Guid.Empty;
         }
     }
 }
