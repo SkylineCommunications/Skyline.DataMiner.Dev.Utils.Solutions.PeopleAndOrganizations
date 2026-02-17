@@ -226,6 +226,56 @@
 				x => GetCategoryIterator(x));
 		}
 
+		public IEnumerable<ExperienceInstance> GetExperience(FilterElement<DomInstance> filter)
+		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return GetExperienceIterator(filter);
+		}
+
+		public IEnumerable<ExperienceInstance> GetExperience(IEnumerable<Guid> ids)
+		{
+			if (ids == null)
+			{
+				throw new ArgumentNullException(nameof(ids));
+			}
+
+			if (!ids.Any())
+			{
+				return Enumerable.Empty<ExperienceInstance>();
+			}
+
+			FilterElement<DomInstance> filter(Guid id) =>
+				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Experience.Id)
+				.AND(DomInstanceExposers.Id.Equal(id));
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				ids.Distinct(),
+				x => filter(x),
+				x => GetExperienceIterator(x));
+		}
+
+		public IEnumerable<ExperienceInstance> GetExperience<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException(nameof(values));
+			}
+
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				values.Distinct(),
+				x => filter(x),
+				x => GetExperienceIterator(x));
+		}
+
 		public IEnumerable<DomInstance> GetPeopleOrganizationInstances(IEnumerable<Guid> ids)
 		{
 			if (ids == null)
@@ -276,6 +326,22 @@
 			return InstanceFactory.CreateInstances(pages, instance => new CategoryInstance(instance));
 		}
 
+		internal IEnumerable<IEnumerable<ExperienceInstance>> GetExperiencePaged(FilterElement<DomInstance> paramFilter, int pageSize)
+		{
+			if (paramFilter == null)
+			{
+				throw new ArgumentNullException(nameof(paramFilter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize));
+			}
+
+			var pages = DomHelper.DomInstances.ReadPaged(paramFilter, pageSize);
+			return InstanceFactory.CreateInstances(pages, instance => new ExperienceInstance(instance));
+		}
+
 		private IEnumerable<OrganizationsInstance> GetOrganizationIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new OrganizationsInstance(instance));
@@ -294,6 +360,11 @@
 		private IEnumerable<CategoryInstance> GetCategoryIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new CategoryInstance(instance));
+		}
+
+		private IEnumerable<ExperienceInstance> GetExperienceIterator(FilterElement<DomInstance> filter)
+		{
+			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new ExperienceInstance(instance));
 		}
 	}
 }

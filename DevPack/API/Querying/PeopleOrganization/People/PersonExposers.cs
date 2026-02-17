@@ -20,6 +20,11 @@
 		public static readonly Exposer<Person, string> Name = new Exposer<Person, string>((obj) => obj.Name, "Name");
 
 		/// <summary>
+		/// Gets an exposer for the <see cref="Person.ExperienceId"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, Guid> ExperienceId = new Exposer<Person, Guid>((obj) => obj.ExperienceId, "ExperienceId");
+
+		/// <summary>
 		/// Gets an exposer for the <see cref="Person.OrganizationId"/> property.
 		/// </summary>
 		public static readonly Exposer<Person, Guid> OrganizationId = new Exposer<Person, Guid>((obj) => obj.OrganizationId, "OrganizationId");

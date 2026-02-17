@@ -22,8 +22,13 @@
         /// </summary>
         public override string Name { get; set; }
 
+		/// <summary>
+		/// Gets or sets the Experience ID of the person.
+		/// </summary>
+		public Guid ExperienceId { get; set; }
+
         /// <summary>
-        /// Gets os sets the Organization ID of the person.
+        /// Gets or sets the Organization ID of the person.
         /// </summary>
         public Guid OrganizationId { get; set; }
 
@@ -32,6 +37,7 @@
             this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
             Name = instance.PeopleInformation.FullName;
+			ExperienceId = instance.PeopleInformation.ExperienceLevel ?? Guid.Empty;
             OrganizationId = instance.Organization.OrganizationId;
         }
     }
