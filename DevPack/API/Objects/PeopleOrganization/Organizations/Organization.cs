@@ -10,8 +10,9 @@
     public class Organization : ApiObject
     {
         private StoragePeopleAndOrganizations.OrganizationsInstance originalInstance;
+		private StoragePeopleAndOrganizations.OrganizationsInstance updatedInstance;
 
-        internal Organization(StoragePeopleAndOrganizations.OrganizationsInstance instance) : base(instance.ID.Id)
+		internal Organization(StoragePeopleAndOrganizations.OrganizationsInstance instance) : base(instance.ID.Id)
         {
             ParseInstance(instance);
             InitTracking();
@@ -27,7 +28,51 @@
 		/// </summary>
 		public Guid CategoryId { get; set; }
 
-        private void ParseInstance(StoragePeopleAndOrganizations.OrganizationsInstance instance)
+		internal StoragePeopleAndOrganizations.OrganizationsInstance OriginalInstance => originalInstance;
+
+		/// <inheritdoc/>
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				int hash = 17;
+				hash = (hash * 23) + Id.GetHashCode();
+				hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+				hash = (hash * 23) + CategoryId.GetHashCode();
+
+				return hash;
+			}
+		}
+
+		/// <summary>
+		/// Determines whether the specified object is equal to the current Organization instance.
+		/// </summary>
+		public override bool Equals(object obj)
+		{
+			if (obj is not Organization other)
+			{
+				return false;
+			}
+
+			return Id == other.Id &&
+				   Name == other.Name &&
+				   CategoryId == other.CategoryId;
+		}
+
+		internal StoragePeopleAndOrganizations.OrganizationsInstance GetInstanceWithChanges()
+		{
+			if (updatedInstance == null)
+			{
+				updatedInstance = IsNew ? new StoragePeopleAndOrganizations.OrganizationsInstance(Id) : originalInstance.Clone();
+			}
+
+			updatedInstance.OrganizationInformation.OrganizationName = Name;
+			updatedInstance.OrganizationInformation.Category = CategoryId != Guid.Empty ? CategoryId : null;
+
+			return updatedInstance;
+		}
+
+		private void ParseInstance(StoragePeopleAndOrganizations.OrganizationsInstance instance)
         {
             this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
