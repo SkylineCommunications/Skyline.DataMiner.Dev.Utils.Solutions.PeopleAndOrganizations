@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -71,7 +72,9 @@
 			}
 
 			ValidateIdsNotInUse(apiOrganizations.Where(x => x.IsNew).ToArray());
+			ValidateStateForUpdateAction(apiOrganizations.Where(x => !x.IsNew).ToArray());
 			ValidateNames(apiOrganizations);
+			ValidateCategories(apiOrganizations);
 
 			var validOrganizations = apiOrganizations.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validOrganizations, CreateOrUpdateLocked);
@@ -133,6 +136,8 @@
 				{
 					var peopleOrganizationsTraceData = new PeopleAndOrganizationsTraceData();
 					peopleOrganizationsTraceData.Add(new PeopleAndOrganizationsErrorData() { ErrorMessage = traceData.ToString() });
+
+					PassTraceData(id.Id, peopleOrganizationsTraceData);
 				}
 			}
 
@@ -308,6 +313,29 @@
 				};
 
 				ReportError(foundInstance.ID.Id, error);
+			}
+		}
+
+		private void ValidateStateForUpdateAction(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var Organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Active }.Contains(x.State)))
+			{
+				var error = new OrganizationInvalidStateError
+				{
+					ErrorMessage = "Not allowed to update an organization that is not in Draft or Active state.",
+					Id = Organization.Id,
+				};
+				ReportError(Organization.Id, error);
 			}
 		}
 
@@ -523,6 +551,46 @@
 				};
 
 				ReportError(organization.Id, error);
+			}
+		}
+
+		private void ValidateCategories(ICollection<Organization> apiOrganizations)
+		{
+			if (apiOrganizations == null)
+			{
+				throw new ArgumentNullException(nameof(apiOrganizations));
+			}
+
+			if (apiOrganizations.Count == 0)
+			{
+				return;
+			}
+
+			var categoryIds = apiOrganizations
+				.Where(x => x.CategoryId != Guid.Empty)
+				.Select(x => x.CategoryId)
+				.Distinct()
+				.ToList();
+			var categoriesById = api.Categories.Read(categoryIds).ToDictionary(x => x.Id);
+
+			foreach (var organization in apiOrganizations)
+			{
+				if (organization.CategoryId == Guid.Empty)
+				{
+					continue;
+				}
+
+				if (!categoriesById.TryGetValue(organization.CategoryId, out var category))
+				{
+					var error = new OrganizationCategoryNotFoundError
+					{
+						ErrorMessage = $"Category with ID '{organization.CategoryId}' not found.",
+						CategoryId = organization.CategoryId,
+						Id = organization.Id,
+					};
+
+					ReportError(organization.Id, error);
+				}
 			}
 		}
 

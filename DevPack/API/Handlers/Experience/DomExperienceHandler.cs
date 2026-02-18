@@ -117,6 +117,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				{
 					var peopleOrganizationsTraceData = new PeopleAndOrganizationsTraceData();
 					peopleOrganizationsTraceData.Add(new PeopleAndOrganizationsErrorData() { ErrorMessage = traceData.ToString() });
+
+					PassTraceData(id.Id, peopleOrganizationsTraceData);
 				}
 			}
 

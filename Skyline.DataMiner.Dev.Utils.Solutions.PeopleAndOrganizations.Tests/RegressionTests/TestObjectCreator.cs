@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Linq;
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
@@ -17,6 +18,8 @@
 
 		private readonly HashSet<Guid> createdRoleIds = new HashSet<Guid>();
 
+		private readonly HashSet<Guid> createdOrganizationIds = new HashSet<Guid>();
+
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
 			this.testContext = testContext ?? throw new ArgumentNullException(nameof(testContext));
@@ -26,6 +29,33 @@
 
 		public void Dispose()
 		{
+			try
+			{
+				PeopleCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				TeamsCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				OrganizationsCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
 			try
 			{
 				ExperienceCleanup();
@@ -54,6 +84,34 @@
 			}
 		}
 
+		private void PeopleCleanup()
+		{
+
+		}
+
+		private void TeamsCleanup()
+		{
+
+		}
+
+		private void OrganizationsCleanup()
+		{
+			var organizations = Api.Organizations.Read(createdOrganizationIds.ToArray());
+
+			try
+			{
+				var toDeprecate = organizations.Where(x => x.State == OrganizationState.Active);
+
+				Api.Organizations.Deprecate(toDeprecate);
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			Api.Organizations.Delete(organizations.ToArray());
+		}
+
 		private void ExperienceCleanup()
 		{
 			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
@@ -73,6 +131,37 @@
 			var roles = Api.Roles.Read(createdRoleIds.ToArray());
 
 			Api.Roles.Delete(roles.ToArray());
+		}
+
+		public Organization CreateOrganization(Organization organization)
+		{
+			var createdOrganization = Api.Organizations.Create(organization);
+			createdOrganizationIds.Add(createdOrganization.Id);
+			return createdOrganization;
+		}
+
+		public IReadOnlyCollection<Organization> CreateOrganizations(IEnumerable<Organization> organizations)
+		{
+			try
+			{
+				var createdOrganizations = Api.Organizations.Create(organizations);
+
+				foreach (var id in organizations.Select(x => x.Id))
+				{
+					createdOrganizationIds.Add(id);
+				}
+
+				return createdOrganizations;
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdOrganizationIds.Add(id);
+				}
+
+				throw;
+			}
 		}
 
 		public Experience CreateExperience(Experience experience)

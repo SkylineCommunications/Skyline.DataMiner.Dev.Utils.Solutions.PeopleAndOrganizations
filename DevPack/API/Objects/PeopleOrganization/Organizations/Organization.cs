@@ -14,6 +14,24 @@
         private StoragePeopleAndOrganizations.OrganizationsInstance originalInstance;
 		private StoragePeopleAndOrganizations.OrganizationsInstance updatedInstance;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Organization"/> class.
+		/// </summary>
+		public Organization() : base()
+		{
+			IsNew = true;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Organization"/> class with a specific organization ID.
+		/// </summary>
+		/// <param name="organizationId">The unique identifier of the organization.</param>
+		public Organization(Guid organizationId) : base(organizationId)
+		{
+			IsNew = true;
+			HasUserDefinedId = true;
+		}
+
 		internal Organization(StoragePeopleAndOrganizations.OrganizationsInstance instance) : base(instance.ID.Id)
         {
             ParseInstance(instance);
