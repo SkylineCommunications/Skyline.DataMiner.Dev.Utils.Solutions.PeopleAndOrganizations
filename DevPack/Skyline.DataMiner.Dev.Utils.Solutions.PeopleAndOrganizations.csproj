@@ -55,4 +55,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="API\Handlers\Skills\" />
+    <Folder Include="API\Objects\PeopleOrganization\Skills\" />
+    <Folder Include="API\Querying\PeopleOrganization\Skills\" />
+    <Folder Include="API\Repositories\PeopleOrganization\Skills\" />
+  </ItemGroup>
 </Project>
