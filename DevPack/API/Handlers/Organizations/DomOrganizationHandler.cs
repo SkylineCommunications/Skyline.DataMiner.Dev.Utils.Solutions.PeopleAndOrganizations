@@ -580,7 +580,7 @@
 					continue;
 				}
 
-				if (!categoriesById.TryGetValue(organization.CategoryId, out var category))
+				if (!categoriesById.TryGetValue(organization.CategoryId, out _))
 				{
 					var error = new OrganizationCategoryNotFoundError
 					{
