@@ -1,6 +1,6 @@
 ﻿namespace RT_PeopleAndOrganizations.RegressionTests
 {
-	public static class TestContextManager
+	public class TestContextManager
 	{
 		public static IntegrationTestContext SharedTestContext { get; } = new IntegrationTestContext();
 
