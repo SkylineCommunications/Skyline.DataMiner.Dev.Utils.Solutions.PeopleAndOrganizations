@@ -35,6 +35,10 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Tests" />
+	</ItemGroup>
+
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
