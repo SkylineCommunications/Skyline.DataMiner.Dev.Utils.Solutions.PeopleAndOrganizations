@@ -299,27 +299,27 @@
 			return Read(query.Filter);
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged()
+		public IEnumerable<IPagedResult<Organization>> ReadPaged()
 		{
 			return ReadPaged(new TRUEFilterElement<Organization>());
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged(int pageSize)
+		public IEnumerable<IPagedResult<Organization>> ReadPaged(int pageSize)
 		{
 			return ReadPaged(new TRUEFilterElement<Organization>(), PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged(FilterElement<Organization> filter)
+		public IEnumerable<IPagedResult<Organization>> ReadPaged(FilterElement<Organization> filter)
 		{
 			return ReadPaged(filter, PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged(IQuery<Organization> query)
+		public IEnumerable<IPagedResult<Organization>> ReadPaged(IQuery<Organization> query)
 		{
 			return ReadPaged(query.Filter);
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged(FilterElement<Organization> filter, int pageSize)
+		public IEnumerable<IPagedResult<Organization>> ReadPaged(FilterElement<Organization> filter, int pageSize)
 		{
 			if (filter == null)
 			{
@@ -334,7 +334,7 @@
 			return ReadPagedIterator(filter, pageSize);
 		}
 
-		public IEnumerable<SDM.IPagedResult<Organization>> ReadPaged(IQuery<Organization> query, int pageSize)
+		public IEnumerable<IPagedResult<Organization>> ReadPaged(IQuery<Organization> query, int pageSize)
 		{
 			return ReadPaged(query.Filter, pageSize);
 		}
