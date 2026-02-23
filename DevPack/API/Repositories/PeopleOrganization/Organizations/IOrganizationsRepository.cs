@@ -47,7 +47,7 @@
 		/// <summary>
 		/// Marks the specified organizations as deprecated, indicating that they are no longer recommended for use.
 		/// </summary>
-		/// <param name="organizations">A collection of organizations to be marked as deprecated. Cannot be null or empty.</param>
+		/// <param name="organizations">A collection of organizations to deprecate. Cannot be null or empty.</param>
 		IReadOnlyCollection<Organization> Deprecate(IEnumerable<Organization> organizations);
 
 		/// <summary>
