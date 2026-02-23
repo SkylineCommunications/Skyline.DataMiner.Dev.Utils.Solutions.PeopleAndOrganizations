@@ -294,6 +294,22 @@
 				x => DomHelper.DomInstances.Read(x));
 		}
 
+		internal IEnumerable<IEnumerable<OrganizationsInstance>> GetOrganizationsPaged(FilterElement<DomInstance> paramFilter, int pageSize)
+		{
+			if (paramFilter == null)
+			{
+				throw new ArgumentNullException(nameof(paramFilter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize));
+			}
+
+			var pages = DomHelper.DomInstances.ReadPaged(paramFilter, pageSize);
+			return InstanceFactory.CreateInstances(pages, instance => new OrganizationsInstance(instance));
+		}
+
 		internal IEnumerable<IEnumerable<RoleInstance>> GetRolesPaged(FilterElement<DomInstance> paramFilter, int pageSize)
 		{
 			if (paramFilter == null)
