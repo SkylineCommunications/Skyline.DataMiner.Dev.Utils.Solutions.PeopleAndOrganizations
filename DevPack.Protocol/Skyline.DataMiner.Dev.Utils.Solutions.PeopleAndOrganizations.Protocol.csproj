@@ -1,55 +1,49 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <PlatformTarget>anycpu</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-    <OutputType>Library</OutputType>
-    <AssemblyTitle>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</AssemblyTitle>
-    <Product>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</Product>
-    <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</AssemblyName>
-    <RootNamespace>Skyline.DataMiner.Solutions.PeopleAndOrganizations.Protocol</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<PlatformTarget>anycpu</PlatformTarget>
+		<LangVersion>latest</LangVersion>
+		<OutputType>Library</OutputType>
+		<AssemblyTitle>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</AssemblyTitle>
+		<Product>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</Product>
+		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</AssemblyName>
+		<RootNamespace>Skyline.DataMiner.Solutions.PeopleAndOrganizations.Protocol</RootNamespace>
 
-    <!-- Use shared version from Directory.Build.props -->
-    <PackageVersion>$(PeopleAndOrganizationsVersion)</PackageVersion>
-    <Version>$(PeopleAndOrganizationsVersion)</Version>
-    <FileVersion>$(PeopleAndOrganizationsVersion)</FileVersion>
-    <AssemblyVersion>1.0.*</AssemblyVersion>
+		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</PackageId>
+		<PackageTags>Skyline;DataMiner</PackageTags>
+		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageIcon>Icon.png</PackageIcon>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
-    <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol</PackageId>
-    <PackageTags>Skyline;DataMiner</PackageTags>
-    <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <PackageIcon>Icon.png</PackageIcon>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    
-    <Authors>SkylineCommunications</Authors>
-    <Company>Skyline Communications</Company>
-    <Description>Provides Protocol extensions to communicate with People and Organizations.</Description>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Solutions.PeopleAndOrganizations</RepositoryUrl>
-    <Deterministic>false</Deterministic>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
+		<Authors>SkylineCommunications</Authors>
+		<Company>Skyline Communications</Company>
+		<Description>Provides Protocol extensions to communicate with People and Organizations.</Description>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Solutions.PeopleAndOrganizations</RepositoryUrl>
+		<Deterministic>false</Deterministic>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
-    <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Dev.Protocol" Version="10.5.11.1" />
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="" />
+		<None Include="LICENSE.txt" Pack="true" PackagePath="" />
+		<None Include="nuget\Icon.png" Pack="true" PackagePath="" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DevPack\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Skyline.DataMiner.Dev.Protocol" Version="10.5.11.1" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DevPack\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
+	</ItemGroup>
 </Project>

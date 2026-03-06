@@ -1,0 +1,75 @@
+name: P&O CICD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+     - 'main'
+     - '*.*.X'
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-**"
+  pull_request:
+    branches: 
+     - '**'
+
+env:
+  #https://github.com/NuGet/Home/issues/7575#issuecomment-443801131
+  NUGET_RESTORE_MSBUILD_ARGS: /p:Configuration=Release
+
+jobs:
+  nuget_validation:
+    name: Validate NuGets
+    runs-on: ubuntu-latest
+    
+    steps:
+     - uses: actions/checkout@v4
+
+     - name: Install dotnet-consolidate
+       run: dotnet tool install -g dotnet-consolidate
+
+     - name: Run dotnet consolidate
+       run: dotnet consolidate -s 'MediaOps Plan.sln'
+
+  integration_tests:
+    name: Integration Tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    needs: nuget_validation
+    concurrency:
+      group: reg-${{github.ref}}
+
+    env:
+      CI: "true"
+      DATAMINER_USERNAME: ${{ secrets.DATAMINER_USERNAME }}
+      DATAMINER_PASSWORD: ${{ secrets.DATAMINER_PASSWORD }}
+      DATAMINER_HOST: ${{ vars.DATAMINER_HOST }}
+      CRED_PREFIX: "DATAMINER"
+
+    steps:
+     - uses: actions/checkout@v4
+
+     - name: Setup dotnet
+       uses: actions/setup-dotnet@v4
+
+     - name: Setup NuGet
+       uses: NuGet/setup-nuget@v2.0.1
+
+     - name: Add NuGet source
+       run: dotnet nuget add source "https://nuget.pkg.github.com/SkylineCommunications/index.json" --name github --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
+     - name: Build
+       run: dotnet build -c Release -p WarningLevel=0 -p:DefineConstants=CI DevPack.Tests
+       
+     - name: Run tests
+       run: dotnet test -c Release --no-build --settings DevPack.Tests.runsettings --logger "console;verbosity=detailed" DevPack.Tests
+
+  internal_release:
+    name: Internal Release
+    if: github.ref_type == 'tag' && contains(github.ref, '-') #Prerelease tags (e.g. 1.2.3-something)
+    needs: nuget_validation
+    uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/Internal NuGet Solution Master Workflow.yml@main
+    with:
+      sonarCloudProjectName: SkylineCommunications_Skyline.DataMiner.Solutions.PeopleAndOrganizations
+    secrets:
+      nugetApiKey: ${{ secrets.NUGETAPIKEY_GITHUB }}

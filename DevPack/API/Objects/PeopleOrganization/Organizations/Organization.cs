@@ -64,6 +64,7 @@
 				hash = (hash * 23) + Id.GetHashCode();
 				hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
 				hash = (hash * 23) + CategoryId.GetHashCode();
+				hash = (hash * 23) + State.GetHashCode();
 
 				return hash;
 			}
@@ -81,7 +82,8 @@
 
 			return Id == other.Id &&
 				   Name == other.Name &&
-				   CategoryId == other.CategoryId;
+				   CategoryId == other.CategoryId &&
+				   State == other.State;
 		}
 
 		internal StoragePeopleAndOrganizations.OrganizationsInstance GetInstanceWithChanges()
