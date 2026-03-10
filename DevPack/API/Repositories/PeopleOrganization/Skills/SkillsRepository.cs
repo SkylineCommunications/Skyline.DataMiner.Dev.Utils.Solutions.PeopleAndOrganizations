@@ -50,7 +50,7 @@
 				result.ThrowBulkException();
 			}
 
-			throw new NotImplementedException();
+			return result.SuccessfulItems.Select(x => new Skill(x.Name)).ToList();
 		}
 
 		public Skill Create(Skill oToCreate)
@@ -70,7 +70,7 @@
 				result.ThrowSingleException(oToCreate.Name);
 			}
 
-			throw new NotImplementedException();
+			return new Skill(result.SuccessfulItems.Single().Name);
 		}
 
 		public IReadOnlyCollection<Skill> CreateOrUpdate(IEnumerable<Skill> oToCreateOrUpdate)
@@ -87,7 +87,7 @@
 				result.ThrowBulkException();
 			}
 
-			throw new NotImplementedException();
+			return result.SuccessfulItems.Select(x => new Skill(x.Name)).ToList();
 		}
 
 		public void Delete(IEnumerable<Skill> oToDelete)
@@ -161,7 +161,7 @@
 				result.ThrowBulkException();
 			}
 
-			throw new NotImplementedException();
+			return result.SuccessfulItems.Select(x => new Skill(x.Name)).ToList();
 		}
 
 		public Skill Update(Skill oToUpdate)
@@ -181,7 +181,7 @@
 				result.ThrowSingleException(oToUpdate.Name);
 			}
 
-			throw new NotImplementedException();
+			return new Skill(result.SuccessfulItems.Single().Name);
 		}
 	}
 }
