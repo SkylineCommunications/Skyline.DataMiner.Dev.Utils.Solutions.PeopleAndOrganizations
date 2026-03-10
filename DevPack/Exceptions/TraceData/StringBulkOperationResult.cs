@@ -3,16 +3,20 @@
 	using System;
 	using System.Collections.Generic;
 
-	internal class StringBulkOperationResult : IBulkOperationResult<string>
+	internal class StringBulkOperationResult<T> : IBulkOperationResult<string>
+		where T : class
 	{
-		public StringBulkOperationResult(IReadOnlyCollection<string> successfulIds, IReadOnlyCollection<string> unsuccessfulIds, IReadOnlyDictionary<string, PeopleAndOrganizationsTraceData> traceDataPerItem)
+		public StringBulkOperationResult(IReadOnlyCollection<T> successItems, IReadOnlyCollection<string> successfulIds, IReadOnlyCollection<string> unsuccessfulIds, IReadOnlyDictionary<string, PeopleAndOrganizationsTraceData> traceDataPerItem)
 		{
+			SuccessfulItems = successItems ?? throw new ArgumentNullException(nameof(successItems));
 			SuccessfulIds = successfulIds ?? throw new ArgumentNullException(nameof(successfulIds));
 			UnsuccessfulIds = unsuccessfulIds ?? throw new ArgumentNullException(nameof(unsuccessfulIds));
 			TraceDataPerItem = traceDataPerItem ?? throw new ArgumentNullException(nameof(traceDataPerItem));
 		}
 
 		public IReadOnlyCollection<string> SuccessfulIds { get; }
+
+		public IReadOnlyCollection<T> SuccessfulItems { get; }
 
 		public IReadOnlyDictionary<string, PeopleAndOrganizationsTraceData> TraceDataPerItem { get; }
 

@@ -6,37 +6,33 @@
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
-	internal class SkillHandler
+	internal class SkillHandler : StringApiObjectValidator<Skill>
 	{
 		private readonly PeopleAndOrganizationsApi api;
 
-		private readonly List<string> successfulIds = new List<string>();
-		private readonly List<string> unsuccessfulIds = new List<string>();
-		private readonly Dictionary<string, PeopleAndOrganizationsTraceData> traceDataPerItem = new Dictionary<string, PeopleAndOrganizationsTraceData>();
-
-		private SkillHandler(PeopleAndOrganizationsApi api)
+		private SkillHandler(PeopleAndOrganizationsApi api) : base(skill => skill.Name)
 		{
 			this.api = api ?? throw new ArgumentNullException(nameof(api));
 		}
 
 		internal static Guid SkillCapabilityId => Guid.Parse("4d76ca23-de30-4129-acc9-9a742e054e52");
 
-		internal static bool TryCreateOrUpdate(PeopleAndOrganizationsApi api, ICollection<Skill> apiSkills, out StringBulkOperationResult result)
+		internal static bool TryCreateOrUpdate(PeopleAndOrganizationsApi api, ICollection<Skill> apiSkills, out StringBulkOperationResult<Skill> result)
 		{
 			var handler = new SkillHandler(api);
 			handler.CreateOrUpdate(apiSkills);
 
-			result = new StringBulkOperationResult(handler.successfulIds, handler.unsuccessfulIds, handler.traceDataPerItem);
+			result = new StringBulkOperationResult<Skill>(handler.SuccessfulItems, handler.SuccessfulIds, handler.UnsuccessfulItems, handler.TraceDataPerItem);
 
 			return !result.HasFailures;
 		}
 
-		internal static bool TryDelete(PeopleAndOrganizationsApi api, ICollection<Skill> apiSKills, out StringBulkOperationResult result)
+		internal static bool TryDelete(PeopleAndOrganizationsApi api, ICollection<Skill> apiSKills, out StringBulkOperationResult<Skill> result)
 		{
 			var handler = new SkillHandler(api);
 			handler.Delete(apiSKills);
 
-			result = new StringBulkOperationResult(handler.successfulIds, handler.unsuccessfulIds, handler.traceDataPerItem);
+			result = new StringBulkOperationResult<Skill>(handler.SuccessfulItems, handler.SuccessfulIds, handler.UnsuccessfulItems, handler.TraceDataPerItem);
 
 			return !result.HasFailures;
 		}

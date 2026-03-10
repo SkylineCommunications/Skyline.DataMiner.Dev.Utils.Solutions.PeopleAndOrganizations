@@ -5,7 +5,7 @@
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 
-	internal class DomInstanceApiObjectValidator<T> : ApiObjectValidator<T> where T : DomInstanceBase
+	internal class DomInstanceApiObjectValidator<T> : ApiObjectValidator<T, Guid> where T : DomInstanceBase
 	{
 		private readonly List<Guid> successfulIds = new List<Guid>();
 
@@ -20,6 +20,11 @@
 
 			successfulIds.Add(item.ID.Id);
 			successfulItems.Add(item);
+		}
+
+		internal bool IsValid(IIdentifiable identifiable)
+		{
+			return IsValid(identifiable.Id);
 		}
 	}
 }
