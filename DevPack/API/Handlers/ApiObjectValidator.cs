@@ -10,20 +10,23 @@
 	// Base class with generic ID support
 	internal abstract class ApiObjectValidatorBase<TId>
 	{
-		private readonly Dictionary<TId, PeopleAndOrganizationsTraceData> traceDataPerItem = new Dictionary<TId, PeopleAndOrganizationsTraceData>();
 		protected readonly HashSet<TId> unsuccessfulItems = new HashSet<TId>();
-
-		internal IReadOnlyDictionary<TId, PeopleAndOrganizationsTraceData> TraceDataPerItem => traceDataPerItem;
-
-		internal IReadOnlyCollection<TId> UnsuccessfulItems => unsuccessfulItems;
+		private readonly Dictionary<TId, PeopleAndOrganizationsTraceData> traceDataPerItem = new Dictionary<TId, PeopleAndOrganizationsTraceData>();
 
 		protected ApiObjectValidatorBase()
 		{
 		}
 
+		internal IReadOnlyDictionary<TId, PeopleAndOrganizationsTraceData> TraceDataPerItem => traceDataPerItem;
+
+		internal IReadOnlyCollection<TId> UnsuccessfulItems => unsuccessfulItems;
+
 		internal void PassTraceData(ApiObjectValidatorBase<TId> internalValidator)
 		{
-			if (internalValidator == null) throw new ArgumentNullException(nameof(internalValidator));
+			if (internalValidator == null)
+			{
+				throw new ArgumentNullException(nameof(internalValidator));
+			}
 
 			// Pass items in error state
 			foreach (var id in internalValidator.UnsuccessfulItems)
@@ -51,6 +54,11 @@
 			}
 		}
 
+		internal bool IsValid(TId id)
+		{
+			return !TraceDataPerItem.ContainsKey(id);
+		}
+
 		protected void ReportError(TId key, PeopleAndOrganizationsErrorData error)
 		{
 			AddValidationError(key, error);
@@ -60,11 +68,6 @@
 		protected virtual void ReportError(TId key)
 		{
 			unsuccessfulItems.Add(key);
-		}
-
-		internal bool IsValid(TId id)
-		{
-			return !TraceDataPerItem.ContainsKey(id);
 		}
 
 		private void AddValidationError(TId key, PeopleAndOrganizationsErrorData error)

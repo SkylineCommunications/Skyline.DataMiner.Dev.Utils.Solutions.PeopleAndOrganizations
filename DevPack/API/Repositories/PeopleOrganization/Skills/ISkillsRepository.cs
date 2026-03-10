@@ -7,7 +7,7 @@
 	/// <summary>
 	/// Defines methods for managing <see cref="Skill"/> objects.
 	/// </summary>
-	public interface ISkillsRepository : ICreatableRepository<Skill>, IRepositoryMarker<Skill>, IReadableRepository<Skill>, IUpdatableRepository<Skill>, IDeletableRepository<Skill>, ICountableRepository<Skill>, IBulkCreatableRepository<Skill>, IBulkUpdatableRepository<Skill>, IBulkDeletableRepository<Skill>
+	public interface ISkillsRepository : IReadableRepository<Skill>, ICountableRepository<Skill>, IBulkCreatableRepository<Skill>, IBulkUpdatableRepository<Skill>, IBulkDeletableRepository<Skill>
 	{
 		/// <summary>
 		/// Gets the total number of API objects in the repository.
@@ -21,16 +21,11 @@
 		/// <returns>An enumerable collection of all API objects.</returns>
 		IEnumerable<Skill> Read();
 
-		//
-		// Summary:
-		//     Creates or updates a collection of entities in a single operation.
-		//
-		// Parameters:
-		//   oToCreateOrUpdate:
-		//     The collection of entities to create or update.
-		//
-		// Returns:
-		//     A read-only collection of the created or updated entities.
+		/// <summary>
+		/// Creates or updates a collection of entities in a single operation.
+		/// </summary>
+		/// <param name="oToCreateOrUpdate">The collection of entities to create or update.</param>
+		/// <returns>A read-only collection of the created or updated entities.</returns>
 		IReadOnlyCollection<Skill> CreateOrUpdate(IEnumerable<Skill> oToCreateOrUpdate);
 	}
 }
