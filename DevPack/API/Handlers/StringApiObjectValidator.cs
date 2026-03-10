@@ -12,8 +12,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 		private readonly List<string> successfulIds = new List<string>();
 		private readonly Func<T, string> idExtractor;
 
-		internal override IReadOnlyCollection<string> SuccessfulIds => successfulIds;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="StringApiObjectValidator{T}"/> class.
 		/// </summary>
@@ -21,6 +19,19 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 		public StringApiObjectValidator(Func<T, string> idExtractor)
 		{
 			this.idExtractor = idExtractor ?? throw new ArgumentNullException(nameof(idExtractor));
+		}
+
+		internal override IReadOnlyCollection<string> SuccessfulIds => successfulIds;
+
+		internal bool IsValid(T item)
+		{
+			var id = idExtractor(item);
+			if (string.IsNullOrEmpty(id))
+			{
+				throw new InvalidOperationException("Cannot validate an item with a null or empty ID");
+			}
+
+			return IsValid(id);
 		}
 
 		protected override void ReportSuccess(T item)

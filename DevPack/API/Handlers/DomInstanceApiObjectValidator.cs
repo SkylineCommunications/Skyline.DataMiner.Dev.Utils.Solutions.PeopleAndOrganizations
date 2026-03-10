@@ -11,6 +11,11 @@
 
 		internal override IReadOnlyCollection<Guid> SuccessfulIds => successfulIds;
 
+		internal bool IsValid(IIdentifiable identifiable)
+		{
+			return IsValid(identifiable.Id);
+		}
+
 		protected override void ReportSuccess(T item)
 		{
 			if (unsuccessfulItems.Contains(item.ID.Id))
@@ -20,11 +25,6 @@
 
 			successfulIds.Add(item.ID.Id);
 			successfulItems.Add(item);
-		}
-
-		internal bool IsValid(IIdentifiable identifiable)
-		{
-			return IsValid(identifiable.Id);
 		}
 	}
 }
