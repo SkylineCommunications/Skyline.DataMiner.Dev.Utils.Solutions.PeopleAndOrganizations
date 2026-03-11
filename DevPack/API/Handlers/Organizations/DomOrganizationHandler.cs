@@ -101,7 +101,7 @@
 			var toUpdateNameValidation = organizationsToUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName.Id)));
 			ValidateDomNames(organizationsToCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = organizationsToCreate
+			var toCreateDomInstances = organizationsToCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -111,7 +111,7 @@
 				.Select(x => new domOrganization(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<domOrganization> domOrganizations)
@@ -328,14 +328,14 @@
 				return;
 			}
 
-			foreach (var Organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Active }.Contains(x.State)))
+			foreach (var organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Active }.Contains(x.State)))
 			{
 				var error = new OrganizationInvalidStateError
 				{
 					ErrorMessage = "Not allowed to update an organization that is not in Draft or Active state.",
-					Id = Organization.Id,
+					Id = organization.Id,
 				};
-				ReportError(Organization.Id, error);
+				ReportError(organization.Id, error);
 			}
 		}
 
@@ -351,14 +351,14 @@
 				return;
 			}
 
-			foreach (var Organization in apiOrganizations.Where(x => x.State != OrganizationState.Draft))
+			foreach (var organization in apiOrganizations.Where(x => x.State != OrganizationState.Draft))
 			{
 				var error = new OrganizationInvalidStateError
 				{
 					ErrorMessage = "Not allowed to activate an organization that is not in Draft state.",
-					Id = Organization.Id,
+					Id = organization.Id,
 				};
-				ReportError(Organization.Id, error);
+				ReportError(organization.Id, error);
 			}
 		}
 
@@ -374,14 +374,14 @@
 				return;
 			}
 
-			foreach (var Organization in apiOrganizations.Where(x => x.State != OrganizationState.Active))
+			foreach (var organization in apiOrganizations.Where(x => x.State != OrganizationState.Active))
 			{
 				var error = new OrganizationInvalidStateError
 				{
 					ErrorMessage = "Not allowed to deprecate an organization that is not in Active state.",
-					Id = Organization.Id,
+					Id = organization.Id,
 				};
-				ReportError(Organization.Id, error);
+				ReportError(organization.Id, error);
 			}
 		}
 
@@ -397,14 +397,14 @@
 				return;
 			}
 
-			foreach (var Organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Deprecated }.Contains(x.State)))
+			foreach (var organization in apiOrganizations.Where(x => !new[] { OrganizationState.Draft, OrganizationState.Deprecated }.Contains(x.State)))
 			{
 				var error = new OrganizationInvalidStateError
 				{
 					ErrorMessage = "Not allowed to delete an organization that is not in Draft or Deprecated state.",
-					Id = Organization.Id,
+					Id = organization.Id,
 				};
-				ReportError(Organization.Id, error);
+				ReportError(organization.Id, error);
 			}
 		}
 
@@ -480,11 +480,11 @@
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName).Equal(name));
 
-			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), filter)
+			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), Filter)
 				.GroupBy(x => x.OrganizationInformation.OrganizationName)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<domOrganization>)x.ToList());
 

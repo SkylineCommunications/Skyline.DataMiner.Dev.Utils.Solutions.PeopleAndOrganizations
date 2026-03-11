@@ -8,6 +8,6 @@
 		/// <summary>
 		/// Gets the name of the role.
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; internal set; }
 	}
 }

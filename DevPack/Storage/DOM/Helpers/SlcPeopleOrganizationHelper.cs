@@ -48,13 +48,13 @@
 				return Enumerable.Empty<OrganizationsInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetOrganizationIterator(x));
 		}
 
@@ -98,13 +98,13 @@
 				return Enumerable.Empty<PeopleInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetPersonIterator(x));
 		}
 
@@ -148,13 +148,13 @@
 				return Enumerable.Empty<RoleInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Role.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetRoleIterator(x));
 		}
 
@@ -198,13 +198,13 @@
 				return Enumerable.Empty<CategoryInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Category.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetCategoryIterator(x));
 		}
 
@@ -248,13 +248,13 @@
 				return Enumerable.Empty<ExperienceInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Experience.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetExperienceIterator(x));
 		}
 

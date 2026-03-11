@@ -27,3 +27,6 @@ dotnet_diagnostic.SA1501.severity = none
 
 # SA1314: Type parameter names should begin with T
 dotnet_diagnostic.SA1314.severity = none
+
+# SA1135: Using directives should be qualified
+dotnet_diagnostic.SA1135.severity = none
