@@ -1,12 +1,14 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
+	using System.Linq;
 
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM.Registration;
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
 
 	/// <summary>
 	/// Provides the main entry point for interacting with the People and Organizations API.
@@ -15,9 +17,10 @@
 	{
 		internal static readonly int DefaultPageSize = 200;
 
+		private const string CatalogItemId = "1b67a623-4ca6-4d25-8b3d-ed4e39496a75"; // MediaOps.Plan Catalog Item ID
+
 		private readonly IConnection connection;
 
-		private readonly InstalledAppPackageCache installedAppPackages;
 		private readonly DomHelpers domHelpers;
 
 		private readonly Lazy<IMediaOpsPlanApi> lazyPlanApi;
@@ -34,8 +37,6 @@
 		{
 			this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
 			this.logger = new NullLogger();
-
-			installedAppPackages = new InstalledAppPackageCache(connection);
 
 			domHelpers = new DomHelpers(connection);
 
@@ -76,9 +77,16 @@
 		/// <inheritdoc/>
 		public bool IsInstalled(out string version)
 		{
-			var isInstalled = installedAppPackages.IsInstalled("SLC-S-MediaOps", out var installedAppInfo);
-			version = isInstalled ? installedAppInfo?.AppInfo?.Version : null;
-			return isInstalled;
+			var registrar = Connection.GetSdmRegistrar();
+			var mediaOpsPlanRegistration = registrar.Solutions.Read(SolutionRegistrationExposers.ID.Equal(CatalogItemId)).FirstOrDefault();
+			if (mediaOpsPlanRegistration == null)
+			{
+				version = null;
+				return false;
+			}
+
+			version = mediaOpsPlanRegistration.Version;
+			return true;
 		}
 
 		/// <inheritdoc/>
