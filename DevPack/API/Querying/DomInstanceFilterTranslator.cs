@@ -11,12 +11,12 @@
 		{
 		}
 
+		protected abstract FilterElement<DomInstance> DomDefinitionFilter { get; }
+
 		protected static FilterElement<DomInstance> HandleGuid(Comparer comparer, object value)
 		{
 			return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
 		}
-
-		protected abstract FilterElement<DomInstance> DomDefinitionFilter { get; }
 
 		public override FilterElement<DomInstance> Translate(FilterElement<T> filter)
 		{

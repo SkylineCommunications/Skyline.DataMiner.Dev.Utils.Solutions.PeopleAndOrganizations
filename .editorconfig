@@ -18,3 +18,12 @@ dotnet_diagnostic.SA1401.severity = none
 
 # SA1305: Field names should not use Hungarian notation
 dotnet_diagnostic.SA1305.severity = none
+
+# SA1202: Elements should be ordered by access
+dotnet_diagnostic.SA1202.severity = suggestion
+
+# SA1501: Statement should not be on a single line
+dotnet_diagnostic.SA1501.severity = none
+
+# SA1314: Type parameter names should begin with T
+dotnet_diagnostic.SA1314.severity = none
