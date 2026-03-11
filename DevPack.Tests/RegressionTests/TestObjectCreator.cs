@@ -86,12 +86,10 @@
 
 		private void PeopleCleanup()
 		{
-
 		}
 
 		private void TeamsCleanup()
 		{
-
 		}
 
 		private void OrganizationsCleanup()

@@ -7,15 +7,95 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
 
-	internal abstract class ApiObjectValidator<T> : ApiObjectValidator
+	// Base class with generic ID support
+	internal abstract class ApiObjectValidatorBase<TId>
+	{
+		protected readonly HashSet<TId> unsuccessfulItems = new HashSet<TId>();
+		private readonly Dictionary<TId, PeopleAndOrganizationsTraceData> traceDataPerItem = new Dictionary<TId, PeopleAndOrganizationsTraceData>();
+
+		protected ApiObjectValidatorBase()
+		{
+		}
+
+		internal IReadOnlyDictionary<TId, PeopleAndOrganizationsTraceData> TraceDataPerItem => traceDataPerItem;
+
+		internal IReadOnlyCollection<TId> UnsuccessfulItems => unsuccessfulItems;
+
+		internal void PassTraceData(ApiObjectValidatorBase<TId> internalValidator)
+		{
+			if (internalValidator == null)
+			{
+				throw new ArgumentNullException(nameof(internalValidator));
+			}
+
+			// Pass items in error state
+			foreach (var id in internalValidator.UnsuccessfulItems)
+			{
+				ReportError(id);
+				if (internalValidator.TraceDataPerItem.TryGetValue(id, out var traceData))
+				{
+					PassTraceData(id, traceData);
+				}
+			}
+		}
+
+		internal void PassTraceData(TId key, PeopleAndOrganizationsTraceData traceData)
+		{
+			if (!traceDataPerItem.TryGetValue(key, out var existingTraceData))
+			{
+				traceDataPerItem.Add(key, traceData);
+			}
+			else
+			{
+				foreach (var error in traceData.ErrorData)
+				{
+					existingTraceData.Add(error);
+				}
+			}
+		}
+
+		internal bool IsValid(TId id)
+		{
+			return !TraceDataPerItem.ContainsKey(id);
+		}
+
+		protected void ReportError(TId key, PeopleAndOrganizationsErrorData error)
+		{
+			AddValidationError(key, error);
+			ReportError(key);
+		}
+
+		protected virtual void ReportError(TId key)
+		{
+			unsuccessfulItems.Add(key);
+		}
+
+		private void AddValidationError(TId key, PeopleAndOrganizationsErrorData error)
+		{
+			if (error == null)
+			{
+				throw new ArgumentNullException(nameof(error));
+			}
+
+			if (!traceDataPerItem.TryGetValue(key, out var mediaOpsTraceData))
+			{
+				mediaOpsTraceData = new PeopleAndOrganizationsTraceData();
+				traceDataPerItem.Add(key, mediaOpsTraceData);
+			}
+
+			mediaOpsTraceData.Add(error);
+		}
+	}
+
+	internal abstract class ApiObjectValidator<T, TId> : ApiObjectValidatorBase<TId>
 	{
 		protected readonly HashSet<T> successfulItems = new HashSet<T>();
 
 		internal IReadOnlyCollection<T> SuccessfulItems => successfulItems;
 
-		internal abstract IReadOnlyCollection<Guid> SuccessfulIds { get; }
+		internal abstract IReadOnlyCollection<TId> SuccessfulIds { get; }
 
-		internal void PassTraceData(ApiObjectValidator<T> internalValidator)
+		internal void PassTraceData(ApiObjectValidator<T, TId> internalValidator)
 		{
 			if (internalValidator == null) throw new ArgumentNullException(nameof(internalValidator));
 
@@ -36,7 +116,7 @@
 			}
 		}
 
-		protected override void ReportError(Guid key)
+		protected override void ReportError(TId key)
 		{
 			if (SuccessfulIds.Contains(key))
 			{
@@ -50,7 +130,10 @@
 		{
 			foreach (var failedToLockObject in result.FailedToLockObjects)
 			{
-				ReportError(failedToLockObject.Id, new PeopleAndOrganizationsErrorData() { ErrorMessage = $"Failed to lock {typeof(T).Name} {failedToLockObject.Id}." });
+				if (failedToLockObject.Id is TId id)
+				{
+					ReportError(id, new PeopleAndOrganizationsErrorData() { ErrorMessage = $"Failed to lock {typeof(T).Name} {failedToLockObject.Id}." });
+				}
 			}
 		}
 
@@ -62,82 +145,6 @@
 			{
 				ReportSuccess(item);
 			}
-		}
-	}
-
-	internal class ApiObjectValidator
-	{
-		private readonly Dictionary<Guid, PeopleAndOrganizationsTraceData> traceDataPerItem = new Dictionary<Guid, PeopleAndOrganizationsTraceData>();
-		protected readonly HashSet<Guid> unsuccessfulItems = new HashSet<Guid>();
-
-		internal IReadOnlyDictionary<Guid, PeopleAndOrganizationsTraceData> TraceDataPerItem => traceDataPerItem;
-
-		internal IReadOnlyCollection<Guid> UnsuccessfulItems => unsuccessfulItems;
-
-		protected ApiObjectValidator()
-		{
-		}
-
-		internal void PassTraceData(ApiObjectValidator internalValidator)
-		{
-			if (internalValidator == null) throw new ArgumentNullException(nameof(internalValidator));
-
-			// Pass items in error state
-			foreach (var id in internalValidator.UnsuccessfulItems)
-			{
-				ReportError(id);
-				if (internalValidator.TraceDataPerItem.TryGetValue(id, out var traceData))
-				{
-					PassTraceData(id, traceData);
-				}
-			}
-		}
-
-		internal void PassTraceData(Guid key, PeopleAndOrganizationsTraceData traceData)
-		{
-			if (!traceDataPerItem.TryGetValue(key, out var existingTraceData))
-			{
-				traceDataPerItem.Add(key, traceData);
-			}
-			else
-			{
-				foreach (var error in traceData.ErrorData)
-				{
-					existingTraceData.Add(error);
-				}
-			}
-		}
-
-		protected void ReportError(Guid key, PeopleAndOrganizationsErrorData error)
-		{
-			AddValidationError(key, error);
-			ReportError(key);
-		}
-
-		protected virtual void ReportError(Guid key)
-		{
-			unsuccessfulItems.Add(key);
-		}
-
-		protected bool IsValid(IIdentifiable identifiable)
-		{
-			return !TraceDataPerItem.Keys.Contains(identifiable.Id);
-		}
-
-		private void AddValidationError(Guid key, PeopleAndOrganizationsErrorData error)
-		{
-			if (error == null)
-			{
-				throw new ArgumentNullException(nameof(error));
-			}
-
-			if (!traceDataPerItem.TryGetValue(key, out var mediaOpsTraceData))
-			{
-				mediaOpsTraceData = new PeopleAndOrganizationsTraceData();
-				traceDataPerItem.Add(key, mediaOpsTraceData);
-			}
-
-			mediaOpsTraceData.Add(error);
 		}
 	}
 }

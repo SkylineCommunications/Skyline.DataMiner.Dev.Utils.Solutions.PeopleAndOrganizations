@@ -1,22 +1,29 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
+	using System.Linq;
 
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM.Registration;
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Tools;
 
 	/// <summary>
 	/// Provides the main entry point for interacting with the People and Organizations API.
 	/// </summary>
 	public class PeopleAndOrganizationsApi : IPeopleAndOrganizationsApi
 	{
+		internal static readonly int DefaultPageSize = 200;
+
+		private const string CatalogItemId = "1b67a623-4ca6-4d25-8b3d-ed4e39496a75"; // MediaOps.Plan Catalog Item ID
+
 		private readonly IConnection connection;
 
-        private readonly InstalledAppPackageCache installedAppPackages;
 		private readonly DomHelpers domHelpers;
 
+		private readonly Lazy<IMediaOpsPlanApi> lazyPlanApi;
 		private readonly Lazy<IOrganizationsRepository> lazyOrganizationsRepository;
 		private readonly Lazy<IPeopleRepository> lazyPeopleRepository;
 		private readonly Lazy<IExperienceRepository> lazyExperienceRepository;
@@ -26,15 +33,14 @@
 
 		private ILogger logger;
 
-        internal PeopleAndOrganizationsApi(IConnection connection)
-        {
-            this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            this.logger = new NullLogger();
-
-            installedAppPackages = new InstalledAppPackageCache(connection);
+		internal PeopleAndOrganizationsApi(IConnection connection)
+		{
+			this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
+			this.logger = new NullLogger();
 
 			domHelpers = new DomHelpers(connection);
 
+			lazyPlanApi = new Lazy<IMediaOpsPlanApi>(() => connection.GetMediaOpsPlanApi());
 			lazyOrganizationsRepository = new Lazy<IOrganizationsRepository>(() => new OrganizationsRepository(this));
 			lazyPeopleRepository = new Lazy<IPeopleRepository>(() => new PeopleRepository(this));
 			lazyExperienceRepository = new Lazy<IExperienceRepository>(() => new ExperienceRepository(this));
@@ -58,34 +64,41 @@
 		/// <inheritdoc/>
 		public IRolesRepository Roles => lazyRolesRepository.Value;
 
-		internal static readonly int DefaultPageSize = 200;
-
 		internal IConnection Connection => connection;
 
 		internal ILogger Logger => logger;
 
 		internal DomHelpers DomHelpers => domHelpers;
 
+		internal IMediaOpsPlanApi PlanApi => lazyPlanApi.Value;
+
 		internal PeopleAndOrganizations.Tools.LockManager LockManager => lazyLockManager.Value;
 
 		/// <inheritdoc/>
 		public bool IsInstalled(out string version)
-        {
-            var isInstalled = installedAppPackages.IsInstalled("SLC-S-MediaOps", out var installedAppInfo);
-            version = isInstalled ? installedAppInfo?.AppInfo?.Version : null;
-            return isInstalled;
-        }
+		{
+			var registrar = Connection.GetSdmRegistrar();
+			var mediaOpsPlanRegistration = registrar.Solutions.Read(SolutionRegistrationExposers.ID.Equal(CatalogItemId)).FirstOrDefault();
+			if (mediaOpsPlanRegistration == null)
+			{
+				version = null;
+				return false;
+			}
 
-        /// <inheritdoc/>
-        public bool IsInstalled()
-        {
-            return IsInstalled(out _);
-        }
+			version = mediaOpsPlanRegistration.Version;
+			return true;
+		}
 
-        /// <inheritdoc/>
-        public void SetLogger(ILogger logger)
-        {
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-    }
+		/// <inheritdoc/>
+		public bool IsInstalled()
+		{
+			return IsInstalled(out _);
+		}
+
+		/// <inheritdoc/>
+		public void SetLogger(ILogger logger)
+		{
+			this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		}
+	}
 }
