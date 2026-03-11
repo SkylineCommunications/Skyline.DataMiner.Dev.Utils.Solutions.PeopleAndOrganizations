@@ -38,8 +38,10 @@
 		}
 
 		/// <summary>
-		/// Determines whether the specified object is equal to the current Role instance.
+		/// Determines whether the specified object is equal to the current Skill instance.
 		/// </summary>
+		/// <param name="obj">The object to compare with the current instance.</param>
+		/// <returns>true if the specified object is equal to the current instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is not Role other)

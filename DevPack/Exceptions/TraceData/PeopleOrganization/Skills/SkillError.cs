@@ -6,7 +6,7 @@
 	public class SkillError : PeopleAndOrganizationsErrorData
 	{
 		/// <summary>
-		/// Gets the name of the skill.
+		/// Gets or sets the name of the skill.
 		/// </summary>
 		public string Name { get; set; }
 	}
