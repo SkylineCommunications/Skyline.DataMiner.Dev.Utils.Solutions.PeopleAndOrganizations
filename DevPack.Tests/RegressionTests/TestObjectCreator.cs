@@ -84,53 +84,6 @@
 			}
 		}
 
-		private void PeopleCleanup()
-		{
-		}
-
-		private void TeamsCleanup()
-		{
-		}
-
-		private void OrganizationsCleanup()
-		{
-			var organizations = Api.Organizations.Read(createdOrganizationIds.ToArray());
-
-			try
-			{
-				var toDeprecate = organizations.Where(x => x.State == OrganizationState.Active);
-
-				Api.Organizations.Deprecate(toDeprecate);
-			}
-			catch
-			{
-				// Ignore cleanup errors
-			}
-
-			Api.Organizations.Delete(organizations.ToArray());
-		}
-
-		private void ExperienceCleanup()
-		{
-			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
-
-			Api.Experience.Delete(experience.ToArray());
-		}
-
-		private void CategoriesCleanup()
-		{
-			var categories = Api.Categories.Read(createdCategoryIds.ToArray());
-
-			Api.Categories.Delete(categories.ToArray());
-		}
-
-		private void RolesCleanup()
-		{
-			var roles = Api.Roles.Read(createdRoleIds.ToArray());
-
-			Api.Roles.Delete(roles.ToArray());
-		}
-
 		public Organization CreateOrganization(Organization organization)
 		{
 			var createdOrganization = Api.Organizations.Create(organization);
@@ -253,6 +206,53 @@
 
 				throw;
 			}
+		}
+
+		private void PeopleCleanup()
+		{
+		}
+
+		private void TeamsCleanup()
+		{
+		}
+
+		private void OrganizationsCleanup()
+		{
+			var organizations = Api.Organizations.Read(createdOrganizationIds.ToArray());
+
+			try
+			{
+				var toDeprecate = organizations.Where(x => x.State == OrganizationState.Active);
+
+				Api.Organizations.Deprecate(toDeprecate);
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			Api.Organizations.Delete(organizations.ToArray());
+		}
+
+		private void ExperienceCleanup()
+		{
+			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
+
+			Api.Experience.Delete(experience.ToArray());
+		}
+
+		private void CategoriesCleanup()
+		{
+			var categories = Api.Categories.Read(createdCategoryIds.ToArray());
+
+			Api.Categories.Delete(categories.ToArray());
+		}
+
+		private void RolesCleanup()
+		{
+			var roles = Api.Roles.Read(createdRoleIds.ToArray());
+
+			Api.Roles.Delete(roles.ToArray());
 		}
 	}
 }
