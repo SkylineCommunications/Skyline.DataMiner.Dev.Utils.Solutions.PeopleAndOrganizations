@@ -10,6 +10,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 		/// <summary>
 		/// Gets the unique identifier for the experience.
 		/// </summary>
-		public Guid Id { get; set; }
+		public Guid Id { get; internal set; }
 	}
 }

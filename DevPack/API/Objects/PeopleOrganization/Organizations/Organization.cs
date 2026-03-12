@@ -73,6 +73,8 @@
 		/// <summary>
 		/// Determines whether the specified object is equal to the current Organization instance.
 		/// </summary>
+		/// <param name="obj">The object to compare with the current instance.</param>
+		/// <returns>true if the specified object is equal to the current Organization instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is not Organization other)
@@ -107,7 +109,6 @@
 			CategoryId = instance.OrganizationInformation.Category ?? Guid.Empty;
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum, OrganizationState>(instance.Status);
-
 		}
 	}
 }

@@ -10,6 +10,6 @@
 		/// <summary>
 		/// Gets the unique identifier for the category.
 		/// </summary>
-		public Guid CategoryId { get; set; }
+		public Guid CategoryId { get; internal set; }
 	}
 }

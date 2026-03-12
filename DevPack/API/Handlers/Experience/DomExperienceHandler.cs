@@ -17,7 +17,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 	{
 		private readonly PeopleAndOrganizationsApi api;
 
-		private	DomExperienceHandler(PeopleAndOrganizationsApi api)
+		private DomExperienceHandler(PeopleAndOrganizationsApi api)
 		{
 			this.api = api ?? throw new ArgumentNullException(nameof(api));
 		}
@@ -82,7 +82,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 			var toUpdateNameValidation = experienceToUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience.Id)));
 			ValidateDomNames(experienceToCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = experienceToCreate
+			var toCreateDomInstances = experienceToCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -92,7 +92,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				.Select(x => new DomExperience(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<DomExperience> domExperience)
@@ -308,11 +308,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Experience.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience).Equal(name));
 
-			var domExperienceByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetExperience(apiExperience.Select(x => x.Name), filter)
+			var domExperienceByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetExperience(apiExperience.Select(x => x.Name), Filter)
 				.GroupBy(x => x.ExperienceInformation.Experience)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomExperience>)x.ToList());
 

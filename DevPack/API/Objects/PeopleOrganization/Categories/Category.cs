@@ -37,7 +37,7 @@
 		}
 
 		/// <summary>
-		/// The name of the category.
+		/// Gets or sets the name of the category.
 		/// </summary>
 		public override string Name { get; set; }
 
@@ -59,6 +59,8 @@
 		/// <summary>
 		/// Determines whether the specified object is equal to the current Category instance.
 		/// </summary>
+		/// <param name="obj">The object to compare with the current instance.</param>
+		/// <returns>True if the specified object is equal to the current instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is not Category other)

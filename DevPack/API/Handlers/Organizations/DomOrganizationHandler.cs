@@ -479,11 +479,11 @@
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName).Equal(name));
 
-			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), filter)
+			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), Filter)
 				.GroupBy(x => x.OrganizationInformation.OrganizationName)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomOrganization>)x.ToList());
 

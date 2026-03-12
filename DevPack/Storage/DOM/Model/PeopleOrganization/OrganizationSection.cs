@@ -10,6 +10,7 @@
 			{
 				return Organization_57695f03 ?? Guid.Empty;
 			}
+
 			set
 			{
 				Organization_57695f03 = value == Guid.Empty ? null : value;

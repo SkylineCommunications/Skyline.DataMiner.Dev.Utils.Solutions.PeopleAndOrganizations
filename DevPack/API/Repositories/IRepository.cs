@@ -8,6 +8,7 @@
 	/// <summary>
 	/// Defines a repository for People and Organizations.
 	/// </summary>
+	/// <typeparam name="T">The type of API object managed by this repository.</typeparam>
 	public interface IRepository<T> : IBulkRepository<T>
 		where T : class
 	{

@@ -17,7 +17,7 @@
 	{
 		private readonly PeopleAndOrganizationsApi api;
 
-		private	DomRoleHandler(PeopleAndOrganizationsApi api)
+		private DomRoleHandler(PeopleAndOrganizationsApi api)
 		{
 			this.api = api ?? throw new ArgumentNullException(nameof(api));
 		}
@@ -82,7 +82,7 @@
 			var toUpdateNameValidation = rolesToUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role.Id)));
 			ValidateDomNames(rolesToCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = rolesToCreate
+			var toCreateDomInstances = rolesToCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -92,7 +92,7 @@
 				.Select(x => new DomRole(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<DomRole> domRoles)
@@ -308,11 +308,11 @@
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Role.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role).Equal(name));
 
-			var domRolesByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetRoles(apiRoles.Select(x => x.Name), filter)
+			var domRolesByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetRoles(apiRoles.Select(x => x.Name), Filter)
 				.GroupBy(x => x.RoleInformation.Role)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomRole>)x.ToList());
 

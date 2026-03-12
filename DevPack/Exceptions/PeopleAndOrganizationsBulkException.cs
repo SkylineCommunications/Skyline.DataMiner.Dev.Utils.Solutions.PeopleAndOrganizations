@@ -9,6 +9,7 @@
 	/// <summary>
 	/// Thrown when a People and Organizations bulk operation failed.
 	/// </summary>
+	/// <typeparam name="K">The type of the identifier used in the bulk operation.</typeparam>
 	public class PeopleAndOrganizationsBulkException<K> : Exception
 		where K : IEquatable<K>
 	{
