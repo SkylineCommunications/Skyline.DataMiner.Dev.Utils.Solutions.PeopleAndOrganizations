@@ -76,7 +76,7 @@
 			ValidateIdsNotInUse(apiTeams.Where(x => x.IsNew).ToArray());
 			ValidateStateForUpdateAction(apiTeams.Where(x => !x.IsNew).ToArray());
 			ValidateNames(apiTeams);
-			ValidateSkills(apiTeams);
+			//ValidateSkills(apiTeams);
 
 			var validTeams = apiTeams.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validTeams, CreateOrUpdateLocked);
@@ -98,12 +98,12 @@
 			var toCreate = apiTeams.Where(x => x.IsNew).ToList();
 			var toUpdate = apiTeams.Except(toCreate).ToList();
 
-			var changeResults = GetTeamsWithChanges(toUpdate);
+			var changeResults = GetTeamsWithChanges(toUpdate).ToList();
 
 			var toUpdateNameValidation = toUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamName.Id)));
 			ValidateDomNames(toCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = toCreate
+			var toCreateDomInstances = toCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -113,7 +113,7 @@
 				.Select(x => new DomTeam(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<DomTeam> domTeams)
@@ -355,7 +355,7 @@
 
 			foreach (var team in apiTeams.Where(x => x.State != TeamState.Draft))
 			{
-				var error = new OrganizationInvalidStateError
+				var error = new TeamInvalidStateError
 				{
 					ErrorMessage = "Not allowed to activate a team that is not in Draft state.",
 					Id = team.Id,
@@ -378,7 +378,7 @@
 
 			foreach (var team in apiTeams.Where(x => x.State != TeamState.Active))
 			{
-				var error = new OrganizationInvalidStateError
+				var error = new TeamInvalidStateError
 				{
 					ErrorMessage = "Not allowed to deprecate a team that is not in Active state.",
 					Id = team.Id,
@@ -543,7 +543,24 @@
 				return;
 			}
 
-			// todo: implement validation for skills (e.g. check if provided skill IDs exist) and report errors for invalid skills.
+			var skillValues = api.Skills.Read().Select(x => x.Name).ToList();
+
+			foreach (var team in apiTeams)
+			{
+				foreach (var skill in team.Skills)
+				{
+					if (!skillValues.Contains(skill.Name))
+					{
+						var error = new TeamInvalidAssignedSkillError
+						{
+							ErrorMessage = $"Skill '{skill.Name}' does not exist.",
+							Id = team.Id,
+							Name = skill.Name,
+						};
+						ReportError(team.Id, error);
+					}
+				}
+			}
 		}
 
 		private IEnumerable<DomChangeResults> GetTeamsWithChanges(ICollection<Team> apiTeams)

@@ -1,17 +1,17 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
-    using System;
+	using System;
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
 
-    /// <summary>
-    /// Represents an organization in People and Organizations.
-    /// </summary>
-    public class Organization : ApiObject
-    {
-        private StoragePeopleAndOrganizations.OrganizationsInstance originalInstance;
+	/// <summary>
+	/// Represents an organization in People and Organizations.
+	/// </summary>
+	public class Organization : ApiObject
+	{
+		private StoragePeopleAndOrganizations.OrganizationsInstance originalInstance;
 		private StoragePeopleAndOrganizations.OrganizationsInstance updatedInstance;
 
 		/// <summary>
@@ -33,15 +33,15 @@
 		}
 
 		internal Organization(StoragePeopleAndOrganizations.OrganizationsInstance instance) : base(instance.ID.Id)
-        {
-            ParseInstance(instance);
-            InitTracking();
-        }
+		{
+			ParseInstance(instance);
+			InitTracking();
+		}
 
-        /// <summary>
-        /// Gets or sets the name of the organization.
-        /// </summary>
-        public override string Name { get; set; }
+		/// <summary>
+		/// Gets or sets the name of the organization.
+		/// </summary>
+		public override string Name { get; set; }
 
 		/// <summary>
 		/// Gets or sets the ID of the category associated with the organization.
@@ -100,14 +100,14 @@
 		}
 
 		private void ParseInstance(StoragePeopleAndOrganizations.OrganizationsInstance instance)
-        {
-            this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
+		{
+			this.originalInstance = instance ?? throw new ArgumentNullException(nameof(instance));
 
-            Name = instance.OrganizationInformation.OrganizationName;
+			Name = instance.OrganizationInformation.OrganizationName;
 			CategoryId = instance.OrganizationInformation.Category ?? Guid.Empty;
 
-			State = EnumExtensions.MapEnum< StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum, OrganizationState>(instance.Status);
+			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum, OrganizationState>(instance.Status);
 
 		}
-    }
+	}
 }

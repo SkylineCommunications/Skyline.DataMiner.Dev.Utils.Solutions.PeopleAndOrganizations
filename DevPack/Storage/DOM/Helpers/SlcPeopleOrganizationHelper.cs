@@ -99,7 +99,7 @@
 			}
 
 			FilterElement<DomInstance> filter(Guid id) =>
-				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id)
+				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
