@@ -59,7 +59,7 @@
 		public string Description { get; set; }
 
 		/// <summary>
-		/// Gets an indication whether the team is bookable.
+		/// Gets a value indicating whether the team is bookable.
 		/// </summary>
 		public bool IsBookable { get; private set; }
 
