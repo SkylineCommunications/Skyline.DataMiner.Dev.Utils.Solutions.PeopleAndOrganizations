@@ -44,7 +44,7 @@
 		/// <returns>true if the specified object is equal to the current instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
-			if (obj is not Role other)
+			if (obj is not Skill other)
 			{
 				return false;
 			}

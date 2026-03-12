@@ -18,7 +18,7 @@
 		/// <summary>
 		/// Reads all Skills from the Repository.
 		/// </summary>
-		/// <returns>An enumerable collection of all Skills.</returns>
+		/// <returns>All Skills in the repository.</returns>
 		IEnumerable<Skill> Read();
 
 		/// <summary>
