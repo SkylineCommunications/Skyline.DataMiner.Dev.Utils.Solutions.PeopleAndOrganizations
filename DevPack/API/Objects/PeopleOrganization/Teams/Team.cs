@@ -88,7 +88,7 @@
 			Name = instance.TeamInformation.TeamName;
 			Email = instance.TeamInformation.TeamEmail;
 			Description = instance.TeamInformation.TeamDescription;
-			IsBookable = instance.TeamInformation.Bookable.HasValue ? instance.TeamInformation.Bookable.Value : false;
+			IsBookable = instance.TeamInformation.Bookable ?? false;
 
 			ResourcePoolId = instance.ResourcePool.LinkedResourcePool.HasValue ? instance.ResourcePool.LinkedResourcePool.Value : Guid.Empty;
 
