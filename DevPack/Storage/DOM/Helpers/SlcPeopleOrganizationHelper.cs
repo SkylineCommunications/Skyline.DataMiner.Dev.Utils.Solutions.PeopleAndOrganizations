@@ -98,13 +98,13 @@
 				return Enumerable.Empty<TeamsInstance>();
 			}
 
-			FilterElement<DomInstance> filter(Guid id) =>
+			FilterElement<DomInstance> Filter(Guid id) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id)
 				.AND(DomInstanceExposers.Id.Equal(id));
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				ids.Distinct(),
-				x => filter(x),
+				x => Filter(x),
 				x => GetTeamIterator(x));
 		}
 

@@ -44,22 +44,22 @@
 		}
 
 		/// <summary>
-		/// The name of the team.
+		/// Gets or sets the name of the team.
 		/// </summary>
 		public override string Name { get; set; }
 
 		/// <summary>
-		/// The email address of the team.
+		/// Gets or sets the email address of the team.
 		/// </summary>
 		public string Email { get; set; }
 
 		/// <summary>
-		/// A description of the functions and responsibilities of the team.
+		/// Gets or sets a description of the functions and responsibilities of the team.
 		/// </summary>
 		public string Description { get; set; }
 
 		/// <summary>
-		/// Indicates whether the team is bookable.
+		/// Gets an indication whether the team is bookable.
 		/// </summary>
 		public bool IsBookable { get; private set; }
 
@@ -160,6 +160,8 @@
 		/// <summary>
 		/// Determines whether the specified object is equal to the current Organization instance.
 		/// </summary>
+		/// <param name="obj">The object to compare with the current instance.</param>
+		/// <returns>true if the specified object is equal to the current Team instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is not Team other)

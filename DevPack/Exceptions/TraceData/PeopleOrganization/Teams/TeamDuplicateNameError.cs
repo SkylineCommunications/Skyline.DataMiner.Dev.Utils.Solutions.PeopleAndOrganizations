@@ -8,6 +8,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 		/// <summary>
 		/// Gets the name of the team.
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; internal set; }
 	}
 }
