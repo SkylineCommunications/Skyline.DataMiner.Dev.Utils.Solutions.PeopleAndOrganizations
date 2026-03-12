@@ -6,8 +6,8 @@
 	public class TeamInvalidAssignedSkillError : TeamError
 	{
 		/// <summary>
-		/// Gets or sets the name of the skill.
+		/// Gets the name of the skill.
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; internal set; }
 	}
 }
