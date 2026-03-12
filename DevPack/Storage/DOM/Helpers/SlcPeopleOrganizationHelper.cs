@@ -76,6 +76,56 @@
 				x => GetOrganizationIterator(x));
 		}
 
+		public IEnumerable<TeamsInstance> GetTeams(FilterElement<DomInstance> filter)
+		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return GetTeamIterator(filter);
+		}
+
+		public IEnumerable<TeamsInstance> GetTeams(IEnumerable<Guid> ids)
+		{
+			if (ids == null)
+			{
+				throw new ArgumentNullException(nameof(ids));
+			}
+
+			if (!ids.Any())
+			{
+				return Enumerable.Empty<TeamsInstance>();
+			}
+
+			FilterElement<DomInstance> Filter(Guid id) =>
+				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id)
+				.AND(DomInstanceExposers.Id.Equal(id));
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				ids.Distinct(),
+				x => Filter(x),
+				x => GetTeamIterator(x));
+		}
+
+		public IEnumerable<TeamsInstance> GetTeams<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException(nameof(values));
+			}
+
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return FilterQueryExecutor.RetrieveFilteredItems(
+				values.Distinct(),
+				x => filter(x),
+				x => GetTeamIterator(x));
+		}
+
 		public IEnumerable<PeopleInstance> GetPeople(FilterElement<DomInstance> filter)
 		{
 			if (filter == null)
@@ -310,6 +360,22 @@
 			return InstanceFactory.CreateInstances(pages, instance => new OrganizationsInstance(instance));
 		}
 
+		internal IEnumerable<IEnumerable<TeamsInstance>> GetTeamsPaged(FilterElement<DomInstance> paramFilter, int pageSize)
+		{
+			if (paramFilter == null)
+			{
+				throw new ArgumentNullException(nameof(paramFilter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize));
+			}
+
+			var pages = DomHelper.DomInstances.ReadPaged(paramFilter, pageSize);
+			return InstanceFactory.CreateInstances(pages, instance => new TeamsInstance(instance));
+		}
+
 		internal IEnumerable<IEnumerable<RoleInstance>> GetRolesPaged(FilterElement<DomInstance> paramFilter, int pageSize)
 		{
 			if (paramFilter == null)
@@ -361,6 +427,11 @@
 		private IEnumerable<OrganizationsInstance> GetOrganizationIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new OrganizationsInstance(instance));
+		}
+
+		private IEnumerable<TeamsInstance> GetTeamIterator(FilterElement<DomInstance> filter)
+		{
+			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new TeamsInstance(instance));
 		}
 
 		private IEnumerable<PeopleInstance> GetPersonIterator(FilterElement<DomInstance> filter)

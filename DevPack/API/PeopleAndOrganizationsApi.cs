@@ -26,9 +26,11 @@
 		private readonly Lazy<IMediaOpsPlanApi> lazyPlanApi;
 		private readonly Lazy<IOrganizationsRepository> lazyOrganizationsRepository;
 		private readonly Lazy<IPeopleRepository> lazyPeopleRepository;
+		private readonly Lazy<ITeamsRepository> lazyTeamsRepository;
 		private readonly Lazy<IExperienceRepository> lazyExperienceRepository;
 		private readonly Lazy<ICategoriesRepository> lazyCategoriesRepository;
 		private readonly Lazy<IRolesRepository> lazyRolesRepository;
+		private readonly Lazy<ISkillsRepository> lazySkillsRepository;
 		private readonly Lazy<PeopleAndOrganizations.Tools.LockManager> lazyLockManager;
 
 		private ILogger logger;
@@ -43,9 +45,11 @@
 			lazyPlanApi = new Lazy<IMediaOpsPlanApi>(() => connection.GetMediaOpsPlanApi());
 			lazyOrganizationsRepository = new Lazy<IOrganizationsRepository>(() => new OrganizationsRepository(this));
 			lazyPeopleRepository = new Lazy<IPeopleRepository>(() => new PeopleRepository(this));
+			lazyTeamsRepository = new Lazy<ITeamsRepository>(() => new TeamsRepository(this));
 			lazyExperienceRepository = new Lazy<IExperienceRepository>(() => new ExperienceRepository(this));
 			lazyCategoriesRepository = new Lazy<ICategoriesRepository>(() => new CategoriesRepository(this));
 			lazyRolesRepository = new Lazy<IRolesRepository>(() => new RolesRepository(this));
+			lazySkillsRepository = new Lazy<ISkillsRepository>(() => new SkillsRepository(this));
 			lazyLockManager = new Lazy<PeopleAndOrganizations.Tools.LockManager>(() => new PeopleAndOrganizations.Tools.LockManager(this));
 		}
 
@@ -56,6 +60,9 @@
 		public IPeopleRepository People => lazyPeopleRepository.Value;
 
 		/// <inheritdoc/>
+		public ITeamsRepository Teams => lazyTeamsRepository.Value;
+
+		/// <inheritdoc/>
 		public IExperienceRepository Experience => lazyExperienceRepository.Value;
 
 		/// <inheritdoc/>
@@ -63,6 +70,9 @@
 
 		/// <inheritdoc/>
 		public IRolesRepository Roles => lazyRolesRepository.Value;
+
+		/// <inheritdoc/>
+		public ISkillsRepository Skills => lazySkillsRepository.Value;
 
 		internal IConnection Connection => connection;
 

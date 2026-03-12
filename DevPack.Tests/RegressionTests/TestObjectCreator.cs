@@ -20,6 +20,8 @@
 
 		private readonly HashSet<Guid> createdOrganizationIds = new HashSet<Guid>();
 
+		private readonly HashSet<Guid> createdTeamIds = new HashSet<Guid>();
+
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
 			this.testContext = testContext ?? throw new ArgumentNullException(nameof(testContext));
@@ -109,6 +111,37 @@
 				foreach (var id in bulkException.Result.SuccessfulIds)
 				{
 					createdOrganizationIds.Add(id);
+				}
+
+				throw;
+			}
+		}
+
+		public Team CreateTeam(Team team)
+		{
+			var createdTeam = Api.Teams.Create(team);
+			createdTeamIds.Add(createdTeam.Id);
+			return createdTeam;
+		}
+
+		public IReadOnlyCollection<Team> CreateTeams(IEnumerable<Team> teams)
+		{
+			try
+			{
+				var createdTeams = Api.Teams.Create(teams);
+
+				foreach (var id in teams.Select(x => x.Id))
+				{
+					createdTeamIds.Add(id);
+				}
+
+				return createdTeams;
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdTeamIds.Add(id);
 				}
 
 				throw;
