@@ -20,6 +20,8 @@
 
 		private readonly HashSet<Guid> createdOrganizationIds = new HashSet<Guid>();
 
+		private readonly HashSet<Guid> createdTeamIds = new HashSet<Guid>();
+
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
 			this.testContext = testContext ?? throw new ArgumentNullException(nameof(testContext));
@@ -84,55 +86,6 @@
 			}
 		}
 
-		private void PeopleCleanup()
-		{
-
-		}
-
-		private void TeamsCleanup()
-		{
-
-		}
-
-		private void OrganizationsCleanup()
-		{
-			var organizations = Api.Organizations.Read(createdOrganizationIds.ToArray());
-
-			try
-			{
-				var toDeprecate = organizations.Where(x => x.State == OrganizationState.Active);
-
-				Api.Organizations.Deprecate(toDeprecate);
-			}
-			catch
-			{
-				// Ignore cleanup errors
-			}
-
-			Api.Organizations.Delete(organizations.ToArray());
-		}
-
-		private void ExperienceCleanup()
-		{
-			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
-
-			Api.Experience.Delete(experience.ToArray());
-		}
-
-		private void CategoriesCleanup()
-		{
-			var categories = Api.Categories.Read(createdCategoryIds.ToArray());
-
-			Api.Categories.Delete(categories.ToArray());
-		}
-
-		private void RolesCleanup()
-		{
-			var roles = Api.Roles.Read(createdRoleIds.ToArray());
-
-			Api.Roles.Delete(roles.ToArray());
-		}
-
 		public Organization CreateOrganization(Organization organization)
 		{
 			var createdOrganization = Api.Organizations.Create(organization);
@@ -158,6 +111,37 @@
 				foreach (var id in bulkException.Result.SuccessfulIds)
 				{
 					createdOrganizationIds.Add(id);
+				}
+
+				throw;
+			}
+		}
+
+		public Team CreateTeam(Team team)
+		{
+			var createdTeam = Api.Teams.Create(team);
+			createdTeamIds.Add(createdTeam.Id);
+			return createdTeam;
+		}
+
+		public IReadOnlyCollection<Team> CreateTeams(IEnumerable<Team> teams)
+		{
+			try
+			{
+				var createdTeams = Api.Teams.Create(teams);
+
+				foreach (var id in teams.Select(x => x.Id))
+				{
+					createdTeamIds.Add(id);
+				}
+
+				return createdTeams;
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdTeamIds.Add(id);
 				}
 
 				throw;
@@ -255,6 +239,53 @@
 
 				throw;
 			}
+		}
+
+		private void PeopleCleanup()
+		{
+		}
+
+		private void TeamsCleanup()
+		{
+		}
+
+		private void OrganizationsCleanup()
+		{
+			var organizations = Api.Organizations.Read(createdOrganizationIds.ToArray());
+
+			try
+			{
+				var toDeprecate = organizations.Where(x => x.State == OrganizationState.Active);
+
+				Api.Organizations.Deprecate(toDeprecate);
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			Api.Organizations.Delete(organizations.ToArray());
+		}
+
+		private void ExperienceCleanup()
+		{
+			var experience = Api.Experience.Read(createdExperienceIds.ToArray());
+
+			Api.Experience.Delete(experience.ToArray());
+		}
+
+		private void CategoriesCleanup()
+		{
+			var categories = Api.Categories.Read(createdCategoryIds.ToArray());
+
+			Api.Categories.Delete(categories.ToArray());
+		}
+
+		private void RolesCleanup()
+		{
+			var roles = Api.Roles.Read(createdRoleIds.ToArray());
+
+			Api.Roles.Delete(roles.ToArray());
 		}
 	}
 }

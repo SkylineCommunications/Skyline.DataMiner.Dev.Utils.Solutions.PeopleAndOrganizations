@@ -37,7 +37,7 @@
 		}
 
 		/// <summary>
-		/// The name of the role that a person has in a team.
+		/// Gets or sets the name of the role that a person has in a team.
 		/// </summary>
 		public override string Name { get; set; }
 
@@ -59,6 +59,8 @@
 		/// <summary>
 		/// Determines whether the specified object is equal to the current Role instance.
 		/// </summary>
+		/// <param name="obj">The object to compare with the current instance.</param>
+		/// <returns>true if the specified object is equal to the current instance; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			if (obj is not Role other)

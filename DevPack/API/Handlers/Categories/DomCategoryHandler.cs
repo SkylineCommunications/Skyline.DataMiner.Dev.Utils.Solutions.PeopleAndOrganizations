@@ -82,7 +82,7 @@
 			var toUpdateNameValidation = categoriesToUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category.Id)));
 			ValidateDomNames(categoriesToCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = categoriesToCreate
+			var toCreateDomInstances = categoriesToCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -92,7 +92,7 @@
 				.Select(x => new DomCategory(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<DomCategory> domCategories)
@@ -308,11 +308,11 @@
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Category.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category).Equal(name));
 
-			var domCategoriesByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetCategories(apiCategories.Select(x => x.Name), filter)
+			var domCategoriesByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetCategories(apiCategories.Select(x => x.Name), Filter)
 				.GroupBy(x => x.CategoryInformation.Category)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomCategory>)x.ToList());
 

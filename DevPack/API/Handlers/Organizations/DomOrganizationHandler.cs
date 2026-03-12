@@ -95,12 +95,12 @@
 			var organizationsToCreate = apiOrganizations.Where(x => x.IsNew).ToList();
 			var organizationsToUpdate = apiOrganizations.Except(organizationsToCreate).ToList();
 
-			var changeResults = GetOrganizationsWithChanges(organizationsToUpdate);
+			var changeResults = GetOrganizationsWithChanges(organizationsToUpdate).ToList();
 
 			var toUpdateNameValidation = organizationsToUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName.Id)));
 			ValidateDomNames(organizationsToCreate.Concat(toUpdateNameValidation).ToList());
 
-			var ToCreateDomInstances = organizationsToCreate
+			var toCreateDomInstances = organizationsToCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
 				.ToList();
@@ -110,7 +110,7 @@
 				.Select(x => new DomOrganization(x.Instance))
 				.ToList();
 
-			CreateOrUpdateDom(ToCreateDomInstances.Concat(toUpdateDomInstances).ToList());
+			CreateOrUpdateDom(toCreateDomInstances.Concat(toUpdateDomInstances).ToList());
 		}
 
 		private void CreateOrUpdateDom(ICollection<DomOrganization> domOrganizations)
@@ -479,11 +479,11 @@
 				return;
 			}
 
-			FilterElement<DomInstance> filter(string name) =>
+			FilterElement<DomInstance> Filter(string name) =>
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName).Equal(name));
 
-			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), filter)
+			var domOrganizationsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(apiOrganizations.Select(x => x.Name), Filter)
 				.GroupBy(x => x.OrganizationInformation.OrganizationName)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomOrganization>)x.ToList());
 

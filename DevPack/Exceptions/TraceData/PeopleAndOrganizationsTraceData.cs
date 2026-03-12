@@ -10,6 +10,7 @@
 	public class PeopleAndOrganizationsTraceData
 	{
 		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleAndOrganizationsTraceData"/> class.
 		/// Creates an empty trace data object.
 		/// </summary>
 		public PeopleAndOrganizationsTraceData()
@@ -17,16 +18,16 @@
 		}
 
 		/// <summary>
-		/// Returns only the error data that was generated while handling the request.
+		/// Gets the error data that was generated while handling the request.
 		/// </summary>
 		/// <returns>Never null.</returns>
-		public List<PeopleAndOrganizationsErrorData> ErrorData { get; set; } = new List<PeopleAndOrganizationsErrorData>();
+		public List<PeopleAndOrganizationsErrorData> ErrorData { get; private set; } = new List<PeopleAndOrganizationsErrorData>();
 
 		/// <summary>
 		/// Returns all the data contained in the object in a readable format.
 		/// Is also log-friendly.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>A string representation of the trace data.</returns>
 		public override string ToString()
 		{
 			var info = new StringBuilder();
@@ -44,7 +45,7 @@
 		/// <summary>
 		/// Returns true if the object does not contain any errors indicating failure of a operation.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>True if the operation succeeded; otherwise, false.</returns>
 		public bool HasSucceeded()
 		{
 			return ErrorData.Count == 0;
@@ -53,6 +54,7 @@
 		/// <summary>
 		/// Adds error data.
 		/// </summary>
+		/// <param name="errorData">The error data to add. Cannot be null.</param>
 		public void Add(PeopleAndOrganizationsErrorData errorData)
 		{
 			if (errorData == null)

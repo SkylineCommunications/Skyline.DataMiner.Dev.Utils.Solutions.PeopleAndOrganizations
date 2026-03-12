@@ -168,6 +168,7 @@
 			{
 				ActionResults = actionResults;
 			}
+
 			public ICollection<K> ActionResults { get; }
 		}
 
@@ -180,6 +181,7 @@
 			}
 
 			public ICollection<T> FailedToLockObjects { get; }
+
 			public ICollection<K> ActionResults { get; }
 		}
 
@@ -307,7 +309,6 @@
 					}
 
 					public static NullScope Instance { get; } = new NullScope();
-
 
 					public void Dispose()
 					{
