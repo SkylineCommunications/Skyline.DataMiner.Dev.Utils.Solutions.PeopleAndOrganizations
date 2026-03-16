@@ -1,10 +1,7 @@
 ﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Skills
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
@@ -13,10 +10,9 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
-	using static Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections;
-
 	[TestClass]
 	[TestCategory("IntegrationTest")]
+	[DoNotParallelize]
 	public sealed class BasicTests : IDisposable
 	{
 		private readonly TestObjectCreator objectCreator;
@@ -105,30 +101,28 @@
 			var toUpdate = createdSkills.Single(x => x.Name == skill2.Name);
 			toUpdate.Name = skill1.Name;
 
-			PeopleAndOrganizationsException? expectedException = null;
 			try
 			{
 				objectCreator.UpdateSkill(toUpdate);
 			}
-			catch (PeopleAndOrganizationsException ex)
+			catch (PeopleAndOrganizationsException exception)
 			{
-				expectedException = ex;
+				Assert.IsNotNull(exception, "Expected exception was not thrown.");
+
+				var errorMessage = $"Skill '{skill1.Name}' already exists.";
+				Assert.AreEqual(errorMessage, exception!.Message);
+
+				Assert.AreEqual(1, exception!.TraceData.ErrorData.Count);
+
+				var skillNameExistsError = exception!.TraceData.ErrorData.OfType<SkillDuplicateNameError>().SingleOrDefault();
+				Assert.IsNotNull(skillNameExistsError);
+				Assert.AreEqual(toUpdate.Name, skillNameExistsError.Name);
+				Assert.AreEqual(errorMessage, skillNameExistsError.ErrorMessage);
+
+				return;
 			}
 
-			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
-
-			var errorMessage = "Name is already in use.";
-			Assert.AreEqual(errorMessage, expectedException.Message);
-
-			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
-			var skillError = expectedException.TraceData.ErrorData.OfType<SkillError>().SingleOrDefault();
-			Assert.IsNotNull(skillError);
-
-			//var skillNameExistsError = skillError as SkillNameExistsError;
-			//Assert.IsNotNull(skillNameExistsError);
-			//Assert.AreEqual(toUpdate.Id, skillNameExistsError.Id);
-			//Assert.AreEqual(toUpdate.Name, skillNameExistsError.Name);
-			//Assert.AreEqual(errorMessage, skillNameExistsError.ErrorMessage);
+			Assert.Fail("Expected exception was not thrown.");
 		}
 
 		[TestMethod]
@@ -166,9 +160,17 @@
 			{
 				skill = objectCreator.CreateSkill(skill);
 			}
-			catch (PeopleAndOrganizationsException ex)
+			catch (PeopleAndOrganizationsException exception)
 			{
-				Assert.AreEqual("Name cannot be empty.", ex.Message);
+				Assert.AreEqual("Skill name cannot be longer than 150 characters.", exception.Message);
+				Assert.AreEqual(1, exception.TraceData.ErrorData.Count);
+
+				var skillError = exception.TraceData.ErrorData.OfType<SkillInvalidNameError>().SingleOrDefault();
+				Assert.IsNotNull(skillError);
+
+				Assert.AreEqual(skill.Name, skillError.Name);
+				Assert.AreEqual("Skill name cannot be longer than 150 characters.", skillError.ErrorMessage);
+
 				return;
 			}
 

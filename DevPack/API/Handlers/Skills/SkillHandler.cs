@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
 	internal class SkillHandler : StringApiObjectValidator<Skill>
@@ -79,12 +80,54 @@
 			{
 				api.PlanApi.Capabilities.CreateOrUpdate([skillsCapability]);
 				ReportSuccess(apiSkillsToCreateOrUpdate);
-
 			}
-			catch (Exception ex)
+			catch (MediaOpsBulkException<Guid> mediaOpsException)
 			{
-				// TODO: parse exception to find out which skill(s) caused the failure and report those, instead of reporting all of them.
-				foreach (var apiSkill in apiSkills) ReportError(apiSkill.Name);
+				foreach (var error in mediaOpsException.Result.TraceDataPerItem[skillsCapability.Id].ErrorData)
+				{
+					switch (error)
+					{
+						case CapabilityDiscreteInvalidLengthError invalidLengthError:
+							foreach (var invalidSkill in invalidLengthError.InvalidDiscretes)
+							{
+								var errorForSkill = new SkillInvalidNameError
+								{
+									ErrorMessage = $"Skill name cannot be longer than {invalidLengthError.MaxLength} characters.",
+									Name = invalidSkill,
+								};
+
+								ReportError(invalidSkill, errorForSkill);
+							}
+
+							break;
+						case CapabilityDuplicateDiscretesError duplicateDiscretesError:
+							foreach (var duplicateSkill in duplicateDiscretesError.Discretes.Distinct())
+							{
+								var errorForSkill = new SkillDuplicateNameError
+								{
+									ErrorMessage = $"Skill '{duplicateSkill}' already exists.",
+									Name = duplicateSkill,
+								};
+
+								ReportError(duplicateSkill, errorForSkill);
+							}
+
+							break;
+						default:
+							foreach (var skill in apiSkillsToCreateOrUpdate)
+							{
+								var errorForSkill = new SkillError
+								{
+									ErrorMessage = $"An error occurred while saving the skill: {mediaOpsException.Message}",
+									Name = skill.Name,
+								};
+
+								ReportError(skill.Name, errorForSkill);
+							}
+
+							break;
+					}
+				}
 			}
 		}
 
@@ -121,10 +164,16 @@
 				ReportSuccess(apiSkills);
 
 			}
-			catch (Exception ex)
+			catch (MediaOpsException exception)
 			{
-				// TODO: parse exception to find out which skill(s) caused the failure and report those, instead of reporting all of them.
-				foreach (var apiSkill in apiSkills) ReportError(apiSkill.Name);
+				foreach (var apiSkill in apiSkills)
+				{
+					ReportError(apiSkill.Name, new SkillError
+					{
+						ErrorMessage = $"Unable to delete skill due to {exception.Message}.",
+						Name = apiSkill.Name,
+					});
+				}
 			}
 		}
 
