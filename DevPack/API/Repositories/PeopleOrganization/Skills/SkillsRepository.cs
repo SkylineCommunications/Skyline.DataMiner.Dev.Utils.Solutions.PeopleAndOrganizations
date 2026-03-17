@@ -5,12 +5,13 @@
 	using System.Linq;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
 
 	using SLDataGateway.API.Types.Querying;
 
 	internal class SkillsRepository : Repository, ISkillsRepository
 	{
+		private readonly SkillFilterTranslator skillFilterTranslator = new SkillFilterTranslator();
+
 		public SkillsRepository(PeopleAndOrganizationsApi api) : base(api)
 		{
 		}
@@ -22,7 +23,7 @@
 
 		public long Count(FilterElement<Skill> filter)
 		{
-			throw new NotImplementedException();
+			return Read(filter).Count();
 		}
 
 		public long Count(IQuery<Skill> query)
@@ -45,6 +46,11 @@
 				throw new InvalidOperationException("Not possible to use method Create for existing skills. Use CreateOrUpdate or Update instead.");
 			}
 
+			if (oToCreate.Any(x => x.Name == null))
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToCreate));
+			}
+
 			if (!SkillHandler.TryCreateOrUpdate(Api, list, out var result))
 			{
 				result.ThrowBulkException();
@@ -63,6 +69,12 @@
 			if (!oToCreate.IsNew)
 			{
 				throw new InvalidOperationException("Not possible to use method Create for existing skill. Use CreateOrUpdate or Update instead.");
+			}
+
+			if (oToCreate.Name == null)
+
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToCreate));
 			}
 
 			if (!SkillHandler.TryCreateOrUpdate(Api, [oToCreate], out var result))
@@ -97,6 +109,11 @@
 				throw new ArgumentNullException(nameof(oToDelete));
 			}
 
+			if (oToDelete.Any(x => x.Name == null))
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToDelete));
+			}
+
 			if (!SkillHandler.TryDelete(Api, oToDelete.ToArray(), out var result))
 			{
 				result.ThrowBulkException();
@@ -108,6 +125,11 @@
 			if (oToDelete == null)
 			{
 				throw new ArgumentNullException(nameof(oToDelete));
+			}
+
+			if (oToDelete.Name == null)
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToDelete));
 			}
 
 			if (!SkillHandler.TryDelete(Api, [oToDelete], out var result))
@@ -123,7 +145,7 @@
 				throw new ArgumentNullException(nameof(filter));
 			}
 
-			throw new NotImplementedException();
+			return skillFilterTranslator.FilterSkills(SkillHandler.ReadAll(Api), filter);
 		}
 
 		public IEnumerable<Skill> Read(IQuery<Skill> query)
@@ -156,6 +178,11 @@
 				throw new InvalidOperationException("Not possible to use method Update for new skills. Use Create or CreateOrUpdate instead.");
 			}
 
+			if (oToUpdate.Any(x => x.Name == null))
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToUpdate));
+			}
+
 			if (!SkillHandler.TryCreateOrUpdate(Api, list, out var result))
 			{
 				result.ThrowBulkException();
@@ -174,6 +201,11 @@
 			if (oToUpdate.IsNew)
 			{
 				throw new InvalidOperationException("Not possible to use method Update for new skill. Use Create or CreateOrUpdate instead.");
+			}
+
+			if (oToUpdate.Name == null)
+			{
+				throw new ArgumentException("Name of skill cannot be null.", nameof(oToUpdate));
 			}
 
 			if (!SkillHandler.TryCreateOrUpdate(Api, [oToUpdate], out var result))

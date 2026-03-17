@@ -22,6 +22,8 @@
 
 		private readonly HashSet<Guid> createdTeamIds = new HashSet<Guid>();
 
+		private readonly HashSet<string> createdSkillNames = new HashSet<string>();
+
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
 			this.testContext = testContext ?? throw new ArgumentNullException(nameof(testContext));
@@ -79,6 +81,15 @@
 			try
 			{
 				RolesCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				SkillsCleanup();
 			}
 			catch
 			{
@@ -241,6 +252,70 @@
 			}
 		}
 
+		public Skill CreateSkill(Skill skill)
+		{
+			var createdSkill = Api.Skills.Create(skill);
+			createdSkillNames.Add(createdSkill.Name);
+			return createdSkill;
+		}
+
+		public IReadOnlyCollection<Skill> CreateSkills(IEnumerable<Skill> skills)
+		{
+			try
+			{
+				var updatedSkills = Api.Skills.Create(skills);
+
+				foreach (var name in skills.Select(x => x.Name))
+				{
+					createdSkillNames.Add(name);
+				}
+
+				return updatedSkills;
+			}
+			catch (PeopleAndOrganizationsBulkException<string> bulkException)
+			{
+				foreach (var name in bulkException.Result.SuccessfulIds)
+				{
+					createdSkillNames.Add(name);
+				}
+
+				throw;
+			}
+		}
+
+		public Skill UpdateSkill(Skill skill)
+		{
+			var updatedSkill = Api.Skills.Update(skill);
+			createdSkillNames.Remove(skill.OriginalName);
+			createdSkillNames.Add(updatedSkill.Name);
+			return updatedSkill;
+		}
+
+		public IReadOnlyCollection<Skill> UpdateSkills(IEnumerable<Skill> skills)
+		{
+			try
+			{
+				var updatedSkills = Api.Skills.Update(skills);
+
+				foreach (var skill in skills)
+				{
+					createdSkillNames.Remove(skill.OriginalName);
+					createdSkillNames.Add(skill.Name);
+				}
+
+				return updatedSkills;
+			}
+			catch (PeopleAndOrganizationsBulkException<string> bulkException)
+			{
+				foreach (var name in bulkException.Result.SuccessfulIds)
+				{
+					createdSkillNames.Add(name);
+				}
+
+				throw;
+			}
+		}
+
 		private void PeopleCleanup()
 		{
 		}
@@ -286,6 +361,13 @@
 			var roles = Api.Roles.Read(createdRoleIds.ToArray());
 
 			Api.Roles.Delete(roles.ToArray());
+		}
+
+		private void SkillsCleanup()
+		{
+			var skills = Api.Skills.Read().Where(x => createdSkillNames.Contains(x.Name)).ToArray();
+
+			Api.Skills.Delete(skills);
 		}
 	}
 }
