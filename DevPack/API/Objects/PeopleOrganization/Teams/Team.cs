@@ -202,7 +202,7 @@
 			updatedInstance.TeamInformation.TeamName = Name;
 			updatedInstance.TeamInformation.TeamEmail = Email;
 			updatedInstance.TeamInformation.TeamDescription = Description;
-			updatedInstance.TeamInformation.Skills = skills.Select(s => s.Name).ToList();
+			updatedInstance.TeamInformation.Skills = skills.Select(s => s.Name);
 
 			return updatedInstance;
 		}
