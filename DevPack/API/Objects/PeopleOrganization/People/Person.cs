@@ -106,6 +106,8 @@
 
 		internal Guid ResourceId { get; private set; }
 
+		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
+
 		/// <summary>
 		/// Adds the specified skill to the person.
 		/// </summary>

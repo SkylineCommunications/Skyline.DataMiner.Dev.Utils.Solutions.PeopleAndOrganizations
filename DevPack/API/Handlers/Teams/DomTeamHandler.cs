@@ -406,6 +406,7 @@
 					ErrorMessage = "Not allowed to delete a team that is not in Draft or Deprecated state.",
 					Id = team.Id,
 				};
+
 				ReportError(team.Id, error);
 			}
 		}
