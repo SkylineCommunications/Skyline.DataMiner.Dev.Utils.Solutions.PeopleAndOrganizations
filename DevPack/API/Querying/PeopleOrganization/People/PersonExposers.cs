@@ -1,6 +1,8 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
+	using System.Collections;
+	using System.Linq;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
@@ -20,6 +22,36 @@
 		public static readonly Exposer<Person, string> Name = new Exposer<Person, string>((obj) => obj.Name, "Name");
 
 		/// <summary>
+		/// Gets an exposer for the <see cref="Person.Email"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, string> Email = new Exposer<Person, string>((obj) => obj.Email, "Email");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.Phone"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, string> Phone = new Exposer<Person, string>((obj) => obj.Phone, "Phone");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.StreetAddress"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, string> StreetAddress = new Exposer<Person, string>((obj) => obj.StreetAddress, "StreetAddress");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.City"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, string> City = new Exposer<Person, string>((obj) => obj.City, "City");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.Country"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, Country> Country = new Exposer<Person, Country>((obj) => obj.Country.Value, "Country");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.ZipCode"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, string> ZipCode = new Exposer<Person, string>((obj) => obj.ZipCode, "ZipCode");
+
+		/// <summary>
 		/// Gets an exposer for the <see cref="Person.ExperienceId"/> property.
 		/// </summary>
 		public static readonly Exposer<Person, Guid> ExperienceId = new Exposer<Person, Guid>((obj) => obj.ExperienceId, "ExperienceId");
@@ -28,5 +60,10 @@
 		/// Gets an exposer for the <see cref="Person.OrganizationId"/> property.
 		/// </summary>
 		public static readonly Exposer<Person, Guid> OrganizationId = new Exposer<Person, Guid>((obj) => obj.OrganizationId, "OrganizationId");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Person.State"/> property.
+		/// </summary>
+		public static readonly Exposer<Person, PersonState> State = new Exposer<Person, PersonState>((obj) => obj.State, "State");
 	}
 }

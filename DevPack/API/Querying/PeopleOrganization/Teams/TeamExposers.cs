@@ -33,5 +33,10 @@
 		/// Gets an exposer for the <see cref="Team.IsBookable"/> property.
 		/// </summary>
 		public static readonly Exposer<Team, bool> IsBookable = new Exposer<Team, bool>((obj) => obj.IsBookable, "IsBookable");
+
+		/// <summary>
+		/// Gets an exposer for the <see cref="Team.State"/> property.
+		/// </summary>
+		public static readonly Exposer<Team, TeamState> State = new Exposer<Team, TeamState>((obj) => obj.State, "State");
 	}
 }
