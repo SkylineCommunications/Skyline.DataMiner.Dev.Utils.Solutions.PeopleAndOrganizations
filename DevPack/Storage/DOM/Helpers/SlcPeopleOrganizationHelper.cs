@@ -376,6 +376,22 @@
 			return InstanceFactory.CreateInstances(pages, instance => new TeamsInstance(instance));
 		}
 
+		internal IEnumerable<IEnumerable<PeopleInstance>> GetPeoplePaged(FilterElement<DomInstance> paramFilter, int pageSize)
+		{
+			if (paramFilter == null)
+			{
+				throw new ArgumentNullException(nameof(paramFilter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize));
+			}
+
+			var pages = DomHelper.DomInstances.ReadPaged(paramFilter, pageSize);
+			return InstanceFactory.CreateInstances(pages, instance => new PeopleInstance(instance));
+		}
+
 		internal IEnumerable<IEnumerable<RoleInstance>> GetRolesPaged(FilterElement<DomInstance> paramFilter, int pageSize)
 		{
 			if (paramFilter == null)
