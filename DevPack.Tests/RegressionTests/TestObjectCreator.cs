@@ -22,6 +22,8 @@
 
 		private readonly HashSet<Guid> createdTeamIds = new HashSet<Guid>();
 
+		private readonly HashSet<Guid> createdPersonIds = new HashSet<Guid>();
+
 		private readonly HashSet<string> createdSkillNames = new HashSet<string>();
 
 		public TestObjectCreator(IntegrationTestContext testContext)
@@ -153,6 +155,37 @@
 				foreach (var id in bulkException.Result.SuccessfulIds)
 				{
 					createdTeamIds.Add(id);
+				}
+
+				throw;
+			}
+		}
+
+		public Person CreatePerson(Person person)
+		{
+			var createdPerson = Api.People.Create(person);
+			createdPersonIds.Add(createdPerson.Id);
+			return createdPerson;
+		}
+
+		public IReadOnlyCollection<Person> CreatePeople(IEnumerable<Person> people)
+		{
+			try
+			{
+				var createdPeople = Api.People.Create(people);
+
+				foreach (var id in people.Select(x => x.Id))
+				{
+					createdPersonIds.Add(id);
+				}
+
+				return createdPeople;
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdPersonIds.Add(id);
 				}
 
 				throw;
@@ -318,6 +351,20 @@
 
 		private void PeopleCleanup()
 		{
+			var people = Api.People.Read(createdPersonIds.ToArray());
+
+			try
+			{
+				var toDeprecate = people.Where(x => x.State == PersonState.Active);
+
+				Api.People.Deprecate(toDeprecate);
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			Api.People.Delete(people.ToArray());
 		}
 
 		private void TeamsCleanup()

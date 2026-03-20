@@ -463,7 +463,7 @@
 
 			foreach (var person in peopleWithDuplicateNames)
 			{
-				var error = new TeamDuplicateNameError
+				var error = new PersonDuplicateNameError
 				{
 					ErrorMessage = $"Person '{person.Name}' has a duplicate name.",
 					Id = person.Id,

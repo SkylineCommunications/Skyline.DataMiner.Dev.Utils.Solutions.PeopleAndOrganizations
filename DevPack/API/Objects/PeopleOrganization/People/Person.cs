@@ -270,7 +270,7 @@
 			}
 
 			if (!skills.SetEquals(other.skills)
-				|| TeamMemberships.SequenceEqual(other.TeamMemberships))
+				|| !TeamMemberships.SequenceEqual(other.TeamMemberships))
 			{
 				return false;
 			}
