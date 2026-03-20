@@ -425,17 +425,17 @@
 
 			var teamsRequiringValidation = apiTeams.ToList();
 
-			foreach (var organization in teamsRequiringValidation.Where(x => !InputValidator.IsNonEmptyText(x.Name)).ToArray())
+			foreach (var team in teamsRequiringValidation.Where(x => !InputValidator.IsNonEmptyText(x.Name)).ToArray())
 			{
 				var error = new TeamInvalidNameError
 				{
 					ErrorMessage = "Name cannot be empty.",
-					Id = organization.Id,
+					Id = team.Id,
 				};
 
-				ReportError(organization.Id, error);
+				ReportError(team.Id, error);
 
-				teamsRequiringValidation.Remove(organization);
+				teamsRequiringValidation.Remove(team);
 			}
 
 			foreach (var team in teamsRequiringValidation.Where(x => !InputValidator.HasValidTextLength(x.Name)).ToArray())

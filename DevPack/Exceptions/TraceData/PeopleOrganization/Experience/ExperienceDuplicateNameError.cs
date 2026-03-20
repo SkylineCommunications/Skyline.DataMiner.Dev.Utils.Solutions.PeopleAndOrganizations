@@ -1,8 +1,9 @@
 namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 {
 	/// <summary>
-	/// Represents an error that occurs when an experience is configured with an invalid name.
+	/// Represents an error that occurs when an experience configuration has a duplicate name.
 	/// </summary>
+	/// <remarks>This can only occur when experience with the same name are provided to a bulk operation.</remarks>
 	public class ExperienceDuplicateNameError : ExperienceError
 	{
 		/// <summary>
