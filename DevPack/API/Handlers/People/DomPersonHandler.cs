@@ -8,6 +8,7 @@
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
@@ -80,6 +81,7 @@
 			ValidateExperience(apiPeople);
 			ValidateOrganizations(apiPeople);
 			ValidateSkills(apiPeople);
+			ValidateTeamMemberships(apiPeople);
 
 			var validPeople = apiPeople.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validPeople, CreateOrUpdateLocked);
@@ -351,7 +353,7 @@
 				return;
 			}
 
-			foreach (var person in apiPeople.Where(x => !new[] {PersonState.Draft, PersonState.Deprecated}.Contains(x.State)))
+			foreach (var person in apiPeople.Where(x => !new[] { PersonState.Draft, PersonState.Deprecated }.Contains(x.State)))
 			{
 				var error = new PersonInvalidStateError
 				{
@@ -626,6 +628,106 @@
 							Id = person.Id,
 							Name = skill.Name,
 						};
+						ReportError(person.Id, error);
+					}
+				}
+			}
+		}
+
+		private void ValidateTeamMemberships(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			var teamIds = apiPeople
+				.SelectMany(x => x.TeamMemberships)
+				.Select(x => x.TeamId)
+				.Distinct()
+				.ToList();
+			var teamsById = api.Teams.Read(teamIds).ToDictionary(x => x.Id);
+
+			var roleIds = apiPeople
+				.SelectMany(x => x.TeamMemberships)
+				.Select(x => x.RoleId)
+				.Where(x => x != Guid.Empty)
+				.Distinct()
+				.ToList();
+			var rolesById = api.Roles.Read(roleIds).ToDictionary(x => x.Id);
+
+			foreach (var person in apiPeople)
+			{
+				var duplicateSettings = person.TeamMemberships
+					.GroupBy(x => x.TeamId)
+					.Where(g => g.Count() > 1)
+					.ToDictionary(x => x.Key, x => x.Count());
+
+				foreach (var kvp in duplicateSettings)
+				{
+					var error = new PersonInvalidTeamMembershipError
+					{
+						Id = person.Id,
+						TeamId = kvp.Key,
+						ErrorMessage = $"Team with ID '{kvp.Key}' is defined {kvp.Value} times.",
+					};
+
+					ReportError(person.Id, error);
+				}
+
+				if (duplicateSettings.Count > 0)
+				{
+					continue;
+				}
+
+				foreach (var teamMembership in person.TeamMemberships)
+				{
+					if (teamMembership.TeamId == Guid.Empty)
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = "Team ID cannot be empty.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (!teamsById.TryGetValue(teamMembership.TeamId, out _))
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = $"Team with ID '{teamMembership.TeamId}' not found.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (teamMembership.RoleId == Guid.Empty)
+					{
+						continue;
+					}
+
+					if (!rolesById.TryGetValue(teamMembership.RoleId, out _))
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							RoleId = teamMembership.RoleId,
+							ErrorMessage = $"Role with ID '{teamMembership.RoleId}' not found.",
+						};
+
 						ReportError(person.Id, error);
 					}
 				}
