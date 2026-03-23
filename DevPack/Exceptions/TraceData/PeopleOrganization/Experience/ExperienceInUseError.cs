@@ -8,9 +8,5 @@
 	/// </summary>
 	public class ExperienceInUseError : ExperienceError
 	{
-		/// <summary>
-		/// Gets or sets the collection of unique identifiers of the people having the category implemented.
-		/// </summary>
-		public List<Guid> PeopleIds { get; set; } = [];
 	}
 }
