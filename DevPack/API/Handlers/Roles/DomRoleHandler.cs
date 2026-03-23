@@ -361,9 +361,9 @@
 			var peopleImplementingRoles = api.People.Read(filter);
 
 			var peopleByRoleId = peopleImplementingRoles
-				.SelectMany(x => x.TeamMemberships.Select(tm => new { RoleId = tm.RoleId, Person = x }))
+				.SelectMany(x => x.TeamMemberships.Select(tm => new { tm.RoleId, Person = x }))
 				.GroupBy(x => x.RoleId)
-				.ToDictionary(x => x.Key, x =>x.Select(y => y.Person).ToList());
+				.ToDictionary(x => x.Key, x => x.Select(y => y.Person).ToList());
 
 			foreach (var role in apiRoles)
 			{
