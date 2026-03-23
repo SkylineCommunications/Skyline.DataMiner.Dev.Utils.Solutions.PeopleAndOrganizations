@@ -4,9 +4,9 @@
 	using System.Collections.Generic;
 
 	/// <summary>
-	/// Represents an error that occurs when attempting to delete an experience that is currently in use.
+	/// Represents an error that occurs when attempting to delete a role that is currently in use.
 	/// </summary>
-	public class ExperienceInUseError : ExperienceError
+	public class RoleInUseError : RoleError
 	{
 	}
 }

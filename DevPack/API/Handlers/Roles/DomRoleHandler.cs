@@ -354,7 +354,33 @@
 				return;
 			}
 
-			// Todo: finish implementation [AB#40242]
+			var filter = new ORFilterElement<Person>(apiRoles
+				.Select(x => PersonExposers.TeamMemberships.RoleId.Equal(x.Id))
+				.ToArray());
+
+			var peopleImplementingRoles = api.People.Read(filter);
+
+			var peopleByRoleId = peopleImplementingRoles
+				.SelectMany(x => x.TeamMemberships.Select(tm => new { RoleId = tm.RoleId, Person = x }))
+				.GroupBy(x => x.RoleId)
+				.ToDictionary(x => x.Key, x =>x.Select(y => y.Person).ToList());
+
+			foreach (var role in apiRoles)
+			{
+				if (!peopleByRoleId.TryGetValue(role.Id, out var people))
+				{
+					continue;
+				}
+
+				var error = new RoleInUseByPeopleError
+				{
+					ErrorMessage = $"Role '{role.Name}' is in use by {people.Count} people.",
+					Id = role.Id,
+					PeopleIds = people.Select(x => x.Id).ToList(),
+				};
+
+				ReportError(role.Id, error);
+			}
 		}
 
 		private IEnumerable<DomChangeResults> GetRolesWithChanges(ICollection<Role> apiRoles)

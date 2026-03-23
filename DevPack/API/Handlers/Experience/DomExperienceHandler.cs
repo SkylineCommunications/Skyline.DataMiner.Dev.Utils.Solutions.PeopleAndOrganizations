@@ -371,7 +371,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 					continue;
 				}
 
-				var error = new ExperienceInUseError
+				var error = new ExperienceInUseByPeopleError
 				{
 					ErrorMessage = $"Experience '{experience.Name}' is in use by {people.Count} people.",
 					Id = experience.Id,
