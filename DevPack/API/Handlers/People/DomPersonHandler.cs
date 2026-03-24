@@ -75,15 +75,17 @@
 				return;
 			}
 
-			ValidateIdsNotInUse(apiPeople.Where(x => x.IsNew).ToArray());
 			ValidateStateForUpdateAction(apiPeople.Where(x => !x.IsNew).ToArray());
-			ValidateNames(apiPeople);
-			ValidateExperience(apiPeople);
-			ValidateOrganizations(apiPeople);
-			ValidateSkills(apiPeople);
-			ValidateTeamMemberships(apiPeople);
+			var toValidate = apiPeople.Where(IsValid).ToList();
 
-			var validPeople = apiPeople.Where(IsValid).ToList();
+			ValidateIdsNotInUse(toValidate.Where(x => x.IsNew).ToArray());
+			ValidateNames(toValidate);
+			ValidateExperience(toValidate);
+			ValidateOrganizations(toValidate);
+			ValidateSkills(toValidate);
+			ValidateTeamMemberships(toValidate);
+
+			var validPeople = toValidate.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validPeople, CreateOrUpdateLocked);
 			ReportError(lockResult);
 		}
@@ -700,13 +702,26 @@
 						continue;
 					}
 
-					if (!teamsById.TryGetValue(teamMembership.TeamId, out _))
+					if (!teamsById.TryGetValue(teamMembership.TeamId, out var team))
 					{
 						var error = new PersonInvalidTeamMembershipError
 						{
 							Id = person.Id,
 							TeamId = teamMembership.TeamId,
 							ErrorMessage = $"Team with ID '{teamMembership.TeamId}' not found.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (team.State == TeamState.Deprecated)
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = $"Team with ID '{teamMembership.TeamId}' is deprecated.",
 						};
 
 						ReportError(person.Id, error);
