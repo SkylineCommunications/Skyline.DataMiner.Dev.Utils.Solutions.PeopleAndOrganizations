@@ -306,7 +306,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged(int pageSize)
 		{
-			return ReadPaged(new TRUEFilterElement<Team>(), PeopleAndOrganizationsApi.DefaultPageSize);
+			return ReadPaged(new TRUEFilterElement<Team>(), pageSize);
 		}
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged(FilterElement<Team> filter)

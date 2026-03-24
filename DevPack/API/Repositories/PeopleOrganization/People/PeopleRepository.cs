@@ -306,7 +306,7 @@
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged(int pageSize)
 		{
-			return ReadPaged(new TRUEFilterElement<Person>(), PeopleAndOrganizationsApi.DefaultPageSize);
+			return ReadPaged(new TRUEFilterElement<Person>(), pageSize);
 		}
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged(FilterElement<Person> filter)

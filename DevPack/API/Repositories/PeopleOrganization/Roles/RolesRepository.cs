@@ -205,7 +205,7 @@
 
 		public IEnumerable<IPagedResult<Role>> ReadPaged(int pageSize)
 		{
-			return ReadPaged(new TRUEFilterElement<Role>(), PeopleAndOrganizationsApi.DefaultPageSize);
+			return ReadPaged(new TRUEFilterElement<Role>(), pageSize);
 		}
 
 		public IEnumerable<IPagedResult<Role>> ReadPaged(FilterElement<Role> filter)
