@@ -204,7 +204,7 @@
 				return this;
 			}
 
-			teamMemberships.Remove(teamMembership);
+			teamMemberships.Remove(toRemove);
 			return this;
 		}
 
