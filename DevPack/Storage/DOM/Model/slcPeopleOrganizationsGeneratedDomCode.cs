@@ -220,6 +220,13 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 
 		public static class Sections
 		{
+			public static class Resource
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("ceadbd12-73f7-474e-9d1f-effbc9d81684"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID LinkedResource { get; } = new FieldDescriptorID(new Guid("6339a363-ec0f-42bb-86aa-4858e984b7d8"));
+			}
+
 			public static class Contracts
 			{
 				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("21ffec53-130a-4a66-9eb3-50194d2c1e43"))
@@ -227,59 +234,15 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 				public static FieldDescriptorID Contract { get; } = new FieldDescriptorID(new Guid("a12295ee-465e-4b0a-9152-4ed92d4f1508"));
 			}
 
-			public static class Organization
+			public static class Collaboration
 			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("397134f8-19eb-4eec-9021-8b1af51d0c1b"))
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("57f9a298-7451-4037-a0e2-ecfabe4b22ab"))
 				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Organization_57695f03 { get; } = new FieldDescriptorID(new Guid("57695f03-2643-4303-82f5-8164291747f3"));
-			}
-
-			public static class RoleInformation
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("03ba0fd8-114a-4f97-b392-7ac8a1f76803"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Role { get; } = new FieldDescriptorID(new Guid("4f63fdbd-a40c-482f-b8ff-8b20c701b481"));
-			}
-
-			public static class ResourcePool
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("8341db0f-59bf-4a71-a124-67f8c5fbbb06"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID LinkedResourcePool { get; } = new FieldDescriptorID(new Guid("73a606b5-fd80-4ea0-819d-5a3b8de60323"));
-			}
-
-			public static class ContactInfo
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("fcf83fa0-0d38-4fe6-ad55-4d36e4457f91"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Email { get; } = new FieldDescriptorID(new Guid("cf8ae3ad-a363-499b-b99c-8ffcabcb5abb"));
-				public static FieldDescriptorID Phone { get; } = new FieldDescriptorID(new Guid("2f683912-7e68-4fa3-862f-5e71ad7d1633"));
-				public static FieldDescriptorID StreetAddress { get; } = new FieldDescriptorID(new Guid("05096697-68b8-4082-b9ec-d77b709377ea"));
-				public static FieldDescriptorID City { get; } = new FieldDescriptorID(new Guid("dd2dcc95-0540-4e01-880b-1d57d5bb9f24"));
-				public static FieldDescriptorID Country { get; } = new FieldDescriptorID(new Guid("1ace7be9-0d34-4d3a-a6f4-fb9c79adc199"));
-				public static FieldDescriptorID ZIP { get; } = new FieldDescriptorID(new Guid("8477ba67-09c2-49af-9743-9e43ce08228a"));
-			}
-
-			public static class ExperienceInformation
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("5c4be963-44ea-4ae2-911f-164f92534cb1"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Experience { get; } = new FieldDescriptorID(new Guid("065992de-67f1-4d34-b470-759e5b64b088"));
-			}
-
-			public static class CategoryInformation
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("e47d729d-1658-41bc-8931-88f4c055b955"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Category { get; } = new FieldDescriptorID(new Guid("c86376b4-c309-4d08-8b0e-83ec69809d58"));
-			}
-
-			public static class Team
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("30aef0e9-658a-436a-ad71-6a48d88faa0b"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID Team_144d3379 { get; } = new FieldDescriptorID(new Guid("144d3379-1393-47ca-a35a-0facc9cf4127"));
-				public static FieldDescriptorID TeamRole { get; } = new FieldDescriptorID(new Guid("444f1e2e-4a66-49af-9a94-07d4783324ec"));
+				public static FieldDescriptorID CreateMSTeamsChannel { get; } = new FieldDescriptorID(new Guid("a8d676e3-c774-4822-81bf-83e3ceb7a1b3"));
+				public static FieldDescriptorID CreateMSTeam { get; } = new FieldDescriptorID(new Guid("c1eb12d6-1ea5-4a6e-8e34-95a4c0de46fe"));
+				public static FieldDescriptorID MSTeamName { get; } = new FieldDescriptorID(new Guid("b4af8f25-6eb5-4907-a12c-47e89ac07837"));
+				public static FieldDescriptorID ChannelId { get; } = new FieldDescriptorID(new Guid("db91af67-8bb9-47d9-b47a-e5f940fb35f9"));
+				public static FieldDescriptorID TeamId { get; } = new FieldDescriptorID(new Guid("f484e928-32b8-40c3-953a-5debea00419d"));
 			}
 
 			public static class TeamInformation
@@ -294,6 +257,71 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 				public static FieldDescriptorID TeamSkills { get; } = new FieldDescriptorID(new Guid("c6a22574-2b96-4cdd-b357-1c7ed221f797"));
 			}
 
+			public static class RoleInformation
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("03ba0fd8-114a-4f97-b392-7ac8a1f76803"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Role { get; } = new FieldDescriptorID(new Guid("4f63fdbd-a40c-482f-b8ff-8b20c701b481"));
+			}
+
+			public static class PeopleInformation
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("f38e6d21-e481-4348-b639-445a510592ec"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID FullName { get; } = new FieldDescriptorID(new Guid("a7fc4201-9af5-4b29-a9b8-df24d6334d08"));
+				public static FieldDescriptorID ExperienceLevel { get; } = new FieldDescriptorID(new Guid("de319ab8-ea47-42cd-a674-c47762ca24f9"));
+				public static FieldDescriptorID ProfileImage { get; } = new FieldDescriptorID(new Guid("aeb3be52-849a-41d6-afc9-c6c53ef38097"));
+				public static FieldDescriptorID PersonalSkills { get; } = new FieldDescriptorID(new Guid("42ffa004-0729-44b3-a864-14cc0fc5fab4"));
+			}
+
+			public static class ContactInfo
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("fcf83fa0-0d38-4fe6-ad55-4d36e4457f91"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Email { get; } = new FieldDescriptorID(new Guid("cf8ae3ad-a363-499b-b99c-8ffcabcb5abb"));
+				public static FieldDescriptorID Phone { get; } = new FieldDescriptorID(new Guid("2f683912-7e68-4fa3-862f-5e71ad7d1633"));
+				public static FieldDescriptorID StreetAddress { get; } = new FieldDescriptorID(new Guid("05096697-68b8-4082-b9ec-d77b709377ea"));
+				public static FieldDescriptorID City { get; } = new FieldDescriptorID(new Guid("dd2dcc95-0540-4e01-880b-1d57d5bb9f24"));
+				public static FieldDescriptorID Country { get; } = new FieldDescriptorID(new Guid("1ace7be9-0d34-4d3a-a6f4-fb9c79adc199"));
+				public static FieldDescriptorID ZIP { get; } = new FieldDescriptorID(new Guid("8477ba67-09c2-49af-9743-9e43ce08228a"));
+			}
+
+			public static class Organization
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("397134f8-19eb-4eec-9021-8b1af51d0c1b"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Organization_57695f03 { get; } = new FieldDescriptorID(new Guid("57695f03-2643-4303-82f5-8164291747f3"));
+			}
+
+			public static class ExperienceInformation
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("5c4be963-44ea-4ae2-911f-164f92534cb1"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Experience { get; } = new FieldDescriptorID(new Guid("065992de-67f1-4d34-b470-759e5b64b088"));
+			}
+
+			public static class ResourcePool
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("8341db0f-59bf-4a71-a124-67f8c5fbbb06"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID LinkedResourcePool { get; } = new FieldDescriptorID(new Guid("73a606b5-fd80-4ea0-819d-5a3b8de60323"));
+			}
+
+			public static class Team
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("30aef0e9-658a-436a-ad71-6a48d88faa0b"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Team_144d3379 { get; } = new FieldDescriptorID(new Guid("144d3379-1393-47ca-a35a-0facc9cf4127"));
+				public static FieldDescriptorID TeamRole { get; } = new FieldDescriptorID(new Guid("444f1e2e-4a66-49af-9a94-07d4783324ec"));
+			}
+
+			public static class CategoryInformation
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("e47d729d-1658-41bc-8931-88f4c055b955"))
+				{ ModuleId = "(slc)people_organizations" };
+				public static FieldDescriptorID Category { get; } = new FieldDescriptorID(new Guid("c86376b4-c309-4d08-8b0e-83ec69809d58"));
+			}
+
 			public static class OrganizationInformation
 			{
 				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("141a95ca-4b5b-4086-b329-209ffe8f1af8"))
@@ -301,13 +329,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 				public static FieldDescriptorID OrganizationName { get; } = new FieldDescriptorID(new Guid("88b88d71-b123-4f56-8aae-a40df08ac875"));
 				public static FieldDescriptorID Category { get; } = new FieldDescriptorID(new Guid("ff3ed352-de62-4a1f-ad03-303b4778585e"));
 				public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("b4a4365f-6148-46ac-be62-31a3d49a1a7f"));
-			}
-
-			public static class Resource
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("ceadbd12-73f7-474e-9d1f-effbc9d81684"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID LinkedResource { get; } = new FieldDescriptorID(new Guid("6339a363-ec0f-42bb-86aa-4858e984b7d8"));
 			}
 
 			public static class Billing
@@ -321,16 +342,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 				public static FieldDescriptorID Zip { get; } = new FieldDescriptorID(new Guid("ba7f898d-80a1-4c2a-a5c0-b7fe591535e2"));
 				public static FieldDescriptorID Country { get; } = new FieldDescriptorID(new Guid("7f58452b-df20-4e58-927e-be9533d6f15f"));
 			}
-
-			public static class PeopleInformation
-			{
-				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("f38e6d21-e481-4348-b639-445a510592ec"))
-				{ ModuleId = "(slc)people_organizations" };
-				public static FieldDescriptorID FullName { get; } = new FieldDescriptorID(new Guid("a7fc4201-9af5-4b29-a9b8-df24d6334d08"));
-				public static FieldDescriptorID ExperienceLevel { get; } = new FieldDescriptorID(new Guid("de319ab8-ea47-42cd-a674-c47762ca24f9"));
-				public static FieldDescriptorID ProfileImage { get; } = new FieldDescriptorID(new Guid("aeb3be52-849a-41d6-afc9-c6c53ef38097"));
-				public static FieldDescriptorID PersonalSkills { get; } = new FieldDescriptorID(new Guid("42ffa004-0729-44b3-a864-14cc0fc5fab4"));
-			}
 		}
 
 		public static class Definitions
@@ -341,9 +352,9 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 			{ ModuleId = "(slc)people_organizations" };
 			public static DomDefinitionId Role { get; } = new DomDefinitionId(new Guid("86b3dff8-764e-4378-9d19-de4bc8de05c2"))
 			{ ModuleId = "(slc)people_organizations" };
-			public static DomDefinitionId People { get; } = new DomDefinitionId(new Guid("1624a01d-de2e-4c36-849c-3ee048a971ee"))
-			{ ModuleId = "(slc)people_organizations" };
 			public static DomDefinitionId Teams { get; } = new DomDefinitionId(new Guid("5150bc87-7e63-4b41-a839-64da947a1986"))
+			{ ModuleId = "(slc)people_organizations" };
+			public static DomDefinitionId People { get; } = new DomDefinitionId(new Guid("1624a01d-de2e-4c36-849c-3ee048a971ee"))
 			{ ModuleId = "(slc)people_organizations" };
 			public static DomDefinitionId Organizations { get; } = new DomDefinitionId(new Guid("c769a960-e401-4cb6-8099-b0563b270c52"))
 			{ ModuleId = "(slc)people_organizations" };
@@ -1134,185 +1145,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 	}
 
 	/// <summary>
-	/// Represents a wrapper class for accessing a PeopleInstance DOM instance.
-	/// The <see cref="PeopleInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class PeopleInstance : DomInstanceBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings.
-		/// </summary>
-		public PeopleInstance() : base(SlcPeople_OrganizationsIds.Definitions.People)
-		{
-			InitializeProperties();
-			AfterLoad();
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings and a specific ID.
-		/// </summary>
-		public PeopleInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.People, id)
-		{
-			InitializeProperties();
-			AfterLoad();
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PeopleInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
-		/// </summary>
-		/// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="PeopleInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public PeopleInstance(DomInstance domInstance) : base(domInstance)
-		{
-			if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.People))
-				throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.People)}'", nameof(domInstance));
-			InitializeProperties();
-			AfterLoad();
-		}
-
-		/// <summary>
-		/// Gets the Status ID of the DOM Instance.
-		/// </summary>
-		public SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum Status
-		{
-			get
-			{
-				return SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.ToEnum(StatusId);
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the Organization section of the DOM Instance.
-		/// </summary>
-		public OrganizationSection Organization { get; set; }
-
-		/// <summary>
-		/// Gets or sets the ContactInfo section of the DOM Instance.
-		/// </summary>
-		public ContactInfoSection ContactInfo { get; set; }
-
-		/// <summary>
-		/// Gets or sets the Team section of the DOM Instance.
-		/// </summary>
-		public IList<TeamSection> Team { get; private set; }
-
-		/// <summary>
-		/// Gets or sets the Resource section of the DOM Instance.
-		/// </summary>
-		public ResourceSection Resource { get; set; }
-
-		/// <summary>
-		/// Gets or sets the PeopleInformation section of the DOM Instance.
-		/// </summary>
-		public PeopleInformationSection PeopleInformation { get; set; }
-
-		public static explicit operator PeopleInstance(DomInstance instance)
-		{
-			return new PeopleInstance(instance);
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="PeopleInstance"/>.
-		/// </summary>
-		/// <returns>A new <see cref="PeopleInstance"/> object that is a deep copy of this instance.</returns>
-		public PeopleInstance Clone()
-		{
-			return new PeopleInstance((DomInstance)this.ToInstance().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="PeopleInstance"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="PeopleInstance"/> object that is a copy of this instance but with a different id.</returns>
-		public PeopleInstance Duplicate()
-		{
-			var instance = (DomInstance)this.ToInstance().Clone();
-			instance.ID = new DomInstanceId(Guid.NewGuid())
-			{ ModuleId = ModuleId };
-			foreach (var section in instance.Sections)
-			{
-				section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
-			}
-
-			return new PeopleInstance(instance);
-		}
-
-		/// <inheritdoc />
-		protected sealed override DomInstance InternalToInstance()
-		{
-			domInstance.Sections.Clear();
-			domInstance.Sections.Add(Organization.ToSection());
-			domInstance.Sections.Add(ContactInfo.ToSection());
-			foreach (var item in Team)
-			{
-				domInstance.Sections.Add(item.ToSection());
-			}
-
-			domInstance.Sections.Add(Resource.ToSection());
-			domInstance.Sections.Add(PeopleInformation.ToSection());
-			return domInstance;
-		}
-
-		/// <inheritdoc />
-		public sealed override void Save(DomHelper helper)
-		{
-			var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
-			var instance = ToInstance();
-			if (exist == null)
-			{
-				domInstance = helper.DomInstances.Create(instance);
-			}
-			else
-			{
-				domInstance = helper.DomInstances.Update(instance);
-			}
-		}
-
-		protected sealed override void InitializeProperties()
-		{
-			var _organization = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id));
-			if (_organization is null)
-			{
-				Organization = new OrganizationSection();
-			}
-			else
-			{
-				Organization = new OrganizationSection(_organization);
-			}
-
-			var _contactInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id));
-			if (_contactInfo is null)
-			{
-				ContactInfo = new ContactInfoSection();
-			}
-			else
-			{
-				ContactInfo = new ContactInfoSection(_contactInfo);
-			}
-
-			Team = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id)).Select(section => new TeamSection(section)).ToList();
-			var _resource = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id));
-			if (_resource is null)
-			{
-				Resource = new ResourceSection();
-			}
-			else
-			{
-				Resource = new ResourceSection(_resource);
-			}
-
-			var _peopleInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id));
-			if (_peopleInformation is null)
-			{
-				PeopleInformation = new PeopleInformationSection();
-			}
-			else
-			{
-				PeopleInformation = new PeopleInformationSection(_peopleInformation);
-			}
-		}
-	}
-
-	/// <summary>
 	/// Represents a wrapper class for accessing a TeamsInstance DOM instance.
 	/// The <see cref="TeamsInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
 	/// </summary>
@@ -1360,14 +1192,14 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 		}
 
 		/// <summary>
-		/// Gets or sets the ResourcePool section of the DOM Instance.
-		/// </summary>
-		public ResourcePoolSection ResourcePool { get; set; }
-
-		/// <summary>
 		/// Gets or sets the TeamInformation section of the DOM Instance.
 		/// </summary>
 		public TeamInformationSection TeamInformation { get; set; }
+
+		/// <summary>
+		/// Gets or sets the ResourcePool section of the DOM Instance.
+		/// </summary>
+		public ResourcePoolSection ResourcePool { get; set; }
 
 		public static explicit operator TeamsInstance(DomInstance instance)
 		{
@@ -1404,8 +1236,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 		protected sealed override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
-			domInstance.Sections.Add(ResourcePool.ToSection());
 			domInstance.Sections.Add(TeamInformation.ToSection());
+			domInstance.Sections.Add(ResourcePool.ToSection());
 			return domInstance;
 		}
 
@@ -1426,16 +1258,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 
 		protected sealed override void InitializeProperties()
 		{
-			var _resourcePool = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id));
-			if (_resourcePool is null)
-			{
-				ResourcePool = new ResourcePoolSection();
-			}
-			else
-			{
-				ResourcePool = new ResourcePoolSection(_resourcePool);
-			}
-
 			var _teamInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id));
 			if (_teamInformation is null)
 			{
@@ -1445,6 +1267,196 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 			{
 				TeamInformation = new TeamInformationSection(_teamInformation);
 			}
+
+			var _resourcePool = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id));
+			if (_resourcePool is null)
+			{
+				ResourcePool = new ResourcePoolSection();
+			}
+			else
+			{
+				ResourcePool = new ResourcePoolSection(_resourcePool);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a PeopleInstance DOM instance.
+	/// The <see cref="PeopleInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class PeopleInstance : DomInstanceBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings.
+		/// </summary>
+		public PeopleInstance() : base(SlcPeople_OrganizationsIds.Definitions.People)
+		{
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings and a specific ID.
+		/// </summary>
+		public PeopleInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.People, id)
+		{
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
+		/// </summary>
+		/// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="PeopleInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public PeopleInstance(DomInstance domInstance) : base(domInstance)
+		{
+			if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.People))
+				throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.People)}'", nameof(domInstance));
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Gets the Status ID of the DOM Instance.
+		/// </summary>
+		public SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum Status
+		{
+			get
+			{
+				return SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.ToEnum(StatusId);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Resource section of the DOM Instance.
+		/// </summary>
+		public ResourceSection Resource { get; set; }
+
+		/// <summary>
+		/// Gets or sets the PeopleInformation section of the DOM Instance.
+		/// </summary>
+		public PeopleInformationSection PeopleInformation { get; set; }
+
+		/// <summary>
+		/// Gets or sets the ContactInfo section of the DOM Instance.
+		/// </summary>
+		public ContactInfoSection ContactInfo { get; set; }
+
+		/// <summary>
+		/// Gets or sets the Organization section of the DOM Instance.
+		/// </summary>
+		public OrganizationSection Organization { get; set; }
+
+		/// <summary>
+		/// Gets or sets the Team section of the DOM Instance.
+		/// </summary>
+		public IList<TeamSection> Team { get; private set; }
+
+		public static explicit operator PeopleInstance(DomInstance instance)
+		{
+			return new PeopleInstance(instance);
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="PeopleInstance"/>.
+		/// </summary>
+		/// <returns>A new <see cref="PeopleInstance"/> object that is a deep copy of this instance.</returns>
+		public PeopleInstance Clone()
+		{
+			return new PeopleInstance((DomInstance)this.ToInstance().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="PeopleInstance"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="PeopleInstance"/> object that is a copy of this instance but with a different id.</returns>
+		public PeopleInstance Duplicate()
+		{
+			var instance = (DomInstance)this.ToInstance().Clone();
+			instance.ID = new DomInstanceId(Guid.NewGuid())
+			{ ModuleId = ModuleId };
+			foreach (var section in instance.Sections)
+			{
+				section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+			}
+
+			return new PeopleInstance(instance);
+		}
+
+		/// <inheritdoc />
+		protected sealed override DomInstance InternalToInstance()
+		{
+			domInstance.Sections.Clear();
+			domInstance.Sections.Add(Resource.ToSection());
+			domInstance.Sections.Add(PeopleInformation.ToSection());
+			domInstance.Sections.Add(ContactInfo.ToSection());
+			domInstance.Sections.Add(Organization.ToSection());
+			foreach (var item in Team)
+			{
+				domInstance.Sections.Add(item.ToSection());
+			}
+
+			return domInstance;
+		}
+
+		/// <inheritdoc />
+		public sealed override void Save(DomHelper helper)
+		{
+			var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
+			var instance = ToInstance();
+			if (exist == null)
+			{
+				domInstance = helper.DomInstances.Create(instance);
+			}
+			else
+			{
+				domInstance = helper.DomInstances.Update(instance);
+			}
+		}
+
+		protected sealed override void InitializeProperties()
+		{
+			var _resource = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id));
+			if (_resource is null)
+			{
+				Resource = new ResourceSection();
+			}
+			else
+			{
+				Resource = new ResourceSection(_resource);
+			}
+
+			var _peopleInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id));
+			if (_peopleInformation is null)
+			{
+				PeopleInformation = new PeopleInformationSection();
+			}
+			else
+			{
+				PeopleInformation = new PeopleInformationSection(_peopleInformation);
+			}
+
+			var _contactInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id));
+			if (_contactInfo is null)
+			{
+				ContactInfo = new ContactInfoSection();
+			}
+			else
+			{
+				ContactInfo = new ContactInfoSection(_contactInfo);
+			}
+
+			var _organization = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id));
+			if (_organization is null)
+			{
+				Organization = new OrganizationSection();
+			}
+			else
+			{
+				Organization = new OrganizationSection(_organization);
+			}
+
+			Team = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id)).Select(section => new TeamSection(section)).ToList();
 		}
 	}
 
@@ -1598,6 +1610,91 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 	using Skyline.DataMiner.Net.Sections;
 
 	/// <summary>
+	/// Represents a wrapper class for accessing a ResourceSection section.
+	/// The <see cref="ResourceSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class ResourceSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ResourceSection"/> class. Creates an empty <see cref="ResourceSection"/> object with default settings.
+		/// </summary>
+		public ResourceSection() : base(SlcPeople_OrganizationsIds.Sections.Resource.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ResourceSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourceSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public ResourceSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Resource.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the LinkedResource field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? LinkedResource
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="ResourceSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="ResourceSection"/> object that is a deep copy of this section.</returns>
+		public ResourceSection Clone()
+		{
+			return new ResourceSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="ResourceSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="ResourceSection"/> object that is a copy of this section but with a different id.</returns>
+		public ResourceSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new ResourceSection(section);
+		}
+	}
+
+	/// <summary>
 	/// Represents a wrapper class for accessing a ContractsSection section.
 	/// The <see cref="ContractsSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
 	/// </summary>
@@ -1683,28 +1780,28 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 	}
 
 	/// <summary>
-	/// Represents a wrapper class for accessing a OrganizationSection section.
-	/// The <see cref="OrganizationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// Represents a wrapper class for accessing a CollaborationSection section.
+	/// The <see cref="CollaborationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
 	/// </summary>
-	internal partial class OrganizationSection : DomSectionBase
+	internal partial class CollaborationSection : DomSectionBase
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OrganizationSection"/> class. Creates an empty <see cref="OrganizationSection"/> object with default settings.
+		/// Initializes a new instance of the <see cref="CollaborationSection"/> class. Creates an empty <see cref="CollaborationSection"/> object with default settings.
 		/// </summary>
-		public OrganizationSection() : base(SlcPeople_OrganizationsIds.Sections.Organization.Id)
+		public CollaborationSection() : base(SlcPeople_OrganizationsIds.Sections.Collaboration.Id)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OrganizationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// Initializes a new instance of the <see cref="CollaborationSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public OrganizationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Organization.Id)
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CollaborationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public CollaborationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Collaboration.Id)
 		{
 		}
 
 		/// <summary>
-		/// Gets or sets the Organization_57695f03 field of the DOM Instance.
+		/// Gets or sets the CreateMSTeamsChannel field of the DOM Instance.
 		/// </summary>
 		/// <remarks>
 		/// When retrieving the value:
@@ -1718,14 +1815,14 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
 		/// </list>
 		/// </remarks>
-		public Guid? Organization_57695f03
+		public Boolean? CreateMSTeamsChannel
 		{
 			get
 			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03);
+				var wrapper = section.GetValue<Boolean>(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeamsChannel);
 				if (wrapper != null)
 				{
-					return (Guid?)wrapper.Value;
+					return (Boolean?)wrapper.Value;
 				}
 				else
 				{
@@ -1737,825 +1834,205 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03);
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeamsChannel);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03, (Guid)value);
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeamsChannel, (Boolean)value);
 				}
 			}
 		}
 
 		/// <summary>
-		/// Creates a deep copy of the current <see cref="OrganizationSection"/>.
+		/// Gets or sets the CreateMSTeam field of the DOM Instance.
 		/// </summary>
-		/// <returns>A new <see cref="OrganizationSection"/> object that is a deep copy of this section.</returns>
-		public OrganizationSection Clone()
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Boolean? CreateMSTeam
 		{
-			return new OrganizationSection((Section)this.ToSection().Clone());
+			get
+			{
+				var wrapper = section.GetValue<Boolean>(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeam);
+				if (wrapper != null)
+				{
+					return (Boolean?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeam);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Collaboration.CreateMSTeam, (Boolean)value);
+				}
+			}
 		}
 
 		/// <summary>
-		/// Creates a duplicate of the current <see cref="OrganizationSection"/> with a new id.
+		/// Gets or sets the MSTeamName field of the DOM Instance.
 		/// </summary>
-		/// <returns>A new <see cref="OrganizationSection"/> object that is a copy of this section but with a different id.</returns>
-		public OrganizationSection Duplicate()
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String MSTeamName
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.Collaboration.MSTeamName);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Collaboration.MSTeamName);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Collaboration.MSTeamName, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the ChannelId field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String ChannelId
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.Collaboration.ChannelId);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Collaboration.ChannelId);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Collaboration.ChannelId, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the TeamId field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String TeamId
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.Collaboration.TeamId);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Collaboration.TeamId);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Collaboration.TeamId, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="CollaborationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="CollaborationSection"/> object that is a deep copy of this section.</returns>
+		public CollaborationSection Clone()
+		{
+			return new CollaborationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="CollaborationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="CollaborationSection"/> object that is a copy of this section but with a different id.</returns>
+		public CollaborationSection Duplicate()
 		{
 			var section = (Section)this.ToSection().Clone();
 			section.ID = new SectionID(Guid.NewGuid());
-			return new OrganizationSection(section);
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a RoleInformationSection section.
-	/// The <see cref="RoleInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class RoleInformationSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleInformationSection"/> class. Creates an empty <see cref="RoleInformationSection"/> object with default settings.
-		/// </summary>
-		public RoleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="RoleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public RoleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the Role field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String Role
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="RoleInformationSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="RoleInformationSection"/> object that is a deep copy of this section.</returns>
-		public RoleInformationSection Clone()
-		{
-			return new RoleInformationSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="RoleInformationSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="RoleInformationSection"/> object that is a copy of this section but with a different id.</returns>
-		public RoleInformationSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new RoleInformationSection(section);
-		}
-
-		/// <inheritdoc />
-		protected override Section InternalToSection()
-		{
-			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role) == null)
-				throw new InvalidOperationException("'Role' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			return section;
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a ResourcePoolSection section.
-	/// The <see cref="ResourcePoolSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class ResourcePoolSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ResourcePoolSection"/> class. Creates an empty <see cref="ResourcePoolSection"/> object with default settings.
-		/// </summary>
-		public ResourcePoolSection() : base(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ResourcePoolSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourcePoolSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public ResourcePoolSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the LinkedResourcePool field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public Guid? LinkedResourcePool
-		{
-			get
-			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool);
-				if (wrapper != null)
-				{
-					return (Guid?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool, (Guid)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="ResourcePoolSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="ResourcePoolSection"/> object that is a deep copy of this section.</returns>
-		public ResourcePoolSection Clone()
-		{
-			return new ResourcePoolSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="ResourcePoolSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="ResourcePoolSection"/> object that is a copy of this section but with a different id.</returns>
-		public ResourcePoolSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new ResourcePoolSection(section);
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a ContactInfoSection section.
-	/// The <see cref="ContactInfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class ContactInfoSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ContactInfoSection"/> class. Creates an empty <see cref="ContactInfoSection"/> object with default settings.
-		/// </summary>
-		public ContactInfoSection() : base(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ContactInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContactInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public ContactInfoSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the Email field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String Email
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the Phone field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String Phone
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the StreetAddress field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String StreetAddress
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the City field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String City
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.City);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.City);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.City, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the Country field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public SlcPeople_OrganizationsIds.Enums.Country? Country
-		{
-			get
-			{
-				var wrapper = section.GetValue<Int32>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country);
-				if (wrapper != null)
-				{
-					return (SlcPeople_OrganizationsIds.Enums.Country?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country, (Int32)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the ZIP field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String ZIP
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="ContactInfoSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="ContactInfoSection"/> object that is a deep copy of this section.</returns>
-		public ContactInfoSection Clone()
-		{
-			return new ContactInfoSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="ContactInfoSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="ContactInfoSection"/> object that is a copy of this section but with a different id.</returns>
-		public ContactInfoSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new ContactInfoSection(section);
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a ExperienceInformationSection section.
-	/// The <see cref="ExperienceInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class ExperienceInformationSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class. Creates an empty <see cref="ExperienceInformationSection"/> object with default settings.
-		/// </summary>
-		public ExperienceInformationSection() : base(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ExperienceInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public ExperienceInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the Experience field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String Experience
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="ExperienceInformationSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="ExperienceInformationSection"/> object that is a deep copy of this section.</returns>
-		public ExperienceInformationSection Clone()
-		{
-			return new ExperienceInformationSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="ExperienceInformationSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="ExperienceInformationSection"/> object that is a copy of this section but with a different id.</returns>
-		public ExperienceInformationSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new ExperienceInformationSection(section);
-		}
-
-		/// <inheritdoc />
-		protected override Section InternalToSection()
-		{
-			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience) == null)
-				throw new InvalidOperationException("'Experience' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			return section;
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a CategoryInformationSection section.
-	/// The <see cref="CategoryInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class CategoryInformationSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CategoryInformationSection"/> class. Creates an empty <see cref="CategoryInformationSection"/> object with default settings.
-		/// </summary>
-		public CategoryInformationSection() : base(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CategoryInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CategoryInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public CategoryInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the Category field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String Category
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="CategoryInformationSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="CategoryInformationSection"/> object that is a deep copy of this section.</returns>
-		public CategoryInformationSection Clone()
-		{
-			return new CategoryInformationSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="CategoryInformationSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="CategoryInformationSection"/> object that is a copy of this section but with a different id.</returns>
-		public CategoryInformationSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new CategoryInformationSection(section);
-		}
-
-		/// <inheritdoc />
-		protected override Section InternalToSection()
-		{
-			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category) == null)
-				throw new InvalidOperationException("'Category' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			return section;
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a TeamSection section.
-	/// The <see cref="TeamSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class TeamSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TeamSection"/> class. Creates an empty <see cref="TeamSection"/> object with default settings.
-		/// </summary>
-		public TeamSection() : base(SlcPeople_OrganizationsIds.Sections.Team.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TeamSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public TeamSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Team.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the Team_144d3379 field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public Guid? Team_144d3379
-		{
-			get
-			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379);
-				if (wrapper != null)
-				{
-					return (Guid?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379, (Guid)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the TeamRole field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public Guid? TeamRole
-		{
-			get
-			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Team.TeamRole);
-				if (wrapper != null)
-				{
-					return (Guid?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Team.TeamRole);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Team.TeamRole, (Guid)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="TeamSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="TeamSection"/> object that is a deep copy of this section.</returns>
-		public TeamSection Clone()
-		{
-			return new TeamSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="TeamSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="TeamSection"/> object that is a copy of this section but with a different id.</returns>
-		public TeamSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new TeamSection(section);
+			return new CollaborationSection(section);
 		}
 	}
 
@@ -2868,6 +2345,1107 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 	}
 
 	/// <summary>
+	/// Represents a wrapper class for accessing a RoleInformationSection section.
+	/// The <see cref="RoleInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class RoleInformationSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RoleInformationSection"/> class. Creates an empty <see cref="RoleInformationSection"/> object with default settings.
+		/// </summary>
+		public RoleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RoleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="RoleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public RoleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Role field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Role
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="RoleInformationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="RoleInformationSection"/> object that is a deep copy of this section.</returns>
+		public RoleInformationSection Clone()
+		{
+			return new RoleInformationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="RoleInformationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="RoleInformationSection"/> object that is a copy of this section but with a different id.</returns>
+		public RoleInformationSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new RoleInformationSection(section);
+		}
+
+		/// <inheritdoc />
+		protected override Section InternalToSection()
+		{
+			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role) == null)
+				throw new InvalidOperationException("'Role' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			return section;
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a PeopleInformationSection section.
+	/// The <see cref="PeopleInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class PeopleInformationSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleInformationSection"/> class. Creates an empty <see cref="PeopleInformationSection"/> object with default settings.
+		/// </summary>
+		public PeopleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PeopleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PeopleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public PeopleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the FullName field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String FullName
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the ExperienceLevel field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? ExperienceLevel
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the ProfileImage field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String ProfileImage
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the PersonalSkills field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String PersonalSkills
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="PeopleInformationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="PeopleInformationSection"/> object that is a deep copy of this section.</returns>
+		public PeopleInformationSection Clone()
+		{
+			return new PeopleInformationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="PeopleInformationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="PeopleInformationSection"/> object that is a copy of this section but with a different id.</returns>
+		public PeopleInformationSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new PeopleInformationSection(section);
+		}
+
+		/// <inheritdoc />
+		protected override Section InternalToSection()
+		{
+			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName) == null)
+				throw new InvalidOperationException("'FullName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills) == null)
+				throw new InvalidOperationException("'PersonalSkills' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			return section;
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a ContactInfoSection section.
+	/// The <see cref="ContactInfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class ContactInfoSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ContactInfoSection"/> class. Creates an empty <see cref="ContactInfoSection"/> object with default settings.
+		/// </summary>
+		public ContactInfoSection() : base(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ContactInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContactInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public ContactInfoSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Email field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Email
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Email, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Phone field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Phone
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Phone, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the StreetAddress field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String StreetAddress
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.StreetAddress, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the City field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String City
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.City);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.City);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.City, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Country field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public SlcPeople_OrganizationsIds.Enums.Country? Country
+		{
+			get
+			{
+				var wrapper = section.GetValue<Int32>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country);
+				if (wrapper != null)
+				{
+					return (SlcPeople_OrganizationsIds.Enums.Country?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country, (Int32)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the ZIP field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String ZIP
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ContactInfo.ZIP, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="ContactInfoSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="ContactInfoSection"/> object that is a deep copy of this section.</returns>
+		public ContactInfoSection Clone()
+		{
+			return new ContactInfoSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="ContactInfoSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="ContactInfoSection"/> object that is a copy of this section but with a different id.</returns>
+		public ContactInfoSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new ContactInfoSection(section);
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a OrganizationSection section.
+	/// The <see cref="OrganizationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class OrganizationSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="OrganizationSection"/> class. Creates an empty <see cref="OrganizationSection"/> object with default settings.
+		/// </summary>
+		public OrganizationSection() : base(SlcPeople_OrganizationsIds.Sections.Organization.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="OrganizationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public OrganizationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Organization.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Organization_57695f03 field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? Organization_57695f03
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="OrganizationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="OrganizationSection"/> object that is a deep copy of this section.</returns>
+		public OrganizationSection Clone()
+		{
+			return new OrganizationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="OrganizationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="OrganizationSection"/> object that is a copy of this section but with a different id.</returns>
+		public OrganizationSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new OrganizationSection(section);
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a ExperienceInformationSection section.
+	/// The <see cref="ExperienceInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class ExperienceInformationSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class. Creates an empty <see cref="ExperienceInformationSection"/> object with default settings.
+		/// </summary>
+		public ExperienceInformationSection() : base(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ExperienceInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public ExperienceInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Experience field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Experience
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="ExperienceInformationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="ExperienceInformationSection"/> object that is a deep copy of this section.</returns>
+		public ExperienceInformationSection Clone()
+		{
+			return new ExperienceInformationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="ExperienceInformationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="ExperienceInformationSection"/> object that is a copy of this section but with a different id.</returns>
+		public ExperienceInformationSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new ExperienceInformationSection(section);
+		}
+
+		/// <inheritdoc />
+		protected override Section InternalToSection()
+		{
+			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience) == null)
+				throw new InvalidOperationException("'Experience' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			return section;
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a ResourcePoolSection section.
+	/// The <see cref="ResourcePoolSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class ResourcePoolSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ResourcePoolSection"/> class. Creates an empty <see cref="ResourcePoolSection"/> object with default settings.
+		/// </summary>
+		public ResourcePoolSection() : base(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ResourcePoolSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourcePoolSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public ResourcePoolSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the LinkedResourcePool field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? LinkedResourcePool
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.ResourcePool.LinkedResourcePool, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="ResourcePoolSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="ResourcePoolSection"/> object that is a deep copy of this section.</returns>
+		public ResourcePoolSection Clone()
+		{
+			return new ResourcePoolSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="ResourcePoolSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="ResourcePoolSection"/> object that is a copy of this section but with a different id.</returns>
+		public ResourcePoolSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new ResourcePoolSection(section);
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a TeamSection section.
+	/// The <see cref="TeamSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class TeamSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TeamSection"/> class. Creates an empty <see cref="TeamSection"/> object with default settings.
+		/// </summary>
+		public TeamSection() : base(SlcPeople_OrganizationsIds.Sections.Team.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TeamSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public TeamSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Team.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Team_144d3379 field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? Team_144d3379
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the TeamRole field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? TeamRole
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Team.TeamRole);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Team.TeamRole);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Team.TeamRole, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="TeamSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="TeamSection"/> object that is a deep copy of this section.</returns>
+		public TeamSection Clone()
+		{
+			return new TeamSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="TeamSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="TeamSection"/> object that is a copy of this section but with a different id.</returns>
+		public TeamSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new TeamSection(section);
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a CategoryInformationSection section.
+	/// The <see cref="CategoryInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	internal partial class CategoryInformationSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CategoryInformationSection"/> class. Creates an empty <see cref="CategoryInformationSection"/> object with default settings.
+		/// </summary>
+		public CategoryInformationSection() : base(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CategoryInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CategoryInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public CategoryInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Category field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Category
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="CategoryInformationSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="CategoryInformationSection"/> object that is a deep copy of this section.</returns>
+		public CategoryInformationSection Clone()
+		{
+			return new CategoryInformationSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="CategoryInformationSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="CategoryInformationSection"/> object that is a copy of this section but with a different id.</returns>
+		public CategoryInformationSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new CategoryInformationSection(section);
+		}
+
+		/// <inheritdoc />
+		protected override Section InternalToSection()
+		{
+			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category) == null)
+				throw new InvalidOperationException("'Category' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			return section;
+		}
+	}
+
+	/// <summary>
 	/// Represents a wrapper class for accessing a OrganizationInformationSection section.
 	/// The <see cref="OrganizationInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
 	/// </summary>
@@ -3043,91 +3621,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName) == null)
 				throw new InvalidOperationException("'OrganizationName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
 			return section;
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a ResourceSection section.
-	/// The <see cref="ResourceSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class ResourceSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ResourceSection"/> class. Creates an empty <see cref="ResourceSection"/> object with default settings.
-		/// </summary>
-		public ResourceSection() : base(SlcPeople_OrganizationsIds.Sections.Resource.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ResourceSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourceSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public ResourceSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Resource.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the LinkedResource field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public Guid? LinkedResource
-		{
-			get
-			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource);
-				if (wrapper != null)
-				{
-					return (Guid?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource, (Guid)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="ResourceSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="ResourceSection"/> object that is a deep copy of this section.</returns>
-		public ResourceSection Clone()
-		{
-			return new ResourceSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="ResourceSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="ResourceSection"/> object that is a copy of this section but with a different id.</returns>
-		public ResourceSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new ResourceSection(section);
 		}
 	}
 
@@ -3435,232 +3928,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeop
 		{
 			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.Billing.Email) == null)
 				throw new InvalidOperationException("'Email' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			return section;
-		}
-	}
-
-	/// <summary>
-	/// Represents a wrapper class for accessing a PeopleInformationSection section.
-	/// The <see cref="PeopleInformationSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-	/// </summary>
-	internal partial class PeopleInformationSection : DomSectionBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PeopleInformationSection"/> class. Creates an empty <see cref="PeopleInformationSection"/> object with default settings.
-		/// </summary>
-		public PeopleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PeopleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
-		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PeopleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public PeopleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
-		{
-		}
-
-		/// <summary>
-		/// Gets or sets the FullName field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String FullName
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the ExperienceLevel field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public Guid? ExperienceLevel
-		{
-			get
-			{
-				var wrapper = section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel);
-				if (wrapper != null)
-				{
-					return (Guid?)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel, (Guid)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the ProfileImage field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String ProfileImage
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ProfileImage, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the PersonalSkills field of the DOM Instance.
-		/// </summary>
-		/// <remarks>
-		/// When retrieving the value:
-		/// <list type="bullet">
-		/// <item>If the field has been set, it will return the value.</item>
-		/// <item>If the field is not set it will return <see langword="null"/>.</item>
-		/// </list>
-		/// When setting the value:
-		/// <list type="bullet">
-		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-		/// </list>
-		/// </remarks>
-		public String PersonalSkills
-		{
-			get
-			{
-				var wrapper = section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills);
-				if (wrapper != null)
-				{
-					return (String)wrapper.Value;
-				}
-				else
-				{
-					return null;
-				}
-			}
-
-			set
-			{
-				if (value == null)
-				{
-					section.RemoveFieldValueById(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills);
-				}
-				else
-				{
-					section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills, (String)value);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates a deep copy of the current <see cref="PeopleInformationSection"/>.
-		/// </summary>
-		/// <returns>A new <see cref="PeopleInformationSection"/> object that is a deep copy of this section.</returns>
-		public PeopleInformationSection Clone()
-		{
-			return new PeopleInformationSection((Section)this.ToSection().Clone());
-		}
-
-		/// <summary>
-		/// Creates a duplicate of the current <see cref="PeopleInformationSection"/> with a new id.
-		/// </summary>
-		/// <returns>A new <see cref="PeopleInformationSection"/> object that is a copy of this section but with a different id.</returns>
-		public PeopleInformationSection Duplicate()
-		{
-			var section = (Section)this.ToSection().Clone();
-			section.ID = new SectionID(Guid.NewGuid());
-			return new PeopleInformationSection(section);
-		}
-
-		/// <inheritdoc />
-		protected override Section InternalToSection()
-		{
-			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName) == null)
-				throw new InvalidOperationException("'FullName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			if (section.GetValue<Guid>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel) == null)
-				throw new InvalidOperationException("'ExperienceLevel' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills) == null)
-				throw new InvalidOperationException("'PersonalSkills' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
 			return section;
 		}
 	}

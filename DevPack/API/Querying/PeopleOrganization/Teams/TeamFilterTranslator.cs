@@ -18,10 +18,26 @@
 			[TeamExposers.Email.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamEmail), comparer, (string)value),
 			[TeamExposers.Description.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamDescription), comparer, (string)value),
 			[TeamExposers.IsBookable.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.TeamInformation.Bookable), comparer, (bool)value),
+			[TeamExposers.State.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.StatusId, comparer, ConvertTeamState((TeamState)value)),
 		};
 
 		protected override Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> Handlers => handlers;
 
 		protected override FilterElement<DomInstance> DomDefinitionFilter => roleDomDefinitionFilter;
+
+		private static string ConvertTeamState(TeamState filterValue)
+		{
+			switch (filterValue)
+			{
+				case TeamState.Draft:
+					return SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Draft;
+				case TeamState.Active:
+					return SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Active;
+				case TeamState.Deprecated:
+					return SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Deprecated;
+				default:
+					throw new InvalidOperationException($"Unsupported team state: {filterValue}");
+			}
+		}
 	}
 }

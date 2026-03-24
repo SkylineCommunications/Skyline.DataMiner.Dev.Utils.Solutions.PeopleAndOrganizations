@@ -1,9 +1,8 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 {
 	/// <summary>
-	/// Represents an error that occurs when a role configuration has a duplicate name.
+	/// Represents an error that occurs when a role configuration specifies an invalid name.
 	/// </summary>
-	/// <remarks>This can only occur when roles with the same name are provided to a bulk operation.</remarks>
 	public class RoleInvalidNameError : RoleError
 	{
 		/// <summary>

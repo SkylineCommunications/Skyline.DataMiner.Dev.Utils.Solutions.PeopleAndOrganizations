@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Data;
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
@@ -406,6 +407,7 @@
 					ErrorMessage = "Not allowed to delete a team that is not in Draft or Deprecated state.",
 					Id = team.Id,
 				};
+
 				ReportError(team.Id, error);
 			}
 		}
@@ -424,17 +426,17 @@
 
 			var teamsRequiringValidation = apiTeams.ToList();
 
-			foreach (var organization in teamsRequiringValidation.Where(x => !InputValidator.IsNonEmptyText(x.Name)).ToArray())
+			foreach (var team in teamsRequiringValidation.Where(x => !InputValidator.IsNonEmptyText(x.Name)).ToArray())
 			{
 				var error = new TeamInvalidNameError
 				{
 					ErrorMessage = "Name cannot be empty.",
-					Id = organization.Id,
+					Id = team.Id,
 				};
 
-				ReportError(organization.Id, error);
+				ReportError(team.Id, error);
 
-				teamsRequiringValidation.Remove(organization);
+				teamsRequiringValidation.Remove(team);
 			}
 
 			foreach (var team in teamsRequiringValidation.Where(x => !InputValidator.HasValidTextLength(x.Name)).ToArray())
@@ -528,7 +530,33 @@
 				return;
 			}
 
-			// Todo: implement logic to check if teams are in use by any person and report errors for those that are.
+			var filter = new ORFilterElement<Person>(apiTeams
+				.Select(x => PersonExposers.TeamMemberships.TeamId.Equal(x.Id))
+				.ToArray());
+
+			var peopleImplementingTeams = api.People.Read(filter);
+
+			var peopleByTeamId = peopleImplementingTeams
+				.SelectMany(x => x.TeamMemberships.Select(tm => new { tm.TeamId, Person = x }))
+				.GroupBy(x => x.TeamId)
+				.ToDictionary(x => x.Key, x => x.Select(y => y.Person).ToList());
+
+			foreach (var team in apiTeams)
+			{
+				if (!peopleByTeamId.TryGetValue(team.Id, out var people))
+				{
+					continue;
+				}
+
+				var error = new TeamInUseByPeopleError
+				{
+					ErrorMessage = $"Team '{team.Name}' is in use by {people.Count} people.",
+					Id = team.Id,
+					PeopleIds = people.Select(x => x.Id).ToList(),
+				};
+
+				ReportError(team.Id, error);
+			}
 		}
 
 		private void ValidateSkills(ICollection<Team> apiTeams)

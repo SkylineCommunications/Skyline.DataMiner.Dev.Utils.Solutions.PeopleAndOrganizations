@@ -16,10 +16,26 @@
 			[OrganizationExposers.Id.fieldName] = HandleGuid,
 			[OrganizationExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName), comparer, (string)value),
 			[OrganizationExposers.CategoryId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Category), comparer, (Guid)value),
+			[OrganizationExposers.State.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.StatusId, comparer, ConvertOrganizationState((OrganizationState)value)),
 		};
 
 		protected override Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> Handlers => handlers;
 
 		protected override FilterElement<DomInstance> DomDefinitionFilter => organizationDomDefinitionFilter;
+
+		private static string ConvertOrganizationState(OrganizationState filterValue)
+		{
+			switch (filterValue)
+			{
+				case OrganizationState.Draft:
+					return SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Draft;
+				case OrganizationState.Active:
+					return SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Active;
+				case OrganizationState.Deprecated:
+					return SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Deprecated;
+				default:
+					throw new InvalidOperationException($"Unsupported organization state: {filterValue}");
+			}
+		}
 	}
 }
