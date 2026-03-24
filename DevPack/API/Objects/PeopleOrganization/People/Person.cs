@@ -204,7 +204,7 @@
 				return this;
 			}
 
-			teamMemberships.Remove(teamMembership);
+			teamMemberships.Remove(toRemove);
 			return this;
 		}
 
@@ -227,7 +227,7 @@
 				hash = (hash * 23) + ResourceId.GetHashCode();
 				hash = (hash * 23) + State.GetHashCode();
 
-				foreach (var skill in skills.OrderBy(x => x).ToList())
+				foreach (var skill in skills.OrderBy(x => x.Name).ToList())
 				{
 					hash = (hash * 23) + skill.GetHashCode();
 				}
@@ -270,7 +270,12 @@
 			}
 
 			if (!skills.SetEquals(other.skills)
-				|| !TeamMemberships.SequenceEqual(other.TeamMemberships))
+				|| !TeamMemberships
+					.OrderBy(tm => tm.TeamId)
+					.ThenBy(tm => tm.RoleId)
+					.SequenceEqual(other.TeamMemberships
+						.OrderBy(tm => tm.TeamId)
+						.ThenBy(tm => tm.RoleId)))
 			{
 				return false;
 			}

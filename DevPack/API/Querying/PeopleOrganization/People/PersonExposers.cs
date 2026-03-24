@@ -74,12 +74,12 @@
 			/// <summary>
 			/// Gets a dynamic list exposer for team membership team IDs.
 			/// </summary>
-			public static readonly DynamicListExposer<Person, Guid> TeamId = DynamicListExposer<Person, Guid>.CreateFromListExposer(new Exposer<Person, IEnumerable>((obj) => obj.TeamMemberships.Where(x => x != null).Select(x => x.TeamId).Where(x => x != null), "TeamMemberships.TeamId"));
+			public static readonly DynamicListExposer<Person, Guid> TeamId = DynamicListExposer<Person, Guid>.CreateFromListExposer(new Exposer<Person, IEnumerable>((obj) => obj.TeamMemberships.Where(x => x != null).Select(x => x.TeamId).Where(x => x != Guid.Empty), "TeamMemberships.TeamId"));
 
 			/// <summary>
 			/// Gets a dynamic list exposer for team membership role IDs.
 			/// </summary>
-			public static readonly DynamicListExposer<Person, Guid> RoleId = DynamicListExposer<Person, Guid>.CreateFromListExposer(new Exposer<Person, IEnumerable>((obj) => obj.TeamMemberships.Where(x => x != null).Select(x => x.RoleId).Where(x => x != null), "TeamMemberships.RoleId"));
+			public static readonly DynamicListExposer<Person, Guid> RoleId = DynamicListExposer<Person, Guid>.CreateFromListExposer(new Exposer<Person, IEnumerable>((obj) => obj.TeamMemberships.Where(x => x != null).Select(x => x.RoleId).Where(x => x != Guid.Empty), "TeamMemberships.RoleId"));
 		}
 	}
 }

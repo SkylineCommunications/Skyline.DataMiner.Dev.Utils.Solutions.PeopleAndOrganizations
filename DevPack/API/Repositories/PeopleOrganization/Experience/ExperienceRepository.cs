@@ -205,7 +205,7 @@
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged(int pageSize)
 		{
-			return ReadPaged(new TRUEFilterElement<Experience>(), PeopleAndOrganizationsApi.DefaultPageSize);
+			return ReadPaged(new TRUEFilterElement<Experience>(), pageSize);
 		}
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged(FilterElement<Experience> filter)
