@@ -279,7 +279,6 @@
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
 			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
 			Assert.IsNotNull(personError);
-			Assert.IsNotNull(personError);
 
 			var personInvalidTeamMembershipError = personError as PersonInvalidTeamMembershipError;
 			Assert.IsNotNull(personInvalidTeamMembershipError);
@@ -322,7 +321,6 @@
 
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
 			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
-			Assert.IsNotNull(personError);
 			Assert.IsNotNull(personError);
 
 			var personInvalidTeamMembershipError = personError as PersonInvalidTeamMembershipError;
