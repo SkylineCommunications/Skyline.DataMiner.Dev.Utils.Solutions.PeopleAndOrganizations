@@ -3,8 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -12,8 +10,6 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
-
-	using static Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections;
 
 	using DomPerson = Storage.DOM.SlcPeople_Organizations.PeopleInstance;
 

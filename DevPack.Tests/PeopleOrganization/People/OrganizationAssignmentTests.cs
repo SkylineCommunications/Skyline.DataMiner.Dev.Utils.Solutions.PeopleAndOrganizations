@@ -50,13 +50,16 @@
 
 			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
 
+			var errorMessage = $"Organization with ID '{person.OrganizationId}' not found.";
+			Assert.AreEqual(errorMessage, expectedException.Message);
+
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
 			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
 			Assert.IsNotNull(personError);
 
 			var personOrganizationNotFoundError = personError as PersonOrganizationNotFoundError;
 			Assert.IsNotNull(personOrganizationNotFoundError);
-			Assert.AreEqual($"Organization with ID '{organizationId}' not found.", personOrganizationNotFoundError.ErrorMessage);
+			Assert.AreEqual(errorMessage, personOrganizationNotFoundError.ErrorMessage);
 			Assert.AreEqual(person.Id, personOrganizationNotFoundError.Id);
 			Assert.AreEqual(organizationId, personOrganizationNotFoundError.OrganizationId);
 		}
@@ -73,10 +76,11 @@
 			};
 			person = objectCreator.CreatePerson(person);
 
+			person.OrganizationId = organizationId;
+
 			PeopleAndOrganizationsException? expectedException = null;
 			try
 			{
-				person.OrganizationId = organizationId;
 				TestContext.Api.People.Update(person);
 			}
 			catch (PeopleAndOrganizationsException ex)
@@ -86,13 +90,16 @@
 
 			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
 
+			var errorMessage = $"Organization with ID '{person.OrganizationId}' not found.";
+			Assert.AreEqual(errorMessage, expectedException.Message);
+
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
 			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
 			Assert.IsNotNull(personError);
 
 			var personOrganizationNotFoundError = personError as PersonOrganizationNotFoundError;
 			Assert.IsNotNull(personOrganizationNotFoundError);
-			Assert.AreEqual($"Organization with ID '{organizationId}' not found.", personOrganizationNotFoundError.ErrorMessage);
+			Assert.AreEqual(errorMessage, personOrganizationNotFoundError.ErrorMessage);
 			Assert.AreEqual(person.Id, personOrganizationNotFoundError.Id);
 			Assert.AreEqual(organizationId, personOrganizationNotFoundError.OrganizationId);
 		}

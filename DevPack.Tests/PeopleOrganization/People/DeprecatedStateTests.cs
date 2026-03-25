@@ -1040,5 +1040,207 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
 			Assert.AreEqual(person.Id, personInvalidStateError.Id);
 		}
+
+		[TestMethod]
+		public void AssignOrganizationThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var organization = new Organization
+			{
+				Name = $"{prefix}_Organization",
+			};
+			organization = objectCreator.CreateOrganization(organization);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Assign organization
+			person.OrganizationId = organization.Id;
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void UpdateOrganizationThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var organization1 = new Organization
+			{
+				Name = $"{prefix}_Organization 1",
+			};
+			var organization2 = new Organization
+			{
+				Name = $"{prefix}_Organization 2",
+			};
+			objectCreator.CreateOrganizations([organization1, organization2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+				OrganizationId = organization1.Id,
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Update organization
+			person.OrganizationId = organization2.Id;
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void AssignExperienceThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var experience = new Experience
+			{
+				Name = $"{prefix}_Experience",
+			};
+			experience = objectCreator.CreateExperience(experience);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Assign experience
+			person.ExperienceId = experience.Id;
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void UpdateExperienceThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var experience1 = new Experience
+			{
+				Name = $"{prefix}_Experience 1",
+			};
+			var experience2 = new Experience
+			{
+				Name = $"{prefix}_Experience 2",
+			};
+			objectCreator.CreateExperience([experience1, experience2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+				ExperienceId = experience1.Id,
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Update experience
+			person.ExperienceId = experience2.Id;
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
 	}
 }

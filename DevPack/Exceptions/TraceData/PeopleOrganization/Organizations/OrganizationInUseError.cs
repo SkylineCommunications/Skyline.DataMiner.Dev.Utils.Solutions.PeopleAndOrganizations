@@ -9,8 +9,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 	internal class OrganizationInUseError : OrganizationError
 	{
 		/// <summary>
-		/// Gets or sets the collection of unique identifiers of the people having the organization implemented.
+		/// Gets the collection of unique identifiers of the people having the organization implemented.
 		/// </summary>
-		public List<Guid> PeopleIds { get; set; } = [];
+		public IReadOnlyCollection<Guid> PeopleIds { get; internal set; } = [];
 	}
 }

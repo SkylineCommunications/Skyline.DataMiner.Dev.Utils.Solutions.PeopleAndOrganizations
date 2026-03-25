@@ -757,5 +757,127 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 			Assert.IsNotNull(domPerson);
 			Assert.IsFalse(domPerson.Sections.Exists(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
 		}
+
+		[TestMethod]
+		public void AssignOrganization()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var organization = new Organization
+			{
+				Name = $"{prefix}_Organization",
+			};
+			organization = objectCreator.CreateOrganization(organization);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Assign organization
+			person.OrganizationId = organization.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(organization.Id, person.OrganizationId);
+		}
+
+		[TestMethod]
+		public void UpdateOrganization()
+		{
+			var prefix = Guid.NewGuid();
+
+			var organization1 = new Organization
+			{
+				Name = $"{prefix}_Organization 1",
+			};
+			var organization2 = new Organization
+			{
+				Name = $"{prefix}_Organization 2",
+			};
+			objectCreator.CreateOrganizations([organization1, organization2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+				OrganizationId = organization1.Id,
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Update organization
+			person.OrganizationId = organization2.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(organization2.Id, person.OrganizationId);
+		}
+
+		[TestMethod]
+		public void AssignExperience()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var experience = new Experience
+			{
+				Name = $"{prefix}_Experience",
+			};
+			experience = objectCreator.CreateExperience(experience);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Assign experience
+			person.ExperienceId = experience.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(experience.Id, person.ExperienceId);
+		}
+
+		[TestMethod]
+		public void UpdateExperience()
+		{
+			var prefix = Guid.NewGuid();
+
+			var experience1 = new Experience
+			{
+				Name = $"{prefix}_Experience 1",
+			};
+			var experience2 = new Experience
+			{
+				Name = $"{prefix}_Experience 2",
+			};
+			objectCreator.CreateExperience([experience1, experience2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+				ExperienceId = experience1.Id,
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Update experience
+			person.ExperienceId = experience2.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(experience2.Id, person.ExperienceId);
+		}
 	}
 }
