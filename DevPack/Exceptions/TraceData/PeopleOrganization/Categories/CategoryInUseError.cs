@@ -2,15 +2,14 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
+	using System.Threading.Tasks;
 
 	/// <summary>
 	/// Represents an error that occurs when attempting to delete a category that is currently in use.
 	/// </summary>
-	internal class CategoryInUseError : CategoryError
+	public class CategoryInUseError : CategoryError
 	{
-		/// <summary>
-		/// Gets or sets the collection of unique identifiers of the organizations having the category implemented.
-		/// </summary>
-		public List<Guid> OrganizationIds { get; set; } = [];
 	}
 }

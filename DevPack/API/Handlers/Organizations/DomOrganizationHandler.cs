@@ -542,7 +542,7 @@
 					continue;
 				}
 
-				var error = new OrganizationInUseError
+				var error = new OrganizationInUseByPeopleError
 				{
 					ErrorMessage = $"Organization '{organization.Name}' is in use by {people.Count} person/people.",
 					Id = organization.Id,

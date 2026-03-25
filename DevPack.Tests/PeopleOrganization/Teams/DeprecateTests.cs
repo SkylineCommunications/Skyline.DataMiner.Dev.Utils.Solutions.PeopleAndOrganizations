@@ -1,4 +1,4 @@
-﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Organizations
+﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Teams
 {
 	using System;
 	using System.Linq;
@@ -31,25 +31,25 @@
 		{
 			var prefix = Guid.NewGuid();
 
-			var organization = new Organization
+			var team = new Team
 			{
-				Name = $"{prefix}_Organization",
+				Name = $"{prefix}_Team",
 			};
-			organization = objectCreator.CreateOrganization(organization);
+			team = objectCreator.CreateTeam(team);
 
 			var person = new Person
 			{
 				Name = $"{prefix}_Person",
-				OrganizationId = organization.Id,
-			};
+			}
+			.AddTeamMembership(new TeamMembership(team));
 			person = objectCreator.CreatePerson(person);
 
-			organization = TestContext.Api.Organizations.Activate(organization);
+			team = TestContext.Api.Teams.Activate(team);
 
 			PeopleAndOrganizationsException? expectedException = null;
 			try
 			{
-				TestContext.Api.Organizations.Deprecate(organization);
+				TestContext.Api.Teams.Deprecate(team);
 			}
 			catch (PeopleAndOrganizationsException ex)
 			{
@@ -58,19 +58,19 @@
 
 			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
 
-			var errorMessage = $"Organization '{organization.Name}' is in use by 1 person/people.";
+			var errorMessage = $"Team '{team.Name}' is in use by 1 people.";
 			Assert.AreEqual(errorMessage, expectedException.Message);
 
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
-			var organizationError = expectedException.TraceData.ErrorData.OfType<OrganizationError>().SingleOrDefault();
-			Assert.IsNotNull(organizationError);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
 
-			var organizationInUseError = organizationError as OrganizationInUseByPeopleError;
-			Assert.IsNotNull(organizationInUseError);
-			Assert.AreEqual(organization.Id, organizationInUseError.Id);
-			Assert.AreEqual(errorMessage, organizationInUseError.ErrorMessage);
-			Assert.AreEqual(1, organizationInUseError.PeopleIds.Count);
-			Assert.IsTrue(organizationInUseError.PeopleIds.Contains(person.Id));
+			var teamInUseByPeopleError = teamError as TeamInUseByPeopleError;
+			Assert.IsNotNull(teamInUseByPeopleError);
+			Assert.AreEqual(team.Id, teamInUseByPeopleError.Id);
+			Assert.AreEqual(errorMessage, teamInUseByPeopleError.ErrorMessage);
+			Assert.AreEqual(1, teamInUseByPeopleError.PeopleIds.Count);
+			Assert.IsTrue(teamInUseByPeopleError.PeopleIds.Contains(person.Id));
 		}
 	}
 }

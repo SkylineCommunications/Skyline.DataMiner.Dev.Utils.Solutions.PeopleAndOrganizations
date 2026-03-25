@@ -1,7 +1,10 @@
-﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Organizations
+﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Roles
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
+	using System.Text;
+	using System.Threading.Tasks;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
@@ -10,11 +13,11 @@
 
 	[TestClass]
 	[TestCategory("IntegrationTest")]
-	public sealed class DeprecateTests : IDisposable
+	public sealed class DeleteTests : IDisposable
 	{
 		private readonly TestObjectCreator objectCreator;
 
-		public DeprecateTests()
+		public DeleteTests()
 		{
 			objectCreator = new TestObjectCreator(TestContext);
 		}
@@ -31,25 +34,32 @@
 		{
 			var prefix = Guid.NewGuid();
 
-			var organization = new Organization
+			var role = new Role
 			{
-				Name = $"{prefix}_Organization",
+				Name = $"{prefix}_Role",
 			};
-			organization = objectCreator.CreateOrganization(organization);
+			role = objectCreator.CreateRole(role);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
 
 			var person = new Person
 			{
 				Name = $"{prefix}_Person",
-				OrganizationId = organization.Id,
-			};
+			}
+			.AddTeamMembership(new TeamMembership(team)
+			{
+				RoleId = role.Id,
+			});
 			person = objectCreator.CreatePerson(person);
-
-			organization = TestContext.Api.Organizations.Activate(organization);
 
 			PeopleAndOrganizationsException? expectedException = null;
 			try
 			{
-				TestContext.Api.Organizations.Deprecate(organization);
+				TestContext.Api.Roles.Delete(role);
 			}
 			catch (PeopleAndOrganizationsException ex)
 			{
@@ -58,19 +68,19 @@
 
 			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
 
-			var errorMessage = $"Organization '{organization.Name}' is in use by 1 person/people.";
+			var errorMessage = $"Role '{role.Name}' is in use by 1 people.";
 			Assert.AreEqual(errorMessage, expectedException.Message);
 
 			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
-			var organizationError = expectedException.TraceData.ErrorData.OfType<OrganizationError>().SingleOrDefault();
-			Assert.IsNotNull(organizationError);
+			var roleError = expectedException.TraceData.ErrorData.OfType<RoleError>().SingleOrDefault();
+			Assert.IsNotNull(roleError);
 
-			var organizationInUseError = organizationError as OrganizationInUseByPeopleError;
-			Assert.IsNotNull(organizationInUseError);
-			Assert.AreEqual(organization.Id, organizationInUseError.Id);
-			Assert.AreEqual(errorMessage, organizationInUseError.ErrorMessage);
-			Assert.AreEqual(1, organizationInUseError.PeopleIds.Count);
-			Assert.IsTrue(organizationInUseError.PeopleIds.Contains(person.Id));
+			var roleInUseByPeopleError = roleError as RoleInUseByPeopleError;
+			Assert.IsNotNull(roleInUseByPeopleError);
+			Assert.AreEqual(role.Id, roleInUseByPeopleError.Id);
+			Assert.AreEqual(errorMessage, roleInUseByPeopleError.ErrorMessage);
+			Assert.AreEqual(1, roleInUseByPeopleError.PeopleIds.Count);
+			Assert.IsTrue(roleInUseByPeopleError.PeopleIds.Contains(person.Id));
 		}
 	}
 }
