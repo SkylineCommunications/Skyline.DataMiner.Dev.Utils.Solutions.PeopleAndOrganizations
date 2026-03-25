@@ -6,7 +6,7 @@
 	/// <summary>
 	/// Represents an error that occurs when attempting to delete a category that is currently in use by one or multiple organizations.
 	/// </summary>
-	internal class CategoryInUseByOrganizationsError : CategoryInUseError
+	public class CategoryInUseByOrganizationsError : CategoryInUseError
 	{
 		/// <summary>
 		/// Gets the collection of unique identifiers of the organizations having the category implemented.
