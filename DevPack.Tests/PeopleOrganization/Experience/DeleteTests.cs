@@ -1,18 +1,12 @@
 ﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 {
 	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel.DataAnnotations;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
-
-	using static Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections;
 
 	[TestClass]
 	[TestCategory("IntegrationTest")]
