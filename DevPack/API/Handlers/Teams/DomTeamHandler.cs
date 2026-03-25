@@ -74,12 +74,14 @@
 				return;
 			}
 
-			ValidateIdsNotInUse(apiTeams.Where(x => x.IsNew).ToArray());
 			ValidateStateForUpdateAction(apiTeams.Where(x => !x.IsNew).ToArray());
-			ValidateNames(apiTeams);
-			ValidateSkills(apiTeams);
+			var toValidate = apiTeams.Where(IsValid).ToList();
 
-			var validTeams = apiTeams.Where(IsValid).ToList();
+			ValidateIdsNotInUse(toValidate.Where(x => x.IsNew).ToArray());
+			ValidateNames(toValidate);
+			ValidateSkills(toValidate);
+
+			var validTeams = toValidate.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validTeams, CreateOrUpdateLocked);
 			ReportError(lockResult);
 		}
