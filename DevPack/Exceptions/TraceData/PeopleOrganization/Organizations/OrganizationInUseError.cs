@@ -11,6 +11,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 		/// <summary>
 		/// Gets the collection of unique identifiers of the people having the organization implemented.
 		/// </summary>
-		public List<Guid> PeopleIds { get; internal set; } = [];
+		public IReadOnlyCollection<Guid> PeopleIds { get; internal set; } = [];
 	}
 }
