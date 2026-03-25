@@ -70,12 +70,14 @@
 				return;
 			}
 
-			ValidateIdsNotInUse(apiOrganizations.Where(x => x.IsNew).ToArray());
 			ValidateStateForUpdateAction(apiOrganizations.Where(x => !x.IsNew).ToArray());
-			ValidateNames(apiOrganizations);
-			ValidateCategories(apiOrganizations);
+			var toValidate = apiOrganizations.Where(IsValid).ToList();
 
-			var validOrganizations = apiOrganizations.Where(IsValid).ToList();
+			ValidateIdsNotInUse(toValidate.Where(x => x.IsNew).ToArray());
+			ValidateNames(toValidate);
+			ValidateCategories(toValidate);
+
+			var validOrganizations = toValidate.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validOrganizations, CreateOrUpdateLocked);
 			ReportError(lockResult);
 		}

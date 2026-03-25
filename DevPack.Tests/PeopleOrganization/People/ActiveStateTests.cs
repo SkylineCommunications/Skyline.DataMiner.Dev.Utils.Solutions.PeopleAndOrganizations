@@ -405,6 +405,360 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 		}
 
 		[TestMethod]
+		public void AddTeamMembershipWithDraftTeam()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			person.AddTeamMembership(new TeamMembership(team));
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNull(fdRoleId);
+		}
+
+		[TestMethod]
+		public void AddTeamMembershipWithDraftTeamAndRole()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var role = new Role
+			{
+				Name = $"{prefix}_Role",
+			};
+			role = objectCreator.CreateRole(role);
+
+			person.AddTeamMembership(new TeamMembership(team)
+			{
+				RoleId = role.Id,
+			});
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNotNull(fdRoleId);
+			Assert.AreEqual(role.Id, (Guid)fdRoleId.Value.Value);
+		}
+
+		[TestMethod]
+		public void AddTeamMembershipWithActiveTeam()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			person.AddTeamMembership(new TeamMembership(team));
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNull(fdRoleId);
+		}
+
+		[TestMethod]
+		public void AddTeamMembershipWithActiveTeamAndRole()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var role = new Role
+			{
+				Name = $"{prefix}_Role",
+			};
+			role = objectCreator.CreateRole(role);
+
+			person.AddTeamMembership(new TeamMembership(team)
+			{
+				RoleId = role.Id,
+			});
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNotNull(fdRoleId);
+			Assert.AreEqual(role.Id, (Guid)fdRoleId.Value.Value);
+		}
+
+		[TestMethod]
+		public void AddTeamMembershipWithDeprecatedTeamThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+			team = TestContext.Api.Teams.Deprecate(team);
+
+			person.AddTeamMembership(new TeamMembership(team));
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			var errorMessage = $"Team with ID '{team.Id}' is deprecated.";
+			Assert.AreEqual(errorMessage, expectedException.Message);
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidTeamMembershipError = personError as PersonInvalidTeamMembershipError;
+			Assert.IsNotNull(personInvalidTeamMembershipError);
+			Assert.AreEqual(errorMessage, personInvalidTeamMembershipError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidTeamMembershipError.Id);
+			Assert.AreEqual(team.Id, personInvalidTeamMembershipError.TeamId);
+			Assert.AreEqual(Guid.Empty, personInvalidTeamMembershipError.RoleId);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.IsFalse(domPerson.Sections.Exists(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+		}
+
+		[TestMethod]
+		public void UpdateTeamMembershipWithRole()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var role = new Role
+			{
+				Name = $"{prefix}_Role",
+			};
+			role = objectCreator.CreateRole(role);
+
+			person.AddTeamMembership(new TeamMembership(team));
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			// Update role
+			var teamMembership = person.TeamMemberships.Single();
+			teamMembership.RoleId = role.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNotNull(fdRoleId);
+			Assert.AreEqual(role.Id, (Guid)fdRoleId.Value.Value);
+		}
+
+		[TestMethod]
+		public void UpdateTeamMembershipWithNoRole()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var role = new Role
+			{
+				Name = $"{prefix}_Role",
+			};
+			role = objectCreator.CreateRole(role);
+
+			person.AddTeamMembership(new TeamMembership(team)
+			{
+				RoleId = role.Id,
+			});
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			// Remove role
+			var teamMembership = person.TeamMemberships.Single();
+			teamMembership.RoleId = Guid.Empty;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.AreEqual(1, domPerson.Sections.Count(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+			var domTeam = domPerson.Sections.Single(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id);
+			var fdTeamId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379.Id);
+			Assert.IsNotNull(fdTeamId);
+			Assert.AreEqual(team.Id, (Guid)fdTeamId.Value.Value);
+			var fdRoleId = domTeam.FieldValues.SingleOrDefault(fd => fd.FieldDescriptorID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.TeamRole.Id);
+			Assert.IsNull(fdRoleId);
+		}
+
+		[TestMethod]
+		public void RemoveTeamMembership()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			person.AddTeamMembership(new TeamMembership(team));
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.TeamMemberships.Count);
+
+			// Remove team membership
+			var teamMembership = person.TeamMemberships.Single();
+			person.RemoveTeamMembership(teamMembership);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(0, person.TeamMemberships.Count);
+
+			var domPerson = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(person.Id)).SingleOrDefault();
+			Assert.IsNotNull(domPerson);
+			Assert.IsFalse(domPerson.Sections.Exists(s => s.SectionDefinitionID.Id == Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections.Team.Id.Id));
+		}
+
+		[TestMethod]
 		public void AssignOrganization()
 		{
 			var prefix = Guid.NewGuid();

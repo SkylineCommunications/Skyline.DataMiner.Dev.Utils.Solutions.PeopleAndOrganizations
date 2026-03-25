@@ -70,14 +70,17 @@
 				return;
 			}
 
-			ValidateIdsNotInUse(apiPeople.Where(x => x.IsNew).ToArray());
 			ValidateStateForUpdateAction(apiPeople.Where(x => !x.IsNew).ToArray());
-			ValidateNames(apiPeople);
-			ValidateExperience(apiPeople);
-			ValidateOrganizations(apiPeople);
-			ValidateSkills(apiPeople);
+			var toValidate = apiPeople.Where(IsValid).ToList();
 
-			var validPeople = apiPeople.Where(IsValid).ToList();
+			ValidateIdsNotInUse(toValidate.Where(x => x.IsNew).ToArray());
+			ValidateNames(toValidate);
+			ValidateExperience(toValidate);
+			ValidateOrganizations(toValidate);
+			ValidateSkills(toValidate);
+			ValidateTeamMemberships(toValidate);
+
+			var validPeople = toValidate.Where(IsValid).ToList();
 			var lockResult = api.LockManager.LockAndExecute(validPeople, CreateOrUpdateLocked);
 			ReportError(lockResult);
 		}
@@ -347,7 +350,7 @@
 				return;
 			}
 
-			foreach (var person in apiPeople.Where(x => !new[] {PersonState.Draft, PersonState.Deprecated}.Contains(x.State)))
+			foreach (var person in apiPeople.Where(x => !new[] { PersonState.Draft, PersonState.Deprecated }.Contains(x.State)))
 			{
 				var error = new PersonInvalidStateError
 				{
@@ -622,6 +625,119 @@
 							Id = person.Id,
 							Name = skill.Name,
 						};
+						ReportError(person.Id, error);
+					}
+				}
+			}
+		}
+
+		private void ValidateTeamMemberships(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			var teamIds = apiPeople
+				.SelectMany(x => x.TeamMemberships)
+				.Select(x => x.TeamId)
+				.Distinct()
+				.ToList();
+			var teamsById = api.Teams.Read(teamIds).ToDictionary(x => x.Id);
+
+			var roleIds = apiPeople
+				.SelectMany(x => x.TeamMemberships)
+				.Select(x => x.RoleId)
+				.Where(x => x != Guid.Empty)
+				.Distinct()
+				.ToList();
+			var rolesById = api.Roles.Read(roleIds).ToDictionary(x => x.Id);
+
+			foreach (var person in apiPeople)
+			{
+				var duplicateSettings = person.TeamMemberships
+					.GroupBy(x => x.TeamId)
+					.Where(g => g.Count() > 1)
+					.ToDictionary(x => x.Key, x => x.Count());
+
+				foreach (var kvp in duplicateSettings)
+				{
+					var error = new PersonInvalidTeamMembershipError
+					{
+						Id = person.Id,
+						TeamId = kvp.Key,
+						ErrorMessage = $"Team with ID '{kvp.Key}' is defined {kvp.Value} times.",
+					};
+
+					ReportError(person.Id, error);
+				}
+
+				if (duplicateSettings.Count > 0)
+				{
+					continue;
+				}
+
+				foreach (var teamMembership in person.TeamMemberships)
+				{
+					if (teamMembership.TeamId == Guid.Empty)
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = "Team ID cannot be empty.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (!teamsById.TryGetValue(teamMembership.TeamId, out var team))
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = $"Team with ID '{teamMembership.TeamId}' not found.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (team.State == TeamState.Deprecated)
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							ErrorMessage = $"Team with ID '{teamMembership.TeamId}' is deprecated.",
+						};
+
+						ReportError(person.Id, error);
+						continue;
+					}
+
+					if (teamMembership.RoleId == Guid.Empty)
+					{
+						continue;
+					}
+
+					if (!rolesById.TryGetValue(teamMembership.RoleId, out _))
+					{
+						var error = new PersonInvalidTeamMembershipError
+						{
+							Id = person.Id,
+							TeamId = teamMembership.TeamId,
+							RoleId = teamMembership.RoleId,
+							ErrorMessage = $"Role with ID '{teamMembership.RoleId}' not found.",
+						};
+
 						ReportError(person.Id, error);
 					}
 				}
