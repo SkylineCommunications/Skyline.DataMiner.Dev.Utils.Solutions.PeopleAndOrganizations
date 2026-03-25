@@ -371,7 +371,7 @@
 					continue;
 				}
 
-				var error = new CategoryInUseError
+				var error = new CategoryInUseByOrganizationsError
 				{
 					ErrorMessage = $"Category '{category.Name}' is in use by {organizations.Count} organization(s).",
 					Id = category.Id,
