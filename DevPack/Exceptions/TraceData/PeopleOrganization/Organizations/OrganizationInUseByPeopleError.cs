@@ -6,7 +6,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 	/// <summary>
 	/// Represents an error that occurs when attempting to delete an organization that is currently in use by one or multiple people.
 	/// </summary>
-	internal class OrganizationInUseByPeopleError : OrganizationInUseError
+	public class OrganizationInUseByPeopleError : OrganizationInUseError
 	{
 		/// <summary>
 		/// Gets the collection of unique identifiers of the people having the organization implemented.
