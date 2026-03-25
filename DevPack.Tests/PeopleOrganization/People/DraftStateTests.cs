@@ -403,5 +403,60 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 			Assert.IsNotNull(person);
 			Assert.AreEqual(organization2.Id, person.OrganizationId);
 		}
+
+		[TestMethod]
+		public void AssignExperience()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var experience = new Experience
+			{
+				Name = $"{prefix}_Experience",
+			};
+			experience = objectCreator.CreateExperience(experience);
+
+			// Assign experience
+			person.ExperienceId = experience.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(experience.Id, person.ExperienceId);
+		}
+
+		[TestMethod]
+		public void UpdateExperience()
+		{
+			var prefix = Guid.NewGuid();
+
+			var experience1 = new Experience
+			{
+				Name = $"{prefix}_Experience 1",
+			};
+			var experience2 = new Experience
+			{
+				Name = $"{prefix}_Experience 2",
+			};
+			objectCreator.CreateExperience([experience1, experience2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+				ExperienceId = experience1.Id,
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Update experience
+			person.ExperienceId = experience2.Id;
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(experience2.Id, person.ExperienceId);
+		}
 	}
 }
