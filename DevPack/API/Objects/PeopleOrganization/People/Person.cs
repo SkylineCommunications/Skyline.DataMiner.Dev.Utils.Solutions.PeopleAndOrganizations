@@ -301,6 +301,8 @@
 			updatedInstance.ContactInfo.ZIP = ZipCode;
 			updatedInstance.ContactInfo.Country = Country.HasValue ? EnumExtensions.MapEnum<Country, StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Enums.Country>(Country.Value) : null;
 
+			updatedInstance.Organization.OrganizationId = OrganizationId;
+
 			updatedInstance.Team.Clear();
 			foreach (var teamMembership in teamMemberships)
 			{
