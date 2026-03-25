@@ -2,7 +2,6 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 {
 	using System;
 	using System.Linq;
-	using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
