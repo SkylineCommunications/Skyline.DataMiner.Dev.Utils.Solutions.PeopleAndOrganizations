@@ -15,13 +15,15 @@
 	internal class LockManager
 	{
 		private const string LockManagerElementName = "People and Organizations Lock Manager";
-		private const int MaxLockAttempts = 5;
+		private const int MaxLockAttempts = 50;
 
-		private readonly TimeSpan _sleepTime = TimeSpan.FromMilliseconds(500);
+		private static readonly Random Random = new Random();
+		private static readonly object RandomLock = new object();
+
+		private static readonly ConcurrentHashSet<string> LockedObjectIds = new ConcurrentHashSet<string>(); // Only used for Integration Testing outside of a DataMiner Agent
+
 		private readonly SkylineLockManagerConnectorApi _lockapi;
 		private readonly ILogger _logger;
-
-		private readonly ConcurrentHashSet<string> lockedObjectIds = new ConcurrentHashSet<string>(); // Only used for Integration Testing outside of a DataMiner Agent
 
 		public LockManager(PeopleAndOrganizationsApi api)
 		{
@@ -32,6 +34,45 @@
 
 			_lockapi = new SkylineLockManagerConnectorApi(api.Connection, LockManagerElementName, new LockManagerLoggerFactory(api.Logger));
 			_logger = api.Logger;
+		}
+
+		public bool TryLockAndExecute(string objectLockId, Action action)
+		{
+			int attempts = 0;
+
+			do
+			{
+				if (TryLockObject(objectLockId))
+				{
+					try
+					{
+						action();
+						return true;
+					}
+					finally
+					{
+						// Release granted locks
+						UnlockObject(objectLockId);
+					}
+				}
+				else
+				{
+					// if any remaining objects to lock, wait before retrying
+					int timeToSleep;
+					lock (RandomLock)
+					{
+						timeToSleep = Random.Next(200, 1000);
+					}
+
+					Thread.Sleep(TimeSpan.FromMilliseconds(timeToSleep));
+				}
+
+				attempts++;
+			}
+			while (attempts < MaxLockAttempts);
+
+			_logger.Error(this, "Failed to lock {0} after {1} attempts.", [objectLockId, MaxLockAttempts]);
+			return false;
 		}
 
 		public LockResult<T> LockAndExecute<T>(ICollection<T> apiObjects, Action<ICollection<T>> action) where T : ApiObject
@@ -82,7 +123,13 @@
 				if (remainingObjectsToHandle.Any())
 				{
 					// if any remaining objects to lock, wait before retrying
-					Thread.Sleep(_sleepTime);
+					int timeToSleep;
+					lock (RandomLock)
+					{
+						timeToSleep = Random.Next(200, 1000);
+					}
+
+					Thread.Sleep(TimeSpan.FromMilliseconds(timeToSleep));
 				}
 
 				attempts++;
@@ -116,7 +163,7 @@
 				List<string> grantedObjectLocks = new List<string>();
 				foreach (var objectToLock in objectsToLock)
 				{
-					if (lockedObjectIds.TryAdd(objectToLock.LockId))
+					if (LockedObjectIds.TryAdd(objectToLock.LockId))
 					{
 						grantedObjectLocks.Add(objectToLock.LockId);
 					}
@@ -145,8 +192,49 @@
 
 				foreach (var lockedObject in lockedObjects)
 				{
-					lockedObjectIds.TryRemove(lockedObject.LockId);
+					LockedObjectIds.TryRemove(lockedObject.LockId);
 				}
+			}
+		}
+
+		private bool TryLockObject(string lockObjectId)
+		{
+			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			{
+				var lockRequest = new LockObjectRequest
+				{
+					ObjectId = lockObjectId,
+				};
+
+				var result = _lockapi.LockObjects([lockRequest]);
+				return result.LockInfosPerObjectId.TryGetValue(lockObjectId, out var lockInfo) && lockInfo.IsGranted;
+			}
+			else
+			{
+				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, keeping locks in memory");
+
+				return LockedObjectIds.TryAdd(lockObjectId);
+			}
+		}
+
+		private void UnlockObject(string lockObjectId)
+		{
+			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			{
+				var unlockRequest = new UnlockObjectRequest
+				{
+					ObjectId = lockObjectId,
+				};
+
+				_lockapi.UnlockObjects([unlockRequest]);
+			}
+			else
+			{
+				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, unlocking locks from memory");
+
+				Thread.Sleep(1000); // Add some delay to simulate lock communication
+
+				LockedObjectIds.TryRemove(lockObjectId);
 			}
 		}
 
