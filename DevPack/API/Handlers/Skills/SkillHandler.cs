@@ -9,6 +9,8 @@
 
 	internal class SkillHandler : StringApiObjectValidator<Skill>
 	{
+		private const string LockName = "PNO_SKILLS";
+
 		private readonly PeopleAndOrganizationsApi api;
 
 		private SkillHandler(PeopleAndOrganizationsApi api) : base(skill => skill.Name)
@@ -59,7 +61,7 @@
 
 			ValidateNames(apiSkills.Where(IsValid).ToArray());
 
-			var lockResult = api.LockManager.TryLockAndExecute($"PNO_SKILLS", () => CreateOrUpdateSkills(apiSkills));
+			var lockResult = api.LockManager.TryLockAndExecute(LockName, () => CreateOrUpdateSkills(apiSkills), 20000);
 			if (!lockResult)
 			{
 				foreach (var skill in apiSkills)
@@ -169,7 +171,7 @@
 				return;
 			}
 
-			var lockResult = api.LockManager.TryLockAndExecute($"PNO_SKILLS", () =>
+			var lockResult = api.LockManager.TryLockAndExecute(LockName, () =>
 			{
 				var skillsCapability = GetSkillsCapability();
 
@@ -182,7 +184,6 @@
 				{
 					api.PlanApi.Capabilities.CreateOrUpdate([skillsCapability]);
 					ReportSuccess(apiSkills);
-
 				}
 				catch (MediaOpsException exception)
 				{
@@ -195,7 +196,7 @@
 						});
 					}
 				}
-			});
+			}, 20000);
 
 			if (!lockResult)
 			{
