@@ -2,13 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
