@@ -2,14 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
+
+	using Alphaleonis.Win32.Filesystem;
 
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
@@ -39,6 +38,15 @@
 		{
 			var handler = new DomTeamHandler(api);
 			handler.TransitionToActiveFromDraft(apiTeams);
+
+			result = new DomInstanceBulkOperationResult<DomTeam>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
+
+		internal static bool TryMakeBookable(PeopleAndOrganizationsApi api, ICollection<Team> apiTeams, out DomInstanceBulkOperationResult<DomTeam> result)
+		{
+			var handler = new DomTeamHandler(api);
+			handler.MakeBookable(apiTeams);
 
 			result = new DomInstanceBulkOperationResult<DomTeam>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
 			return !result.HasFailures;
@@ -270,6 +278,156 @@
 			ReportSuccess(toDelete.Where(x => domResult.SuccessfulIds.Contains(x.ID)).Select(x => new DomTeam(x)));
 		}
 
+		private void MakeBookable(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			ValidateStateForMakeBookableAction(apiTeams);
+			var toValidate = apiTeams.Where(IsValid).ToList();
+
+			ValidateIfNotAlreadyBookable(toValidate);
+
+			var validTeams = toValidate.Where(IsValid).ToList();
+			var lockResult = api.LockManager.LockAndExecute(validTeams, MakeBookableLocked);
+			ReportError(lockResult);
+		}
+
+		private void MakeBookableLocked(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Any(x => !IsValid(x)))
+			{
+				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
+			}
+
+			var teamsById = new Dictionary<Guid, Team>();
+			var teamIdByPoolId = new Dictionary<Guid, Guid>();
+
+			var poolsToCreate = new List<Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool>();
+			foreach (var team in apiTeams)
+			{
+				var pool = BuildResourcePool(team);
+
+				poolsToCreate.Add(pool);
+
+				teamsById[team.Id] = team;
+				teamIdByPoolId[pool.Id] = team.Id;
+			}
+
+			var teamsToSave = new List<Team>();
+			try
+			{
+				var createdResourcePools = api.PlanApi.ResourcePools.Create(poolsToCreate);
+				createdResourcePools = api.PlanApi.ResourcePools.Complete(createdResourcePools);
+
+				HandleSuccess(teamIdByPoolId.Keys);
+			}
+			catch (MediaOpsBulkException<Guid> createException)
+			{
+				HandleFailure(createException.Result.UnsuccessfulIds.ToList(), createException.Result.TraceDataPerItem);
+
+				try
+				{
+					api.PlanApi.ResourcePools.Complete(createException.Result.SuccessfulIds);
+
+					HandleSuccess(createException.Result.SuccessfulIds.ToList());
+				}
+				catch (MediaOpsBulkException<Guid> completeException)
+				{
+					HandleSuccess(completeException.Result.SuccessfulIds.ToList());
+					HandleFailure(completeException.Result.UnsuccessfulIds.ToList(), completeException.Result.TraceDataPerItem);
+				}
+			}
+
+			if (teamsToSave.Count > 0)
+			{
+				var domTeams = teamsToSave.Select(x => x.GetInstanceWithChanges()).ToList();
+
+				CreateOrUpdateDom(domTeams);
+			}
+
+			void HandleSuccess(ICollection<Guid> poolIds)
+			{
+				foreach (var poolId in poolIds)
+				{
+					if (!teamIdByPoolId.TryGetValue(poolId, out var teamId))
+					{
+						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					teamsById.TryGetValue(teamId, out var team);
+					team.ResourcePoolId = poolId;
+					team.IsBookable = true;
+
+					teamsToSave.Add(team);
+				}
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
+				{
+					if (!teamIdByPoolId.TryGetValue(poolId, out var teamId))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						ReportError(teamId, ComposeError(teamId, traceData));
+					}
+					else
+					{
+						ReportError(teamId);
+					}
+				}
+			}
+		}
+
+		private Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool BuildResourcePool(Team apiTeam)
+		{
+			var resourcePool = new Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool
+			{
+				Name = apiTeam.Name,
+			};
+
+			return resourcePool;
+		}
+
+		private PeopleAndOrganizationsErrorData ComposeError(Guid teamId, MediaOpsTraceData traceData)
+		{
+			if (traceData.ErrorData.Count > 1
+				|| traceData.ErrorData[0] is not ResourcePoolError)
+			{
+				return new PeopleAndOrganizationsErrorData
+				{
+					ErrorMessage = traceData.ToString(),
+				};
+			}
+			else
+			{
+				return new TeamMakeBookableError
+				{
+					Id = teamId,
+					ErrorMessage = traceData.ErrorData[0].ErrorMessage,
+				};
+			}
+		}
+
 		private void ValidateIdsNotInUse(ICollection<Team> apiTeams)
 		{
 			if (apiTeams == null)
@@ -386,6 +544,32 @@
 					ErrorMessage = "Not allowed to deprecate a team that is not in Active state.",
 					Id = team.Id,
 				};
+				ReportError(team.Id, error);
+			}
+		}
+
+		private void ValidateStateForMakeBookableAction(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var team in apiTeams.Where(x => x.IsNew || x.State != TeamState.Active))
+			{
+				var error = new TeamInvalidStateError
+				{
+					ErrorMessage = team.IsNew
+					? "A team that was not saved cannot be made bookable."
+					: "Not allowed to make a team bookable that is not in Active state.",
+					Id = team.Id,
+				};
+
 				ReportError(team.Id, error);
 			}
 		}
@@ -590,6 +774,30 @@
 						ReportError(team.Id, error);
 					}
 				}
+			}
+		}
+
+		private void ValidateIfNotAlreadyBookable(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var team in apiTeams.Where(x => x.IsBookable))
+			{
+				var error = new TeamMakeBookableError
+				{
+					ErrorMessage = $"Team '{team.Name}' is already bookable.",
+					Id = team.Id,
+				};
+
+				ReportError(team.Id, error);
 			}
 		}
 

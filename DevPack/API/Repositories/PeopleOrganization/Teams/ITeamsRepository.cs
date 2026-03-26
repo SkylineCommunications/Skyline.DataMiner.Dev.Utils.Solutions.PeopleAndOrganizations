@@ -63,5 +63,33 @@
 		/// <param name="teamIds">The unique identifiers of the teams to deprecate.</param>
 		/// <returns>A read-only collection of deprecated teams.</returns>
 		IReadOnlyCollection<Team> Deprecate(IEnumerable<Guid> teamIds);
+
+		/// <summary>
+		/// Marks the specified team as bookable, indicating that it can be reserved or scheduled.
+		/// </summary>
+		/// <param name="team">The team to be marked as bookable. Cannot be null.</param>
+		/// <returns>The bookable team.</returns>
+		Team MakeBookable(Team team);
+
+		/// <summary>
+		/// Marks the specified team as bookable, indicating that it can be reserved or scheduled.
+		/// </summary>
+		/// <param name="teamId">The unique identifier of the team to make bookable.</param>
+		/// <returns>The bookable team.</returns>
+		Team MakeBookable(Guid teamId);
+
+		/// <summary>
+		/// Marks the specified teams as bookable, indicating that they can be reserved or scheduled.
+		/// </summary>
+		/// <param name="teams">A collection of teams to be marked as bookable. Cannot be null or empty.</param>
+		/// <returns>A read-only collection of bookable teams.</returns>
+		IReadOnlyCollection<Team> MakeBookable(IEnumerable<Team> teams);
+
+		/// <summary>
+		/// Marks the specified teams as bookable, indicating that they can be reserved or scheduled.
+		/// </summary>
+		/// <param name="teamIds">The unique identifiers of the teams to make bookable.</param>
+		/// <returns>A read-only collection of bookable teams.</returns>
+		IReadOnlyCollection<Team> MakeBookable(IEnumerable<Guid> teamIds);
 	}
 }

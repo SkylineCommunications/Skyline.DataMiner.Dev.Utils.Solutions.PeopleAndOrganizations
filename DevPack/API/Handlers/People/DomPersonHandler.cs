@@ -190,6 +190,7 @@
 			}
 
 			ValidateStateForDeprecateAction(apiPeople);
+			ValidatePeopleAreNotInUse(apiPeople.Where(IsValid).ToArray());
 
 			// Todo: find people with resource link and try to deprecate those first.
 			var toTransition = apiPeople.Where(IsValid).ToList();
@@ -741,6 +742,36 @@
 						ReportError(person.Id, error);
 					}
 				}
+			}
+		}
+
+		private void ValidatePeopleAreNotInUse(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			var peopleWithTeamMemberships = apiPeople.Where(x => x.TeamMemberships.Count > 0).ToList();
+			if (peopleWithTeamMemberships.Count == 0)
+			{
+				return;
+			}
+
+			foreach (var person in peopleWithTeamMemberships)
+			{
+				var error = new PersonInUseByTeamsError
+				{
+					ErrorMessage = $"Person '{person.Name}' is still assigned to {person.TeamMemberships.Count} team(s).",
+					Id = person.Id,
+					TeamIds = person.TeamMemberships.Select(x => x.TeamId).ToList(),
+				};
+				ReportError(person.Id, error);
 			}
 		}
 

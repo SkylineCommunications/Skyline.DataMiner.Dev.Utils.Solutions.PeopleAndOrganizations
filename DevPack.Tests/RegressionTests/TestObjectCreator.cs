@@ -2,9 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using System.Linq;
 
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
+	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
@@ -26,12 +27,18 @@
 
 		private readonly HashSet<string> createdSkillNames = new HashSet<string>();
 
+		private readonly HashSet<Guid> createdResourcePoolIds = new HashSet<Guid>();
+
+		private readonly HashSet<Guid> createdResourceIds = new HashSet<Guid>();
+
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
 			this.testContext = testContext ?? throw new ArgumentNullException(nameof(testContext));
 		}
 
 		private IPeopleAndOrganizationsApi Api => testContext.Api;
+
+		private IMediaOpsPlanApi PlanApi => testContext.PlanApi;
 
 		public void Dispose()
 		{
@@ -92,6 +99,24 @@
 			try
 			{
 				SkillsCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				ResourcesCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				ResourcePoolsCleanup();
 			}
 			catch
 			{
@@ -349,6 +374,68 @@
 			}
 		}
 
+		public T CreateResource<T>(T resource) where T : Resource
+		{
+			var createdResource = (T)PlanApi.Resources.Create(resource);
+			createdResourceIds.Add(createdResource.Id);
+			return createdResource;
+		}
+
+		public IReadOnlyCollection<Resource> CreateResources(IEnumerable<Resource> resources)
+		{
+			try
+			{
+				var createdResources = PlanApi.Resources.Create(resources);
+
+				foreach (var id in resources.Select(x => x.Id))
+				{
+					createdResourceIds.Add(id);
+				}
+
+				return createdResources;
+			}
+			catch (MediaOpsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdResourceIds.Add(id);
+				}
+
+				throw;
+			}
+		}
+
+		public ResourcePool CreateResourcePool(ResourcePool resourcePool)
+		{
+			var createdPool = PlanApi.ResourcePools.Create(resourcePool);
+			createdResourcePoolIds.Add(createdPool.Id);
+			return createdPool;
+		}
+
+		public IReadOnlyCollection<ResourcePool> CreateResourcePools(IEnumerable<ResourcePool> resourcePools)
+		{
+			try
+			{
+				var createdPools = PlanApi.ResourcePools.Create(resourcePools);
+
+				foreach (var id in resourcePools.Select(x => x.Id))
+				{
+					createdResourcePoolIds.Add(id);
+				}
+
+				return createdPools;
+			}
+			catch (MediaOpsBulkException<Guid> bulkException)
+			{
+				foreach (var id in bulkException.Result.SuccessfulIds)
+				{
+					createdResourcePoolIds.Add(id);
+				}
+
+				throw;
+			}
+		}
+
 		private void PeopleCleanup()
 		{
 			var people = Api.People.Read(createdPersonIds.ToArray());
@@ -369,6 +456,20 @@
 
 		private void TeamsCleanup()
 		{
+			var teams = Api.Teams.Read(createdTeamIds.ToArray());
+
+			try
+			{
+				var toDeprecate = teams.Where(x => x.State == TeamState.Active);
+
+				Api.Teams.Deprecate(toDeprecate);
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			Api.Teams.Delete(teams.ToArray());
 		}
 
 		private void OrganizationsCleanup()
@@ -415,6 +516,44 @@
 			var skills = Api.Skills.Read().Where(x => createdSkillNames.Contains(x.Name)).ToArray();
 
 			Api.Skills.Delete(skills);
+		}
+
+		private void ResourcesCleanup()
+		{
+			var resources = PlanApi.Resources.Read(createdResourceIds.ToArray());
+
+			foreach (var resource in resources.Where(r => r.State == ResourceState.Complete))
+			{
+				try
+				{
+					PlanApi.Resources.Deprecate(resource.Id);
+				}
+				catch
+				{
+					// Ignore cleanup errors
+				}
+			}
+
+			PlanApi.Resources.Delete(createdResourceIds.ToArray());
+		}
+
+		private void ResourcePoolsCleanup()
+		{
+			var pools = PlanApi.ResourcePools.Read(createdResourcePoolIds.ToArray());
+
+			foreach (var pool in pools.Where(p => p.State == ResourcePoolState.Complete))
+			{
+				try
+				{
+					PlanApi.ResourcePools.Deprecate(pool.Id);
+				}
+				catch
+				{
+					// Ignore cleanup errors
+				}
+			}
+
+			PlanApi.ResourcePools.Delete(createdResourcePoolIds.ToArray());
 		}
 	}
 }
