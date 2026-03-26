@@ -5,6 +5,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
 	using Team = Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Team;

@@ -5,6 +5,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Organizations
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
 	[TestClass]
