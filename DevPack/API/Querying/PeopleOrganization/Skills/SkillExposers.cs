@@ -5,7 +5,7 @@
 	/// <summary>
 	/// Provides exposers for querying and filtering <see cref="Skill"/> objects.
 	/// </summary>
-	public class SkillExposers
+	public static class SkillExposers
 	{
 		/// <summary>
 		/// Gets an exposer for the <see cref="Skill.Name"/> property.

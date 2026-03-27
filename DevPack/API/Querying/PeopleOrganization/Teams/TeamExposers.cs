@@ -7,7 +7,7 @@
 	/// <summary>
 	/// Provides exposers for querying and filtering <see cref="Team"/> objects.
 	/// </summary>
-	public class TeamExposers
+	public static class TeamExposers
 	{
 		/// <summary>
 		/// Gets an exposer for the <see cref="ApiObject.Id"/> property.
