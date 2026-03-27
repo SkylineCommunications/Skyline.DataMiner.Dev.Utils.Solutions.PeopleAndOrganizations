@@ -8,7 +8,6 @@
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions.TraceData.PeopleOrganization.Skills;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
 
 	internal class SkillHandler : StringApiObjectValidator<Skill>
@@ -224,8 +223,18 @@
 
 		private void ValidateSkillsNotInUse(ICollection<Skill> apiSkills)
 		{
+			if (apiSkills == null)
+			{
+				throw new ArgumentNullException(nameof(apiSkills));
+			}
+
+			if (apiSkills.Count == 0)
+			{
+				return;
+			}
+
 			ValidateSkillsNotInUseByTeams(apiSkills);
-			ValidateSkillNotInUseByPeople(apiSkills);
+			ValidateSkillsNotInUseByPeople(apiSkills);
 		}
 
 		private void ValidateSkillsNotInUseByTeams(ICollection<Skill> apiSkills)
@@ -248,7 +257,7 @@
 			}
 		}
 
-		private void ValidateSkillNotInUseByPeople(ICollection<Skill> apiSkills)
+		private void ValidateSkillsNotInUseByPeople(ICollection<Skill> apiSkills)
 		{
 			var domPeopleFilter = new ORFilterElement<DomInstance>(apiSkills.Select(x => DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills).Contains(x.Name)).ToArray());
 			var people = api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(domPeopleFilter).Select(x => new Person(x)).ToList();

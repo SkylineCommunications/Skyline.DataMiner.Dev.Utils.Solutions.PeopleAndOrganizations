@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions.TraceData.PeopleOrganization.Skills
+﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 {
 	/// <summary>
 	/// Represents an error that occurs when attempting to delete a skill that is currently in use.

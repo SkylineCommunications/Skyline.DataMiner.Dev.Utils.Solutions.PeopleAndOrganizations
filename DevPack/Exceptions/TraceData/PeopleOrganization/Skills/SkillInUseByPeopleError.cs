@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions.TraceData.PeopleOrganization.Skills
+﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions
 {
 	using System;
 	using System.Collections.Generic;
