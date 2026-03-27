@@ -152,7 +152,7 @@
 				hash = (hash * 23) + ResourcePoolId.GetHashCode();
 				hash = (hash * 23) + State.GetHashCode();
 
-				foreach (var skill in skills.OrderBy(x => x).ToList())
+				foreach (var skill in skills.OrderBy(x => x.Name).ToList())
 				{
 					hash = (hash * 23) + skill.GetHashCode();
 				}

@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
