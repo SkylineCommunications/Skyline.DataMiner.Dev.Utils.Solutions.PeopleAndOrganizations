@@ -9,7 +9,7 @@
 	public class ExperienceInUseByPeopleError : ExperienceInUseError
 	{
 		/// <summary>
-		/// Gets the collection of unique identifiers of the people having the category implemented.
+		/// Gets the collection of unique identifiers of the people having the experience implemented.
 		/// </summary>
 		public IReadOnlyCollection<Guid> PeopleIds { get; internal set; } = [];
 	}
