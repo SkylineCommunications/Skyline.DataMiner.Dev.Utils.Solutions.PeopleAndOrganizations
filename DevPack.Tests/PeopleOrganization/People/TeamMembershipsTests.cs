@@ -1,18 +1,12 @@
 ﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
-	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
-
-	using static Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Sections;
 
 	using Team = Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Team;
 
