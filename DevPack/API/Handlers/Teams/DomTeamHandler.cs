@@ -114,6 +114,17 @@
 			var toUpdateNameValidation = toUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamName.Id)));
 			ValidateDomNames(toCreate.Concat(toUpdateNameValidation).ToList());
 
+			var teamsWithSkillChanges = toUpdate.Where(x =>
+				IsValid(x)
+				&& changeResults.Any(y => y.Instance.ID.Id == x.Id
+					&& y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamSkills.Id)));
+
+			var bookableTeamsWithChanges = toUpdateNameValidation
+				.Union(teamsWithSkillChanges)
+				.Where(x => IsValid(x) && x.IsBookable)
+				.ToList();
+			UpdateBookableTeams(bookableTeamsWithChanges);
+
 			var toCreateDomInstances = toCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
@@ -155,6 +166,87 @@
 			}
 
 			ReportSuccess(domResult.SuccessfulItems.Select(x => new DomTeam(x)));
+		}
+
+		private void UpdateBookableTeams(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			var teamsByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+			var poolsbyId = api.PlanApi.ResourcePools.Read(teamsByPoolId.Keys).ToDictionary(x => x.Id);
+
+			var poolsToCreateOrUpdate = new List<MediaOps.Plan.API.ResourcePool>();
+			foreach (var kvp in teamsByPoolId)
+			{
+				if (!poolsbyId.TryGetValue(kvp.Key, out var pool))
+				{
+					pool = new MediaOps.Plan.API.ResourcePool(kvp.Key);
+				}
+
+				pool.Name = kvp.Value.Name;
+
+				if (kvp.Value.Skills.Count > 0)
+				{
+					var capabilitySetting = new MediaOps.Plan.API.CapabilitySettings(SkillHandler.SkillCapabilityId)
+						.SetDiscretes(kvp.Value.Skills.Select(x => x.Name).ToList());
+					pool.SetCapabilities([capabilitySetting]);
+				}
+				else
+				{
+					RemovePoolCapabilities(pool);
+				}
+
+				poolsToCreateOrUpdate.Add(pool);
+			}
+
+			try
+			{
+				api.PlanApi.ResourcePools.CreateOrUpdate(poolsToCreateOrUpdate);
+			}
+			catch (MediaOpsBulkException<Guid> ex)
+			{
+				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				{
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						foreach (var error in ComposeErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
+					}
+					else
+					{
+						ReportError(team.Id);
+					}
+				}
+			}
+
+			void RemovePoolCapabilities(MediaOps.Plan.API.ResourcePool pool)
+			{
+				if (pool.Capabilities.Count == 0)
+				{
+					return;
+				}
+
+				foreach (var capabilitySetting in pool.Capabilities.ToArray())
+				{
+					pool.RemoveCapability(capabilitySetting);
+				}
+			}
 		}
 
 		private void TransitionToActiveFromDraft(ICollection<Team> apiTeams)
@@ -201,6 +293,8 @@
 			ValidateStateForDeprecateAction(apiTeams);
 			ValidateTeamsAreNotInUse(apiTeams.Where(IsValid).ToArray());
 
+			DeprecateBookableTeams(apiTeams.Where(x => IsValid(x) && x.IsBookable).ToArray());
+
 			var toTransition = apiTeams.Where(IsValid).ToList();
 			foreach (var team in toTransition)
 			{
@@ -212,6 +306,49 @@
 				catch (Exception ex)
 				{
 					ReportError(team.Id, new PeopleAndOrganizationsErrorData() { ErrorMessage = ex.ToString() });
+				}
+			}
+		}
+
+		private void DeprecateBookableTeams(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			var teamByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+
+			try
+			{
+				api.PlanApi.ResourcePools.Deprecate(teamByPoolId.Keys);
+			}
+			catch (MediaOpsBulkException<Guid> ex)
+			{
+				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				{
+					if (!teamByPoolId.TryGetValue(poolId, out var team))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						foreach (var error in ComposeErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
+					}
+					else
+					{
+						ReportError(team.Id);
+					}
 				}
 			}
 		}
@@ -261,7 +398,12 @@
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
 			}
 
-			var toDelete = apiTeams.Select(x => x.OriginalInstance.ToInstance()).ToList();
+			DeleteBookableTeams(apiTeams.Where(x => IsValid(x) && x.IsBookable).ToArray());
+
+			var toDelete = apiTeams
+				.Where(IsValid)
+				.Select(x => x.OriginalInstance.ToInstance())
+				.ToList();
 			api.DomHelpers.SlcPeopleOrganizationHelper.DomHelper.DomInstances.TryDeleteInBatches(toDelete, out var domResult);
 
 			foreach (var id in domResult.UnsuccessfulIds)
@@ -276,6 +418,49 @@
 			}
 
 			ReportSuccess(toDelete.Where(x => domResult.SuccessfulIds.Contains(x.ID)).Select(x => new DomTeam(x)));
+		}
+
+		private void DeleteBookableTeams(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			var teamsByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+
+			try
+			{
+				api.PlanApi.ResourcePools.Delete(teamsByPoolId.Keys);
+			}
+			catch (MediaOpsBulkException<Guid> ex)
+			{
+				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				{
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						foreach (var error in ComposeErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
+					}
+					else
+					{
+						ReportError(team.Id);
+					}
+				}
+			}
 		}
 
 		private void MakeBookable(ICollection<Team> apiTeams)
@@ -312,18 +497,16 @@
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
 			}
 
-			var teamsById = new Dictionary<Guid, Team>();
-			var teamIdByPoolId = new Dictionary<Guid, Guid>();
+			var teamsByPoolId = new Dictionary<Guid, Team>();
 
-			var poolsToCreate = new List<Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool>();
+			var poolsToCreate = new List<MediaOps.Plan.API.ResourcePool>();
 			foreach (var team in apiTeams)
 			{
 				var pool = BuildResourcePool(team);
 
 				poolsToCreate.Add(pool);
 
-				teamsById[team.Id] = team;
-				teamIdByPoolId[pool.Id] = team.Id;
+				teamsByPoolId[pool.Id] = team;
 			}
 
 			var teamsToSave = new List<Team>();
@@ -332,7 +515,7 @@
 				var createdResourcePools = api.PlanApi.ResourcePools.Create(poolsToCreate);
 				createdResourcePools = api.PlanApi.ResourcePools.Complete(createdResourcePools);
 
-				HandleSuccess(teamIdByPoolId.Keys);
+				HandleSuccess(teamsByPoolId.Keys);
 			}
 			catch (MediaOpsBulkException<Guid> createException)
 			{
@@ -362,13 +545,12 @@
 			{
 				foreach (var poolId in poolIds)
 				{
-					if (!teamIdByPoolId.TryGetValue(poolId, out var teamId))
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
 					{
 						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
 						continue;
 					}
 
-					teamsById.TryGetValue(teamId, out var team);
 					team.ResourcePoolId = poolId;
 					team.IsBookable = true;
 
@@ -380,7 +562,7 @@
 			{
 				foreach (var poolId in poolIds)
 				{
-					if (!teamIdByPoolId.TryGetValue(poolId, out var teamId))
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
 					{
 						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
 						continue;
@@ -388,42 +570,54 @@
 
 					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
 					{
-						ReportError(teamId, ComposeError(teamId, traceData));
+						foreach (var error in ComposeErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
 					}
 					else
 					{
-						ReportError(teamId);
+						ReportError(team.Id);
 					}
 				}
 			}
 		}
 
-		private Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool BuildResourcePool(Team apiTeam)
+		private MediaOps.Plan.API.ResourcePool BuildResourcePool(Team apiTeam)
 		{
-			var resourcePool = new Skyline.DataMiner.Solutions.MediaOps.Plan.API.ResourcePool
+			var resourcePool = new MediaOps.Plan.API.ResourcePool
 			{
 				Name = apiTeam.Name,
 			};
 
+			if (apiTeam.Skills.Count > 0)
+			{
+				var capabilitySetting = new MediaOps.Plan.API.CapabilitySettings(SkillHandler.SkillCapabilityId)
+				.SetDiscretes(apiTeam.Skills.Select(x => x.Name).ToList());
+
+				resourcePool.AddCapability(capabilitySetting);
+			}
+
 			return resourcePool;
 		}
 
-		private PeopleAndOrganizationsErrorData ComposeError(Guid teamId, MediaOpsTraceData traceData)
+		private IEnumerable<PeopleAndOrganizationsErrorData> ComposeErrors(Guid teamId, MediaOpsTraceData traceData)
 		{
-			if (traceData.ErrorData.Count > 1
-				|| traceData.ErrorData[0] is not ResourcePoolError)
+			var resourcePoolErrors = traceData.ErrorData.OfType<ResourcePoolError>().ToList();
+			if (traceData.ErrorData.Count != resourcePoolErrors.Count)
 			{
-				return new PeopleAndOrganizationsErrorData
+				yield return new PeopleAndOrganizationsErrorData
 				{
 					ErrorMessage = traceData.ToString(),
 				};
 			}
-			else
+
+			foreach (var error in resourcePoolErrors)
 			{
-				return new TeamMakeBookableError
+				yield return new TeamMakeBookableError
 				{
 					Id = teamId,
-					ErrorMessage = traceData.ErrorData[0].ErrorMessage,
+					ErrorMessage = error.ErrorMessage,
 				};
 			}
 		}
