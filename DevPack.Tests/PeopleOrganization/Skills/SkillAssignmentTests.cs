@@ -1,10 +1,7 @@
 ﻿namespace RT_PeopleAndOrganizations.PeopleOrganization.Skills
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using System.Threading.Tasks;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
@@ -13,7 +10,6 @@
 
 	[TestClass]
 	[TestCategory("IntegrationTest")]
-	[DoNotParallelize]
 	public sealed class SkillAssignmentTests : IDisposable
 	{
 		private readonly TestObjectCreator objectCreator;
