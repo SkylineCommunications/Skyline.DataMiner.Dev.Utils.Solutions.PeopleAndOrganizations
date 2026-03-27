@@ -192,17 +192,7 @@
 				}
 
 				pool.Name = kvp.Value.Name;
-
-				if (kvp.Value.Skills.Count > 0)
-				{
-					var capabilitySetting = new MediaOps.Plan.API.CapabilitySettings(SkillHandler.SkillCapabilityId)
-						.SetDiscretes(kvp.Value.Skills.Select(x => x.Name).ToList());
-					pool.SetCapabilities([capabilitySetting]);
-				}
-				else
-				{
-					RemovePoolCapabilities(pool);
-				}
+				ApplyPoolCapabilities(pool, kvp.Value.Skills);
 
 				poolsToCreateOrUpdate.Add(pool);
 			}
@@ -213,7 +203,34 @@
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+			}
+
+			void ApplyPoolCapabilities(MediaOps.Plan.API.ResourcePool pool, IReadOnlyCollection<Skill> skills)
+			{
+				if (skills.Count > 0)
+				{
+					var capabilitySetting = new MediaOps.Plan.API.CapabilitySettings(SkillHandler.SkillCapabilityId)
+						.SetDiscretes(skills.Select(x => x.Name).ToList());
+					pool.SetCapabilities([capabilitySetting]);
+
+					return;
+				}
+
+				if (pool.Capabilities.Count == 0)
+				{
+					return;
+				}
+
+				foreach (var capabilitySetting in pool.Capabilities.ToArray())
+				{
+					pool.RemoveCapability(capabilitySetting);
+				}
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
 				{
 					if (!teamsByPoolId.TryGetValue(poolId, out var team))
 					{
@@ -221,7 +238,7 @@
 						continue;
 					}
 
-					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
 					{
 						foreach (var error in ComposeErrors(team.Id, traceData))
 						{
@@ -232,19 +249,6 @@
 					{
 						ReportError(team.Id);
 					}
-				}
-			}
-
-			void RemovePoolCapabilities(MediaOps.Plan.API.ResourcePool pool)
-			{
-				if (pool.Capabilities.Count == 0)
-				{
-					return;
-				}
-
-				foreach (var capabilitySetting in pool.Capabilities.ToArray())
-				{
-					pool.RemoveCapability(capabilitySetting);
 				}
 			}
 		}
@@ -322,23 +326,28 @@
 				return;
 			}
 
-			var teamByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+			var teamsByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
 
 			try
 			{
-				api.PlanApi.ResourcePools.Deprecate(teamByPoolId.Keys);
+				api.PlanApi.ResourcePools.Deprecate(teamsByPoolId.Keys);
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
 				{
-					if (!teamByPoolId.TryGetValue(poolId, out var team))
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
 					{
 						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
 						continue;
 					}
 
-					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
 					{
 						foreach (var error in ComposeErrors(team.Id, traceData))
 						{
@@ -440,7 +449,12 @@
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				foreach (var poolId in ex.Result.UnsuccessfulIds)
+				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
 				{
 					if (!teamsByPoolId.TryGetValue(poolId, out var team))
 					{
@@ -448,7 +462,7 @@
 						continue;
 					}
 
-					if (ex.Result.TraceDataPerItem.TryGetValue(poolId, out var traceData))
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
 					{
 						foreach (var error in ComposeErrors(team.Id, traceData))
 						{
