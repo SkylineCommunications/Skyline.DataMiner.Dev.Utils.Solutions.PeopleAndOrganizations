@@ -66,7 +66,7 @@
 			{
 				foreach (var skill in apiSkills)
 				{
-					var errorForSkill = new SkillInvalidNameError
+					var errorForSkill = new SkillError
 					{
 						ErrorMessage = $"Failed to lock skill {skill.Name}.",
 						Name = skill.Name,
@@ -202,7 +202,7 @@
 			{
 				foreach (var skill in apiSkills)
 				{
-					var errorForSkill = new SkillInvalidNameError
+					var errorForSkill = new SkillError
 					{
 						ErrorMessage = $"Failed to lock skill {skill.Name}.",
 						Name = skill.Name,
