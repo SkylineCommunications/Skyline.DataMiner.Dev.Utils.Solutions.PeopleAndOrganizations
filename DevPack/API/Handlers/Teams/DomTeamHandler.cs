@@ -495,124 +495,19 @@
 			ValidateIfNotAlreadyBookable(toValidate);
 
 			var validTeams = toValidate.Where(IsValid).ToList();
-			var lockResult = api.LockManager.LockAndExecute(validTeams, MakeBookableLocked);
-			ReportError(lockResult);
-		}
+			MediaOpsHandler<Team>.TryCreateOrUpdate(api, validTeams, out var result);
 
-		private void MakeBookableLocked(ICollection<Team> apiTeams)
-		{
-			if (apiTeams == null)
+			foreach (var id in result.UnsuccessfulIds)
 			{
-				throw new ArgumentNullException(nameof(apiTeams));
-			}
+				ReportError(id);
 
-			if (apiTeams.Any(x => !IsValid(x)))
-			{
-				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
-			}
-
-			var teamsByPoolId = new Dictionary<Guid, Team>();
-
-			var poolsToCreate = new List<MediaOps.Plan.API.ResourcePool>();
-			foreach (var team in apiTeams)
-			{
-				var pool = BuildResourcePool(team);
-
-				poolsToCreate.Add(pool);
-
-				teamsByPoolId[pool.Id] = team;
-			}
-
-			var teamsToSave = new List<Team>();
-			try
-			{
-				var createdResourcePools = api.PlanApi.ResourcePools.Create(poolsToCreate);
-				createdResourcePools = api.PlanApi.ResourcePools.Complete(createdResourcePools);
-
-				HandleSuccess(teamsByPoolId.Keys);
-			}
-			catch (MediaOpsBulkException<Guid> createException)
-			{
-				HandleFailure(createException.Result.UnsuccessfulIds.ToList(), createException.Result.TraceDataPerItem);
-
-				try
+				if (result.TraceDataPerItem.TryGetValue(id, out var traceData))
 				{
-					api.PlanApi.ResourcePools.Complete(createException.Result.SuccessfulIds);
-
-					HandleSuccess(createException.Result.SuccessfulIds.ToList());
-				}
-				catch (MediaOpsBulkException<Guid> completeException)
-				{
-					HandleSuccess(completeException.Result.SuccessfulIds.ToList());
-					HandleFailure(completeException.Result.UnsuccessfulIds.ToList(), completeException.Result.TraceDataPerItem);
+					PassTraceData(id, traceData);
 				}
 			}
 
-			if (teamsToSave.Count > 0)
-			{
-				var domTeams = teamsToSave.Select(x => x.GetInstanceWithChanges()).ToList();
-
-				CreateOrUpdateDom(domTeams);
-			}
-
-			void HandleSuccess(ICollection<Guid> poolIds)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					team.ResourcePoolId = poolId;
-					team.IsBookable = true;
-
-					teamsToSave.Add(team);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
-					{
-						foreach (var error in ComposeErrors(team.Id, traceData))
-						{
-							ReportError(team.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(team.Id);
-					}
-				}
-			}
-		}
-
-		private MediaOps.Plan.API.ResourcePool BuildResourcePool(Team apiTeam)
-		{
-			var resourcePool = new MediaOps.Plan.API.ResourcePool
-			{
-				Name = apiTeam.Name,
-			};
-
-			if (apiTeam.Skills.Count > 0)
-			{
-				var capabilitySetting = new MediaOps.Plan.API.CapabilitySettings(SkillHandler.SkillCapabilityId)
-				.SetDiscretes(apiTeam.Skills.Select(x => x.Name).ToList());
-
-				resourcePool.AddCapability(capabilitySetting);
-			}
-
-			return resourcePool;
+			CreateOrUpdateDom(result.SuccessfulItems.Select(x => x.GetInstanceWithChanges()).ToList());
 		}
 
 		private IEnumerable<PeopleAndOrganizationsErrorData> ComposeErrors(Guid teamId, MediaOpsTraceData traceData)
