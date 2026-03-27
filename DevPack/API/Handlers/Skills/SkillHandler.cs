@@ -9,6 +9,8 @@
 
 	internal class SkillHandler : StringApiObjectValidator<Skill>
 	{
+		private const string LockName = "PNO_SKILLS";
+
 		private readonly PeopleAndOrganizationsApi api;
 
 		private SkillHandler(PeopleAndOrganizationsApi api) : base(skill => skill.Name)
@@ -59,6 +61,24 @@
 
 			ValidateNames(apiSkills.Where(IsValid).ToArray());
 
+			var lockResult = api.LockManager.TryLockAndExecute(LockName, () => CreateOrUpdateSkills(apiSkills), 20000);
+			if (!lockResult)
+			{
+				foreach (var skill in apiSkills)
+				{
+					var errorForSkill = new SkillError
+					{
+						ErrorMessage = $"Failed to lock skill {skill.Name}.",
+						Name = skill.Name,
+					};
+
+					ReportError(skill.Name, errorForSkill);
+				}
+			}
+		}
+
+		private void CreateOrUpdateSkills(ICollection<Skill> apiSkills)
+		{
 			var apiSkillsToCreateOrUpdate = apiSkills.Where(IsValid).ToList();
 			var toCreate = apiSkillsToCreateOrUpdate.Where(x => x.IsNew).ToList();
 			var toUpdate = apiSkillsToCreateOrUpdate.Except(toCreate).ToList();
@@ -151,28 +171,44 @@
 				return;
 			}
 
-			var skillsCapability = GetSkillsCapability();
-
-			foreach (var skill in apiSkills.Where(IsValid))
+			var lockResult = api.LockManager.TryLockAndExecute(LockName, () =>
 			{
-				skillsCapability.RemoveDiscrete(skill.Name);
-			}
+				var skillsCapability = GetSkillsCapability();
 
-			try
-			{
-				api.PlanApi.Capabilities.CreateOrUpdate([skillsCapability]);
-				ReportSuccess(apiSkills);
-
-			}
-			catch (MediaOpsException exception)
-			{
-				foreach (var apiSkill in apiSkills)
+				foreach (var skill in apiSkills.Where(IsValid))
 				{
-					ReportError(apiSkill.Name, new SkillError
+					skillsCapability.RemoveDiscrete(skill.Name);
+				}
+
+				try
+				{
+					api.PlanApi.Capabilities.CreateOrUpdate([skillsCapability]);
+					ReportSuccess(apiSkills);
+				}
+				catch (MediaOpsException exception)
+				{
+					foreach (var apiSkill in apiSkills)
 					{
-						ErrorMessage = $"Unable to delete skill due to {exception.Message}.",
-						Name = apiSkill.Name,
-					});
+						ReportError(apiSkill.Name, new SkillError
+						{
+							ErrorMessage = $"Unable to delete skill due to {exception.Message}.",
+							Name = apiSkill.Name,
+						});
+					}
+				}
+			}, 20000);
+
+			if (!lockResult)
+			{
+				foreach (var skill in apiSkills)
+				{
+					var errorForSkill = new SkillError
+					{
+						ErrorMessage = $"Failed to lock skill {skill.Name}.",
+						Name = skill.Name,
+					};
+
+					ReportError(skill.Name, errorForSkill);
 				}
 			}
 		}
