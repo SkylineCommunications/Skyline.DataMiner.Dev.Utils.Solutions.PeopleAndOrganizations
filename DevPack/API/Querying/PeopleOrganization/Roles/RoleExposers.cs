@@ -7,7 +7,7 @@
 	/// <summary>
 	/// Provides exposers for querying and filtering <see cref="Role"/> objects.
 	/// </summary>
-	public class RoleExposers
+	public static class RoleExposers
 	{
 		/// <summary>
 		/// Gets an exposer for the <see cref="ApiObject.Id"/> property.

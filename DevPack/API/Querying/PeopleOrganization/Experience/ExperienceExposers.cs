@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 	/// <summary>
 	/// Provides exposers for querying and filtering <see cref="Experience"/> objects.
 	/// </summary>
-	public class ExperienceExposers
+	public static class ExperienceExposers
 	{
 		/// <summary>
 		/// Gets an exposer for the <see cref="ApiObject.Id"/> property.
