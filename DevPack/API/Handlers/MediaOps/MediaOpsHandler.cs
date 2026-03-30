@@ -29,6 +29,24 @@
 			return !result.HasFailures;
 		}
 
+		internal static bool TryDeprecate(PeopleAndOrganizationsApi api, ICollection<T> apiObjects, out ApiObjectBulkOperationResult<T> result)
+		{
+			var handler = new MediaOpsHandler<T>(api);
+			handler.Deprecate(apiObjects);
+
+			result = new ApiObjectBulkOperationResult<T>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
+
+		internal static bool TryDelete(PeopleAndOrganizationsApi api, ICollection<T> apiObjects, out ApiObjectBulkOperationResult<T> result)
+		{
+			var handler = new MediaOpsHandler<T>(api);
+			handler.Delete(apiObjects);
+
+			result = new ApiObjectBulkOperationResult<T>(handler.SuccessfulItems, handler.UnsuccessfulItems, handler.TraceDataPerItem);
+			return !result.HasFailures;
+		}
+
 		protected override void ReportSuccess(T item)
 		{
 			if (unsuccessfulItems.Contains(item.Id))
@@ -78,17 +96,6 @@
 				return;
 			}
 
-			var lockResult = api.LockManager.LockAndExecute(apiTeams, CreateOrUpdateLocked);
-			ReportError(lockResult);
-		}
-
-		private void CreateOrUpdateLocked(ICollection<Team> apiTeams)
-		{
-			if (apiTeams == null)
-			{
-				throw new ArgumentNullException(nameof(apiTeams));
-			}
-
 			if (apiTeams.Any(x => !IsValid(x.Id)))
 			{
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
@@ -109,7 +116,7 @@
 				{
 					pool = new ResourcePool();
 				}
-				else if (poolsById.TryGetValue(team.ResourcePoolId, out pool))
+				else if (!poolsById.TryGetValue(team.ResourcePoolId, out pool))
 				{
 					api.Logger.Error(this, $"Resource pool no longer found with ID '{team.ResourcePoolId}'. Will be recreated with original ID.");
 					pool = new ResourcePool(team.ResourcePoolId);
@@ -180,7 +187,7 @@
 
 					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
 					{
-						foreach (var error in ComposeErrors(team.Id, traceData))
+						foreach (var error in ComposeTeamErrors(team.Id, traceData))
 						{
 							ReportError(team.Id, error);
 						}
@@ -193,7 +200,194 @@
 			}
 		}
 
-		private IEnumerable<PeopleAndOrganizationsErrorData> ComposeErrors(Guid teamId, MediaOpsTraceData traceData)
+		private void CreateOrUpdate(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+		}
+
+		public void Deprecate(ICollection<T> apiObjects)
+		{
+			if (apiObjects == null)
+			{
+				throw new ArgumentNullException(nameof(apiObjects));
+			}
+
+			if (apiObjects.Count == 0)
+			{
+				return;
+			}
+
+			var mapping = new Dictionary<Type, Action>
+			{
+				[typeof(Team)] = () => Deprecate(apiObjects.Cast<Team>().ToList()),
+				[typeof(Person)] = () => Deprecate(apiObjects.Cast<Person>().ToList()),
+			};
+
+			if (!mapping.TryGetValue(typeof(T), out var action))
+			{
+				throw new NotSupportedException($"Type {typeof(T).Name} is not supported by {nameof(MediaOpsHandler<T>)}");
+			}
+
+			action();
+		}
+
+		public void Deprecate(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			var teamsByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+
+			try
+			{
+				api.PlanApi.ResourcePools.Deprecate(teamsByPoolId.Keys);
+			}
+			catch (MediaOpsBulkException<Guid> ex)
+			{
+				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
+				{
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						foreach (var error in ComposeTeamErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
+					}
+					else
+					{
+						ReportError(team.Id);
+					}
+				}
+			}
+		}
+
+		public void Deprecate(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+		}
+
+		public void Delete(ICollection<T> apiObjects)
+		{
+			if (apiObjects == null)
+			{
+				throw new ArgumentNullException(nameof(apiObjects));
+			}
+
+			if (apiObjects.Count == 0)
+			{
+				return;
+			}
+
+			var mapping = new Dictionary<Type, Action>
+			{
+				[typeof(Team)] = () => Delete(apiObjects.Cast<Team>().ToList()),
+				[typeof(Person)] = () => Delete(apiObjects.Cast<Person>().ToList()),
+			};
+
+			if (!mapping.TryGetValue(typeof(T), out var action))
+			{
+				throw new NotSupportedException($"Type {typeof(T).Name} is not supported by {nameof(MediaOpsHandler<T>)}");
+			}
+
+			action();
+		}
+
+		public void Delete(ICollection<Team> apiTeams)
+		{
+			if (apiTeams == null)
+			{
+				throw new ArgumentNullException(nameof(apiTeams));
+			}
+
+			if (apiTeams.Count == 0)
+			{
+				return;
+			}
+
+			var teamsByPoolId = apiTeams.ToDictionary(x => x.ResourcePoolId);
+
+			try
+			{
+				api.PlanApi.ResourcePools.Delete(teamsByPoolId.Keys);
+			}
+			catch (MediaOpsBulkException<Guid> ex)
+			{
+				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+			}
+
+			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+			{
+				foreach (var poolId in poolIds)
+				{
+					if (!teamsByPoolId.TryGetValue(poolId, out var team))
+					{
+						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+						continue;
+					}
+
+					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
+					{
+						foreach (var error in ComposeTeamErrors(team.Id, traceData))
+						{
+							ReportError(team.Id, error);
+						}
+					}
+					else
+					{
+						ReportError(team.Id);
+					}
+				}
+			}
+		}
+
+		public void Delete(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+		}
+
+		private IEnumerable<PeopleAndOrganizationsErrorData> ComposeTeamErrors(Guid teamId, MediaOpsTraceData traceData)
 		{
 			var resourcePoolErrors = traceData.ErrorData.OfType<ResourcePoolError>().ToList();
 			if (traceData.ErrorData.Count != resourcePoolErrors.Count)
@@ -211,19 +405,6 @@
 					Id = teamId,
 					ErrorMessage = error.ErrorMessage,
 				};
-			}
-		}
-
-		private void CreateOrUpdate(ICollection<Person> apiPeople)
-		{
-			if (apiPeople == null)
-			{
-				throw new ArgumentNullException(nameof(apiPeople));
-			}
-
-			if (apiPeople.Count == 0)
-			{
-				return;
 			}
 		}
 
