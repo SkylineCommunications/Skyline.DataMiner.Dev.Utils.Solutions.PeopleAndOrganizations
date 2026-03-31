@@ -1,10 +1,13 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
+	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
@@ -12,8 +15,10 @@
 	/// <summary>
 	/// Represents a person in People and Organizations.
 	/// </summary>
-	public class Person : ApiObject
+	public class Person : ApiObject, ITemporaryCache<ApiObject>
 	{
+		private readonly ConcurrentDictionary<Type, List<ApiObject>> cache = new();
+
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
 
@@ -104,7 +109,7 @@
 		/// </summary>
 		public IReadOnlyCollection<TeamMembership> TeamMemberships => teamMemberships;
 
-		internal Guid ResourceId { get; private set; }
+		internal Guid ResourceId { get; set; }
 
 		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
 
@@ -302,6 +307,7 @@
 			updatedInstance.ContactInfo.Country = Country.HasValue ? EnumExtensions.MapEnum<Country, StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Enums.Country>(Country.Value) : null;
 
 			updatedInstance.Organization.OrganizationId = OrganizationId;
+			updatedInstance.Resource.LinkedResource = ResourceId != Guid.Empty ? ResourceId : null;
 
 			updatedInstance.Team.Clear();
 			foreach (var teamMembership in teamMemberships)
@@ -343,6 +349,98 @@
 			}
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum, PersonState>(instance.Status);
+		}
+
+		void ITemporaryCache<ApiObject>.SetCache<T>(IEnumerable<T> objects)
+		{
+			var type = typeof(T);
+			if (type == typeof(ApiObject))
+			{
+				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
+			}
+
+			if (objects == null)
+			{
+				throw new ArgumentNullException(nameof(objects));
+			}
+
+			if (!objects.Any())
+			{
+				return;
+			}
+
+			if (objects.Any(o => o == null))
+			{
+				throw new ArgumentException("objects collection contains null values", nameof(objects));
+			}
+
+			if (!cache.TryGetValue(type, out var cachedObjects))
+			{
+				cachedObjects = new List<ApiObject>();
+				cache.TryAdd(type, cachedObjects);
+			}
+
+			cachedObjects.Clear();
+			cachedObjects.AddRange(objects.Cast<ApiObject>());
+		}
+
+		void ITemporaryCache<ApiObject>.AddToCache<T>(IEnumerable<T> objects)
+		{
+			var type = typeof(T);
+			if (type == typeof(ApiObject))
+			{
+				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
+			}
+
+			if (objects == null)
+			{
+				throw new ArgumentNullException(nameof(objects));
+			}
+
+			if (!objects.Any())
+			{
+				return;
+			}
+
+			if (objects.Any(o => o == null))
+			{
+				throw new ArgumentException("objects collection contains null values", nameof(objects));
+			}
+
+			if (!cache.TryGetValue(type, out var cachedObjects))
+			{
+				cachedObjects = new List<ApiObject>(objects.Cast<ApiObject>());
+				cache.TryAdd(type, cachedObjects);
+
+				return;
+			}
+
+			var cachedObjectsById = cachedObjects.ToDictionary(o => o.Id);
+			foreach (var apiObject in objects.Cast<ApiObject>())
+			{
+				if (cachedObjectsById.ContainsKey(apiObject.Id))
+				{
+					cachedObjects.Remove(cachedObjectsById[apiObject.Id]);
+				}
+
+				cachedObjects.Add(apiObject);
+			}
+		}
+
+		IEnumerable<T> ITemporaryCache<ApiObject>.GetFromCache<T>()
+		{
+			var type = typeof(T);
+			if (type == typeof(ApiObject))
+			{
+				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
+			}
+
+			if (!cache.TryGetValue(typeof(T), out var cachedObjects))
+			{
+				return Enumerable.Empty<T>();
+			}
+
+			return cachedObjects.OfType<T>();
 		}
 	}
 }
