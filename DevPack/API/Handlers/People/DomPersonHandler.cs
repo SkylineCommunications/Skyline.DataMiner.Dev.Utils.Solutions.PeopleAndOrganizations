@@ -105,6 +105,30 @@
 			var toUpdateNameValidation = toUpdate.Where(x => changeResults.Any(y => y.Instance.ID.Id == x.Id && y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName.Id)));
 			ValidateDomNames(toCreate.Concat(toUpdateNameValidation).ToList());
 
+			var peopleWithSkillChanges = toUpdate.Where(x =>
+				IsValid(x)
+				&& changeResults.Any(y => y.Instance.ID.Id == x.Id
+					&& y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills.Id)));
+			var peopleWithTeamChanges = toUpdate.Where(x =>
+				IsValid(x)
+				&& changeResults.Any(y => y.Instance.ID.Id == x.Id
+					&& (y.AddedSections.Select(z => z.SectionDefinitionId).Contains(SlcPeople_OrganizationsIds.Sections.Team.Id.Id)
+						|| y.RemovedSections.Select(z => z.SectionDefinitionId).Contains(SlcPeople_OrganizationsIds.Sections.Team.Id.Id))));
+			var peopleWithResourceChanges = toUpdate.Where(x =>
+				IsValid(x)
+				&& x.ResourceId != Guid.Empty
+				&& changeResults.Any(y => y.Instance.ID.Id == x.Id
+					&& (y.AddedSections.Select(z => z.SectionDefinitionId).Contains(SlcPeople_OrganizationsIds.Sections.Resource.Id.Id)
+						|| y.ChangedFields.Select(z => z.FieldDescriptorId).Contains(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource.Id))));
+
+			var bookablePeopleWithChanges = toUpdateNameValidation
+				.Union(peopleWithSkillChanges)
+				.Union(peopleWithTeamChanges)
+				.Union(peopleWithResourceChanges)
+				.Where(x => IsValid(x) && x.ResourceId != Guid.Empty)
+				.ToList();
+			UpdateBookablePeople(bookablePeopleWithChanges);
+
 			var toCreateDomInstances = toCreate
 				.Where(IsValid)
 				.Select(x => x.GetInstanceWithChanges())
@@ -146,6 +170,38 @@
 			}
 
 			ReportSuccess(domResult.SuccessfulItems.Select(x => new DomPerson(x)));
+		}
+
+		private void UpdateBookablePeople(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			if (apiPeople.Any(x => !IsValid(x)))
+			{
+				throw new ArgumentException($"Not all provided people are valid", nameof(apiPeople));
+			}
+
+			var toCreateIds = apiPeople.Where(x => x.ResourceId == Guid.Empty).Select(x => x.Id).ToList();
+
+			MediaOpsResourceHandler.TryCreateOrUpdate(api, apiPeople, out var result);
+
+			foreach (var id in result.UnsuccessfulIds)
+			{
+				ReportError(id);
+
+				if (result.TraceDataPerItem.TryGetValue(id, out var traceData))
+				{
+					PassTraceData(id, traceData);
+				}
+			}
 		}
 
 		private void TransitionToActiveFromDraft(ICollection<Person> apiPeople)
@@ -192,7 +248,8 @@
 			ValidateStateForDeprecateAction(apiPeople);
 			ValidatePeopleAreNotInUse(apiPeople.Where(IsValid).ToArray());
 
-			// Todo: find people with resource link and try to deprecate those first.
+			DeprecateBookablePeople(apiPeople.Where(x => IsValid(x) && x.ResourceId != Guid.Empty).ToArray());
+
 			var toTransition = apiPeople.Where(IsValid).ToList();
 			foreach (var person in toTransition)
 			{
@@ -204,6 +261,31 @@
 				catch (Exception ex)
 				{
 					ReportError(person.Id, new PeopleAndOrganizationsErrorData() { ErrorMessage = ex.ToString() });
+				}
+			}
+		}
+
+		private void DeprecateBookablePeople(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			MediaOpsResourceHandler.TryDeprecate(api, apiPeople, out var result);
+
+			foreach (var id in result.UnsuccessfulIds)
+			{
+				ReportError(id);
+
+				if (result.TraceDataPerItem.TryGetValue(id, out var traceData))
+				{
+					PassTraceData(id, traceData);
 				}
 			}
 		}
@@ -253,7 +335,12 @@
 				throw new ArgumentException($"Not all provided people are valid", nameof(apiPeople));
 			}
 
-			var toDelete = apiPeople.Select(x => x.OriginalInstance.ToInstance()).ToList();
+			DeleteBookablePeople(apiPeople.Where(x => x.ResourceId != Guid.Empty).ToArray());
+
+			var toDelete = apiPeople
+				.Where(IsValid)
+				.Select(x => x.OriginalInstance.ToInstance())
+				.ToList();
 			api.DomHelpers.SlcPeopleOrganizationHelper.DomHelper.DomInstances.TryDeleteInBatches(toDelete, out var domResult);
 
 			foreach (var id in domResult.UnsuccessfulIds)
@@ -268,6 +355,31 @@
 			}
 
 			ReportSuccess(toDelete.Where(x => domResult.SuccessfulIds.Contains(x.ID)).Select(x => new DomPerson(x)));
+		}
+
+		private void DeleteBookablePeople(ICollection<Person> apiPeople)
+		{
+			if (apiPeople == null)
+			{
+				throw new ArgumentNullException(nameof(apiPeople));
+			}
+
+			if (apiPeople.Count == 0)
+			{
+				return;
+			}
+
+			MediaOpsResourceHandler.TryDelete(api, apiPeople, out var result);
+
+			foreach (var id in result.UnsuccessfulIds)
+			{
+				ReportError(id);
+
+				if (result.TraceDataPerItem.TryGetValue(id, out var traceData))
+				{
+					PassTraceData(id, traceData);
+				}
+			}
 		}
 
 		private void ValidateStateForUpdateAction(ICollection<Person> apiPeople)

@@ -4,11 +4,9 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using Alphaleonis.Win32.Filesystem;
-
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Solutions.MediaOps.Plan.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
@@ -185,7 +183,7 @@
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
 			}
 
-			MediaOpsHandler<Team>.TryCreateOrUpdate(api, apiTeams, out var result);
+			MediaOpsResourcePoolHandler.TryCreateOrUpdate(api, apiTeams, out var result);
 
 			foreach (var id in result.UnsuccessfulIds)
 			{
@@ -271,7 +269,7 @@
 				return;
 			}
 
-			MediaOpsHandler<Team>.TryDeprecate(api, apiTeams, out var result);
+			MediaOpsResourcePoolHandler.TryDeprecate(api, apiTeams, out var result);
 
 			foreach (var id in result.UnsuccessfulIds)
 			{
@@ -329,7 +327,7 @@
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
 			}
 
-			DeleteBookableTeams(apiTeams.Where(x => IsValid(x) && x.IsBookable).ToArray());
+			DeleteBookableTeams(apiTeams.Where(x => x.IsBookable).ToArray());
 
 			var toDelete = apiTeams
 				.Where(IsValid)
@@ -363,7 +361,7 @@
 				return;
 			}
 
-			MediaOpsHandler<Team>.TryDelete(api, apiTeams, out var result);
+			MediaOpsResourcePoolHandler.TryDelete(api, apiTeams, out var result);
 
 			foreach (var id in result.UnsuccessfulIds)
 			{
@@ -410,39 +408,292 @@
 				throw new ArgumentException($"Not all provided teams are valid", nameof(apiTeams));
 			}
 
-			MediaOpsHandler<Team>.TryCreateOrUpdate(api, apiTeams, out var result);
+			var mapper = TeamPersonBookableMapper.Load(api, apiTeams);
+			CreateResourcesForBookablePeople(mapper);
+			CompleteResourcesForBookablePeople(mapper);
+			CreateResourcePoolsForBookableTeams(mapper);
+			CompleteResourcePoolsForBookableTeams(mapper);
+			UpdateBookablePeople(mapper);
 
-			foreach (var id in result.UnsuccessfulIds)
+			var validTeams = mapper.TeamsById.Values.Where(IsValid).ToList();
+			CreateOrUpdateDom(validTeams.Select(x => x.GetInstanceWithChanges()).ToList());
+		}
+
+		private void CreateResourcesForBookablePeople(TeamPersonBookableMapper mapper)
+		{
+			if (mapper == null)
+			{
+				throw new ArgumentNullException(nameof(mapper));
+			}
+
+			var toCreate = mapper.PersonsById.Values
+				.Where(x => !x.HadResourceIdWhenLoaded)
+				.Select(x => x.Person)
+				.ToList();
+			if (MediaOpsResourceHandler.TryCreateOrUpdate(api, toCreate, out var createResult))
+			{
+				return;
+			}
+
+			var teamIdsWithFailures = new HashSet<Guid>();
+			foreach (var personId in createResult.UnsuccessfulIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				foreach (var team in teams)
+				{
+					teamIdsWithFailures.Add(team.Id);
+				}
+			}
+
+			foreach (var teamId in teamIdsWithFailures)
+			{
+				if (!mapper.PersonsByTeamId.TryGetValue(teamId, out var people))
+				{
+					continue;
+				}
+
+				var failedPeople = people.Where(x => createResult.UnsuccessfulIds.Contains(x.Person.Id)).ToList();
+
+				var error = new TeamMakeBookableError
+				{
+					ErrorMessage = $"Failed to create resource for {failedPeople.Count} person(s) associated with this team, so the team cannot be made bookable.",
+					Id = teamId,
+				};
+				ReportError(teamId, error);
+
+				foreach (var person in failedPeople)
+				{
+					if (!createResult.TraceDataPerItem.TryGetValue(person.Person.Id, out var traceData))
+					{
+						continue;
+					}
+
+					PassTraceData(teamId, traceData);
+				}
+			}
+
+			var toDeleteIds = new HashSet<Guid>();
+			foreach (var personId in createResult.SuccessfulIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
+				{
+					toDeleteIds.Add(personId);
+				}
+			}
+
+			if (toDeleteIds.Count == 0)
+			{
+				return;
+			}
+
+			var toDelete = mapper.PersonsById
+				.Where(x => toDeleteIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDelete(api, toDelete, out var deleteResult))
+			{
+				api.Logger.Error(this, $"Failed to delete resources for {deleteResult.UnsuccessfulIds.Count} person(s) that had their resource creation succeed but were associated only with teams that had resource creation failures.", [deleteResult.UnsuccessfulIds.ToArray()]);
+			}
+		}
+
+		private void CompleteResourcesForBookablePeople(TeamPersonBookableMapper mapper)
+		{
+			if (mapper == null)
+			{
+				throw new ArgumentNullException(nameof(mapper));
+			}
+
+			var validTeams = mapper.TeamsById.Values.Where(IsValid).ToList();
+			var peopleToComplete = validTeams
+				.SelectMany(t => mapper.PersonsByTeamId.TryGetValue(t.Id, out var people)
+					? people
+						.Where(p => !p.HadResourceIdWhenLoaded)
+						.Select(p => p.Person)
+					: new List<Person>())
+				.Distinct()
+				.ToList();
+
+			if (MediaOpsResourceHandler.TryComplete(api, peopleToComplete, out var completeResult))
+			{
+				return;
+			}
+
+			var teamIdsWithFailures = new HashSet<Guid>();
+			foreach (var personId in completeResult.UnsuccessfulIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				foreach (var team in teams)
+				{
+					teamIdsWithFailures.Add(team.Id);
+				}
+			}
+
+			foreach (var teamId in teamIdsWithFailures)
+			{
+				if (!mapper.PersonsByTeamId.TryGetValue(teamId, out var people))
+				{
+					continue;
+				}
+
+				var failedPeople = people.Where(x => completeResult.UnsuccessfulIds.Contains(x.Person.Id)).ToList();
+
+				var error = new TeamMakeBookableError
+				{
+					ErrorMessage = $"Failed to complete resource for {failedPeople.Count} person(s) associated with this team, so the team cannot be made bookable.",
+					Id = teamId,
+				};
+				ReportError(teamId, error);
+
+				foreach (var person in failedPeople)
+				{
+					if (!completeResult.TraceDataPerItem.TryGetValue(person.Person.Id, out var traceData))
+					{
+						continue;
+					}
+
+					PassTraceData(teamId, traceData);
+				}
+			}
+
+			var toDeprecateIds = new HashSet<Guid>();
+			foreach (var personId in completeResult.SuccessfulIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
+				{
+					toDeprecateIds.Add(personId);
+				}
+			}
+
+			if (toDeprecateIds.Count == 0)
+			{
+				return;
+			}
+
+			var toDeprecate = mapper.PersonsById
+				.Where(x => toDeprecateIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecate, out var deprecateResult))
+			{
+				api.Logger.Error(this, $"Failed to deprecate resources for {deprecateResult.UnsuccessfulIds.Count} person(s) that had their resource completion succeed but were associated only with teams that had resource completion failures.", [deprecateResult.UnsuccessfulIds.ToArray()]);
+			}
+
+			var toDeleteIds = completeResult.UnsuccessfulIds.Concat(deprecateResult.SuccessfulIds).ToList();
+			var toDelete = mapper.PersonsById
+				.Where(x => toDeleteIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDelete(api, toDelete, out var deleteResult))
+			{
+				api.Logger.Error(this, $"Failed to delete resources for {deleteResult.UnsuccessfulIds.Count} person(s) that had their resource completion succeed but were associated only with teams that had resource completion failures or had their resource deprecated due to being associated only with teams that had resource completion failures.", [deleteResult.UnsuccessfulIds.ToArray()]);
+			}
+		}
+
+		private void CreateResourcePoolsForBookableTeams(TeamPersonBookableMapper mapper)
+		{
+			if (mapper == null)
+			{
+				throw new ArgumentNullException(nameof(mapper));
+			}
+
+			var validTeams = mapper.TeamsById.Values.Where(IsValid).ToList();
+
+			if (MediaOpsResourcePoolHandler.TryCreateOrUpdate(api, validTeams, out var createResult))
+			{
+				return;
+			}
+
+			foreach (var id in createResult.UnsuccessfulIds)
 			{
 				ReportError(id);
 
-				if (result.TraceDataPerItem.TryGetValue(id, out var traceData))
+				if (createResult.TraceDataPerItem.TryGetValue(id, out var traceData))
 				{
 					PassTraceData(id, traceData);
 				}
 			}
-
-			CreateOrUpdateDom(result.SuccessfulItems.Select(x => x.GetInstanceWithChanges()).ToList());
 		}
 
-		private IEnumerable<PeopleAndOrganizationsErrorData> ComposeErrors(Guid teamId, MediaOpsTraceData traceData)
+		private void CompleteResourcePoolsForBookableTeams(TeamPersonBookableMapper mapper)
 		{
-			var resourcePoolErrors = traceData.ErrorData.OfType<ResourcePoolError>().ToList();
-			if (traceData.ErrorData.Count != resourcePoolErrors.Count)
+			if (mapper == null)
 			{
-				yield return new PeopleAndOrganizationsErrorData
-				{
-					ErrorMessage = traceData.ToString(),
-				};
+				throw new ArgumentNullException(nameof(mapper));
 			}
 
-			foreach (var error in resourcePoolErrors)
+			var validTeams = mapper.TeamsById.Values.Where(IsValid).ToList();
+
+			if (MediaOpsResourcePoolHandler.TryComplete(api, validTeams, out var completeResult))
 			{
-				yield return new TeamMakeBookableError
+				return;
+			}
+
+			foreach (var id in completeResult.UnsuccessfulIds)
+			{
+				ReportError(id);
+
+				if (completeResult.TraceDataPerItem.TryGetValue(id, out var traceData))
 				{
-					Id = teamId,
-					ErrorMessage = error.ErrorMessage,
-				};
+					PassTraceData(id, traceData);
+				}
+			}
+		}
+
+		private void UpdateBookablePeople(TeamPersonBookableMapper mapper)
+		{
+			if (mapper == null)
+			{
+				throw new ArgumentNullException(nameof(mapper));
+			}
+
+			var validTeams = mapper.TeamsById.Values.Where(IsValid).ToList();
+			var peopleToUpdate = validTeams
+				.SelectMany(t => mapper.PersonsByTeamId.TryGetValue(t.Id, out var people)
+					? people
+					: new List<TeamPersonBookableMapper.WrappedPerson>())
+				.DistinctBy(x => x.Person.Id)
+				.ToList();
+
+			// Set cache
+			foreach (var person in peopleToUpdate)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(person.Person.Id, out var teams))
+				{
+					continue;
+				}
+
+				((Cache.ITemporaryCache<ApiObject>)person.Person).SetCache<Team>(teams);
+			}
+
+			var domUpdates = peopleToUpdate.Where(x => !x.HadResourceIdWhenLoaded).Select(x => x.Person).ToList();
+			var directUpdates = peopleToUpdate.Where(x => x.HadResourceIdWhenLoaded).Select(x => x.Person).ToList();
+
+			if (domUpdates.Count > 0)
+			{
+				DomPersonHandler.TryCreateOrUpdate(api, domUpdates, out var result);
+			}
+
+			if (directUpdates.Count > 0)
+			{
+				MediaOpsResourceHandler.TryCreateOrUpdate(api, directUpdates, out var result);
 			}
 		}
 
@@ -875,6 +1126,94 @@
 				}
 
 				yield return changeResult;
+			}
+		}
+
+		private sealed class TeamPersonBookableMapper
+		{
+			private readonly Dictionary<Guid, WrappedPerson> personsById = new();
+			private readonly Dictionary<Guid, Team> teamsById = new();
+
+			private readonly Dictionary<Guid, List<WrappedPerson>> personsByTeamId = new();
+			private readonly Dictionary<Guid, List<Team>> teamsByPersonId = new();
+
+			private TeamPersonBookableMapper(ICollection<Team> apiTeams)
+			{
+				if (apiTeams == null)
+				{
+					throw new ArgumentNullException(nameof(apiTeams));
+				}
+
+				teamsById = apiTeams.ToDictionary(x => x.Id);
+			}
+
+			public IReadOnlyDictionary<Guid, WrappedPerson> PersonsById => personsById;
+
+			public IReadOnlyDictionary<Guid, Team> TeamsById => teamsById;
+
+			public IReadOnlyDictionary<Guid, List<WrappedPerson>> PersonsByTeamId => personsByTeamId;
+
+			public IReadOnlyDictionary<Guid, List<Team>> TeamsByPersonId => teamsByPersonId;
+
+			public static TeamPersonBookableMapper Load(PeopleAndOrganizationsApi api, ICollection<Team> apiTeams)
+			{
+				if (api == null)
+				{
+					throw new ArgumentNullException(nameof(api));
+				}
+
+				var mapper = new TeamPersonBookableMapper(apiTeams);
+
+				var filter = new ANDFilterElement<Person>(
+					PersonExposers.State.Equal(PersonState.Active),
+					/*new ORFilterElement<Person>(
+						PersonExposers.HasResourceId.Equal(false),
+						PersonExposers.ResourceId.Equal(Guid.Empty)),*/
+					new ORFilterElement<Person>(apiTeams.Select(x => PersonExposers.TeamMemberships.TeamId.Equal(x.Id)).ToArray()));
+
+				foreach (var person in api.People.Read(filter))
+				{
+					mapper.personsById[person.Id] = new WrappedPerson(person);
+
+					foreach (var teamMembership in person.TeamMemberships)
+					{
+						if (!mapper.teamsById.ContainsKey(teamMembership.TeamId))
+						{
+							continue;
+						}
+
+						if (!mapper.personsByTeamId.TryGetValue(teamMembership.TeamId, out var personsInTeam))
+						{
+							personsInTeam = new List<WrappedPerson>();
+							mapper.personsByTeamId[teamMembership.TeamId] = personsInTeam;
+						}
+
+						if (!mapper.teamsByPersonId.TryGetValue(person.Id, out var teamsOfPerson))
+						{
+							teamsOfPerson = new List<Team>();
+							mapper.teamsByPersonId[person.Id] = teamsOfPerson;
+						}
+
+						personsInTeam.Add(new WrappedPerson(person));
+						teamsOfPerson.Add(mapper.teamsById[teamMembership.TeamId]);
+					}
+				}
+
+				return mapper;
+			}
+
+			internal sealed class WrappedPerson
+			{
+				public WrappedPerson(Person person)
+				{
+					Person = person ?? throw new ArgumentNullException(nameof(person));
+
+					HadResourceIdWhenLoaded = person.ResourceId != Guid.Empty;
+				}
+
+				public Person Person { get; }
+
+				public bool HadResourceIdWhenLoaded { get; }
 			}
 		}
 	}

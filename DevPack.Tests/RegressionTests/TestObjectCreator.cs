@@ -442,6 +442,27 @@
 
 			try
 			{
+				var peopleWithTeamMemberships = people.Where(p => p.TeamMemberships.Any()).ToList();
+				if (peopleWithTeamMemberships.Count > 0)
+				{
+					foreach (var person in peopleWithTeamMemberships)
+					{
+						foreach (var membership in person.TeamMemberships.ToArray())
+						{
+							person.RemoveTeamMembership(membership);
+						}
+					}
+
+					Api.People.Update(peopleWithTeamMemberships);
+				}
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
 				var toDeprecate = people.Where(x => x.State == PersonState.Active);
 
 				Api.People.Deprecate(toDeprecate);

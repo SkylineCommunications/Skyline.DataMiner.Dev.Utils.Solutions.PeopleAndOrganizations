@@ -17,7 +17,7 @@
 	/// </summary>
 	public class Person : ApiObject, ITemporaryCache<ApiObject>
 	{
-		private readonly ConcurrentDictionary<Type, List<ApiObject>> cache = new();
+		private readonly ConcurrentDictionary<Type, List<ApiObject>> localCache = new();
 
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
@@ -374,10 +374,10 @@
 				throw new ArgumentException("objects collection contains null values", nameof(objects));
 			}
 
-			if (!cache.TryGetValue(type, out var cachedObjects))
+			if (!localCache.TryGetValue(type, out var cachedObjects))
 			{
 				cachedObjects = new List<ApiObject>();
-				cache.TryAdd(type, cachedObjects);
+				localCache.TryAdd(type, cachedObjects);
 			}
 
 			cachedObjects.Clear();
@@ -407,10 +407,10 @@
 				throw new ArgumentException("objects collection contains null values", nameof(objects));
 			}
 
-			if (!cache.TryGetValue(type, out var cachedObjects))
+			if (!localCache.TryGetValue(type, out var cachedObjects))
 			{
 				cachedObjects = new List<ApiObject>(objects.Cast<ApiObject>());
-				cache.TryAdd(type, cachedObjects);
+				localCache.TryAdd(type, cachedObjects);
 
 				return;
 			}
@@ -435,7 +435,7 @@
 				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
 			}
 
-			if (!cache.TryGetValue(typeof(T), out var cachedObjects))
+			if (!localCache.TryGetValue(typeof(T), out var cachedObjects))
 			{
 				return Enumerable.Empty<T>();
 			}
