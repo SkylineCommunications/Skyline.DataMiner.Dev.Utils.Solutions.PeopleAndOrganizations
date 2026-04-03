@@ -5,8 +5,6 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 

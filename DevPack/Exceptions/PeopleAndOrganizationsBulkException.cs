@@ -4,8 +4,6 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using Skyline.DataMiner.Net.Messages;
-
 	/// <summary>
 	/// Thrown when a People and Organizations bulk operation failed.
 	/// </summary>
