@@ -78,11 +78,11 @@
 			try
 			{
 				var resources = api.PlanApi.Resources.CreateOrUpdate(resourcesToCreateOrUpdate);
-				HandlePersonResourceCreated(personsByResourceId, resources.Select(x => x.Id).ToList());
+				HandlePersonResourceSuccess(personsByResourceId, resources.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandlePersonResourceCreated(personsByResourceId, ex.Result.SuccessfulIds.ToList());
+				HandlePersonResourceSuccess(personsByResourceId, ex.Result.SuccessfulIds.ToList());
 				HandlePersonResourceFailures(personsByResourceId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
@@ -195,7 +195,7 @@
 			}
 		}
 
-		private void HandlePersonResourceCreated(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds)
+		private void HandlePersonResourceSuccess(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds)
 		{
 			foreach (var resourceId in resourceIds)
 			{
@@ -206,19 +206,6 @@
 				}
 
 				person.ResourceId = resourceId;
-				ReportSuccess(person);
-			}
-		}
-
-		private void HandlePersonResourceSuccess(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds)
-		{
-			foreach (var resourceId in resourceIds)
-			{
-				if (!personsByResourceId.TryGetValue(resourceId, out var person))
-				{
-					api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-					continue;
-				}
 
 				ReportSuccess(person);
 			}

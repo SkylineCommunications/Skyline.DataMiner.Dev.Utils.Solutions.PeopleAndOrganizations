@@ -435,8 +435,8 @@
 				return;
 			}
 
-			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, createResult.UnsuccessfulIds);
-			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, createResult.UnsuccessfulIds, createResult.TraceDataPerItem, "create");
+			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, createResult.UnsuccessfulIds.ToList());
+			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, createResult.UnsuccessfulIds.ToList(), createResult.TraceDataPerItem, "create");
 
 			var toDeleteIds = GetPersonIdsOnlyLinkedToFailedTeams(mapper, createResult.SuccessfulIds, teamIdsWithFailures);
 			if (toDeleteIds.Count == 0)
@@ -476,8 +476,8 @@
 				return;
 			}
 
-			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, completeResult.UnsuccessfulIds);
-			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, completeResult.UnsuccessfulIds, completeResult.TraceDataPerItem, "complete");
+			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, completeResult.UnsuccessfulIds.ToList());
+			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, completeResult.UnsuccessfulIds.ToList(), completeResult.TraceDataPerItem, "complete");
 
 			var toDeprecateIds = GetPersonIdsOnlyLinkedToFailedTeams(mapper, completeResult.SuccessfulIds, teamIdsWithFailures);
 			if (toDeprecateIds.Count == 0)
