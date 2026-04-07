@@ -53,7 +53,7 @@
 		/// <summary>
 		/// Marks the specified teams as deprecated, indicating that they are no longer recommended for use.
 		/// </summary>
-		/// <param name="teams">A collection of teams to be marked as deprecated. Cannot be null or empty.</param>
+		/// <param name="teams">A collection of teams to be marked as deprecated. Cannot be null.</param>
 		/// <returns>A read-only collection of deprecated teams.</returns>
 		IReadOnlyCollection<Team> Deprecate(IEnumerable<Team> teams);
 
@@ -81,7 +81,7 @@
 		/// <summary>
 		/// Marks the specified teams as bookable, indicating that they can be reserved or scheduled.
 		/// </summary>
-		/// <param name="teams">A collection of teams to be marked as bookable. Cannot be null or empty.</param>
+		/// <param name="teams">A collection of teams to be marked as bookable. Cannot be null.</param>
 		/// <returns>A read-only collection of bookable teams.</returns>
 		IReadOnlyCollection<Team> MakeBookable(IEnumerable<Team> teams);
 
