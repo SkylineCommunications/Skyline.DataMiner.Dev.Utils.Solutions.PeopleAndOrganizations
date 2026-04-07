@@ -96,53 +96,12 @@
 			try
 			{
 				var pools = api.PlanApi.ResourcePools.CreateOrUpdate(poolsToCreateOrUpdate);
-				HandleSuccess(pools.Select(x => x.Id).ToList());
+				HandlePoolSuccess(teamsByPoolId, pools.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> poolIds)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					team.ResourcePoolId = poolId;
-					team.IsBookable = true;
-
-					ReportSuccess(team);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
-					{
-						foreach (var error in ComposeTeamErrors(team.Id, traceData))
-						{
-							ReportError(team.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(team.Id);
-					}
-				}
+				HandlePoolSuccess(teamsByPoolId, ex.Result.SuccessfulIds.ToList());
+				HandlePoolFailures(teamsByPoolId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -173,53 +132,12 @@
 			try
 			{
 				var pools = api.PlanApi.ResourcePools.Complete(teamsByPoolId.Keys);
-				HandleSuccess(pools.Select(x => x.Id).ToList());
+				HandlePoolSuccess(teamsByPoolId, pools.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> poolIds)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					team.ResourcePoolId = poolId;
-					team.IsBookable = true;
-
-					ReportSuccess(team);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
-					{
-						foreach (var error in ComposeTeamErrors(team.Id, traceData))
-						{
-							ReportError(team.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(team.Id);
-					}
-				}
+				HandlePoolSuccess(teamsByPoolId, ex.Result.SuccessfulIds.ToList());
+				HandlePoolFailures(teamsByPoolId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -250,53 +168,12 @@
 			try
 			{
 				var pools = api.PlanApi.ResourcePools.Deprecate(teamsByPoolId.Keys);
-				HandleSuccess(pools.Select(x => x.Id).ToList());
+				HandlePoolSuccess(teamsByPoolId, pools.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> poolIds)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					team.ResourcePoolId = poolId;
-					team.IsBookable = true;
-
-					ReportSuccess(team);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var poolId in poolIds)
-				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
-					{
-						foreach (var error in ComposeTeamErrors(team.Id, traceData))
-						{
-							ReportError(team.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(team.Id);
-					}
-				}
+				HandlePoolSuccess(teamsByPoolId, ex.Result.SuccessfulIds.ToList());
+				HandlePoolFailures(teamsByPoolId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -327,52 +204,52 @@
 			try
 			{
 				api.PlanApi.ResourcePools.Delete(teamsByPoolId.Keys);
-				HandleSuccess(teamsByPoolId.Keys);
+				HandlePoolSuccess(teamsByPoolId, teamsByPoolId.Keys.ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+				HandlePoolSuccess(teamsByPoolId, ex.Result.SuccessfulIds.ToList());
+				HandlePoolFailures(teamsByPoolId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
+		}
 
-			void HandleSuccess(ICollection<Guid> poolIds)
+		private void HandlePoolSuccess(Dictionary<Guid, Team> teamsByPoolId, ICollection<Guid> poolIds)
+		{
+			foreach (var poolId in poolIds)
 			{
-				foreach (var poolId in poolIds)
+				if (!teamsByPoolId.TryGetValue(poolId, out var team))
 				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
-
-					team.ResourcePoolId = poolId;
-					team.IsBookable = true;
-
-					ReportSuccess(team);
+					api.Logger.Error(this, $"Received success result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+					continue;
 				}
+
+				team.ResourcePoolId = poolId;
+				team.IsBookable = true;
+
+				ReportSuccess(team);
 			}
+		}
 
-			void HandleFailure(ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+		private void HandlePoolFailures(Dictionary<Guid, Team> teamsByPoolId, ICollection<Guid> poolIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+		{
+			foreach (var poolId in poolIds)
 			{
-				foreach (var poolId in poolIds)
+				if (!teamsByPoolId.TryGetValue(poolId, out var team))
 				{
-					if (!teamsByPoolId.TryGetValue(poolId, out var team))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
-						continue;
-					}
+					api.Logger.Error(this, $"Received failure result for Resource Pool ID '{poolId}' that cannot be mapped to a team.");
+					continue;
+				}
 
-					if (traceDataPerItem.TryGetValue(poolId, out var traceData))
+				if (traceDataPerItem.TryGetValue(poolId, out var traceData))
+				{
+					foreach (var error in ComposeTeamErrors(team.Id, traceData))
 					{
-						foreach (var error in ComposeTeamErrors(team.Id, traceData))
-						{
-							ReportError(team.Id, error);
-						}
+						ReportError(team.Id, error);
 					}
-					else
-					{
-						ReportError(team.Id);
-					}
+				}
+				else
+				{
+					ReportError(team.Id);
 				}
 			}
 		}
