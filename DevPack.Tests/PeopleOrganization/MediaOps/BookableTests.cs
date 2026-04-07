@@ -11,8 +11,6 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
-	using SLDataGateway.API.Repositories.MessageHandlers.TracingUtil;
-
 	using CoreResource = Skyline.DataMiner.Net.Messages.Resource;
 	using CoreResourcePool = Skyline.DataMiner.Net.Messages.ResourcePool;
 
@@ -50,7 +48,7 @@
 			team = TestContext.Api.Teams.MakeBookable(team);
 			Assert.IsNotNull(team);
 			var resourcePoolId = team.ResourcePoolId;
-			Assert.AreEqual(resourcePoolId, team.ResourcePoolId);
+			Assert.AreNotEqual(Guid.Empty, resourcePoolId);
 			Assert.AreEqual(true, team.IsBookable);
 
 			var resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
@@ -96,11 +94,10 @@
 			// Make bookable
 			team = TestContext.Api.Teams.MakeBookable(team);
 			Assert.IsNotNull(team);
-			var resourcePoolId = team.ResourcePoolId;
-			Assert.AreEqual(resourcePoolId, team.ResourcePoolId);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
 			Assert.AreEqual(true, team.IsBookable);
 
-			var resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			Assert.AreEqual(name, resourcePool.Name);
 			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
@@ -112,7 +109,7 @@
 			team.Name = updatedName;
 			team = TestContext.Api.Teams.Update(team);
 
-			resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			Assert.AreEqual(updatedName, resourcePool.Name);
 		}
@@ -147,11 +144,10 @@
 			// Make bookable
 			team = TestContext.Api.Teams.MakeBookable(team);
 			Assert.IsNotNull(team);
-			var resourcePoolId = team.ResourcePoolId;
-			Assert.AreEqual(resourcePoolId, team.ResourcePoolId);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
 			Assert.AreEqual(true, team.IsBookable);
 
-			var resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			Assert.AreEqual(team.Name, resourcePool.Name);
 			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
@@ -166,7 +162,7 @@
 			team.SetSkills([skill1, skill3]);
 			team = TestContext.Api.Teams.Update(team);
 
-			resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			capabilitySetting = resourcePool.Capabilities.SingleOrDefault();
 			Assert.IsNotNull(capabilitySetting);
@@ -179,7 +175,7 @@
 			team.RemoveSkill(skill3);
 			team = TestContext.Api.Teams.Update(team);
 
-			resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			capabilitySetting = resourcePool.Capabilities.SingleOrDefault();
 			Assert.IsNull(capabilitySetting);
@@ -1268,7 +1264,7 @@
 		}
 
 		[TestMethod]
-		public void test5()
+		public void MakeBookable_WhenPersonAddedToBookableTeam_CreatesResourceAndAddsToPool()
 		{
 			var prefix = Guid.NewGuid();
 
@@ -1289,11 +1285,10 @@
 			// Make bookable
 			team = TestContext.Api.Teams.MakeBookable(team);
 			Assert.IsNotNull(team);
-			var resourcePoolId = team.ResourcePoolId;
-			Assert.AreEqual(resourcePoolId, team.ResourcePoolId);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
 			Assert.AreEqual(true, team.IsBookable);
 
-			var resourcePool = TestContext.PlanApi.ResourcePools.Read(resourcePoolId);
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
 			Assert.IsNotNull(resourcePool);
 			Assert.AreEqual(team.Name, resourcePool.Name);
 			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
@@ -1312,6 +1307,7 @@
 			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
 
 			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
 			Assert.AreEqual(person.Name, resource.Name);
 			Assert.AreEqual(ResourceState.Complete, resource.State);
 			Assert.AreEqual(0, resource.Capabilities.Count);
@@ -1319,6 +1315,406 @@
 			Assert.AreEqual(0, resource.Properties.Count);
 			Assert.AreEqual(1, resource.ResourcePoolIds.Count);
 			Assert.IsTrue(resource.ResourcePoolIds.Contains(resourcePool.Id));
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonRemovedFromBookableTeam_RemovesResourceFromPool()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(person.Name, resource.Name);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+			Assert.AreEqual(0, resource.Capabilities.Count);
+			Assert.AreEqual(0, resource.Capacities.Count);
+			Assert.AreEqual(0, resource.Properties.Count);
+			Assert.AreEqual(1, resource.ResourcePoolIds.Count);
+			Assert.IsTrue(resource.ResourcePoolIds.Contains(resourcePool.Id));
+
+			// Remove person from team
+			var membership = person.TeamMemberships.First();
+			person.RemoveTeamMembership(membership);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(person.Name, resource.Name);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+			Assert.AreEqual(0, resource.Capabilities.Count);
+			Assert.AreEqual(0, resource.Capacities.Count);
+			Assert.AreEqual(0, resource.Properties.Count);
+			Assert.AreEqual(0, resource.ResourcePoolIds.Count);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonAddedToBookableTeamAndNameConflictsWithUnmanagedResource_ThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var resource = new UnmanagedResource
+			{
+				Name = person.Name,
+			};
+			objectCreator.CreateResource(resource);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			// Assign person to team
+			person.AddTeamMembership(new TeamMembership(team));
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personMakeBookableError = personError as PersonMakeBookableError;
+			Assert.IsNotNull(personMakeBookableError);
+			Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+			Assert.AreEqual(person.Id, personMakeBookableError.Id);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonAddedToBookableTeamAndNameConflictsWithCoreResource_ThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			var resource = new CoreResource
+			{
+				Name = person.Name,
+			};
+			objectCreator.CreateCoreResource(resource);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			// Assign person to team
+			person.AddTeamMembership(new TeamMembership(team));
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personMakeBookableError = personError as PersonMakeBookableError;
+			Assert.IsNotNull(personMakeBookableError);
+			Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+			Assert.AreEqual(person.Id, personMakeBookableError.Id);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenDraftPersonActivatedInBookableTeam_CreatesResourceAndAddsToPool()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(ResourceExposers.Name.Equal(person.Name)).SingleOrDefault();
+			Assert.IsNull(resource);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(person.Name, resource.Name);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+			Assert.AreEqual(0, resource.Capabilities.Count);
+			Assert.AreEqual(0, resource.Capacities.Count);
+			Assert.AreEqual(0, resource.Properties.Count);
+			Assert.AreEqual(1, resource.ResourcePoolIds.Count);
+			Assert.IsTrue(resource.ResourcePoolIds.Contains(resourcePool.Id));
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenDraftPersonActivatedAndNameConflictsWithUnmanagedResource_ThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+
+			var resource = new UnmanagedResource
+			{
+				Name = person.Name,
+			};
+			objectCreator.CreateResource(resource);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			// Activate
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Activate(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personMakeBookableError = personError as PersonMakeBookableError;
+			Assert.IsNotNull(personMakeBookableError);
+			Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+			Assert.AreEqual(person.Id, personMakeBookableError.Id);
+
+			// Verify person is not active
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(PersonState.Draft, person.State);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenDraftPersonActivatedAndNameConflictsWithCoreResource_ThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person()
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+
+			var coreResource = new CoreResource
+			{
+				Name = person.Name,
+			};
+			objectCreator.CreateCoreResource(coreResource);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var resourcePool = TestContext.PlanApi.ResourcePools.Read(team.ResourcePoolId);
+			Assert.IsNotNull(resourcePool);
+			Assert.AreEqual(team.Name, resourcePool.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool.State);
+			Assert.AreEqual(0, resourcePool.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool.LinkedResourcePools.Count);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			// Activate
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Activate(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personMakeBookableError = personError as PersonMakeBookableError;
+			Assert.IsNotNull(personMakeBookableError);
+			Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+			Assert.AreEqual(person.Id, personMakeBookableError.Id);
+
+			// Verify person is not active
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(PersonState.Draft, person.State);
+			Assert.AreEqual(Guid.Empty, person.ResourceId);
+
+			// Verify resource is not created
+			var resource = TestContext.PlanApi.Resources.Read(ResourceExposers.Name.Equal(person.Name)).SingleOrDefault();
+			Assert.IsNull(resource);
 		}
 	}
 }
