@@ -1716,5 +1716,372 @@
 			var resource = TestContext.PlanApi.Resources.Read(ResourceExposers.Name.Equal(person.Name)).SingleOrDefault();
 			Assert.IsNull(resource);
 		}
+
+		[TestMethod]
+		public void MakeBookable_WhenTeamIsAlreadyBookable_ThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+			team = TestContext.Api.Teams.MakeBookable(team);
+
+			Assert.IsNotNull(team);
+			Assert.AreEqual(true, team.IsBookable);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamMakeBookableError = teamError as TeamMakeBookableError;
+			Assert.IsNotNull(teamMakeBookableError);
+			Assert.AreEqual($"Team '{team.Name}' is already bookable.", teamMakeBookableError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamMakeBookableError.Id);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonWithSkillsMadeBookable_SynchronizesResourceCapabilities()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			objectCreator.CreateSkills([skill1, skill2]);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team))
+			.SetSkills([skill1, skill2]);
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			// Verify person's resource has skill capabilities
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(person.Name, resource.Name);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+
+			var capabilitySetting = resource.Capabilities.SingleOrDefault();
+			Assert.IsNotNull(capabilitySetting);
+			Assert.AreEqual(2, capabilitySetting.Discretes.Count);
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill1.Name));
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill2.Name));
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonNameUpdatedInBookableTeam_SynchronizesResourceName()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(person.Name, resource.Name);
+
+			// Update person name
+			var updatedName = $"{prefix}_Person Updated";
+			person.Name = updatedName;
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(updatedName, person.Name);
+
+			// Verify resource name is updated
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(updatedName, resource.Name);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonSkillsUpdatedInBookableTeam_SynchronizesResourceCapabilities()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			var skill3 = new Skill
+			{
+				Name = $"{prefix}_Skill 3",
+			};
+			objectCreator.CreateSkills([skill1, skill2, skill3]);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team))
+			.SetSkills([skill1, skill2]);
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+
+			var capabilitySetting = resource.Capabilities.SingleOrDefault();
+			Assert.IsNotNull(capabilitySetting);
+			Assert.AreEqual(2, capabilitySetting.Discretes.Count);
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill1.Name));
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill2.Name));
+
+			// Update person skills
+			person.SetSkills([skill2, skill3]);
+			person = TestContext.Api.People.Update(person);
+
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			capabilitySetting = resource.Capabilities.SingleOrDefault();
+			Assert.IsNotNull(capabilitySetting);
+			Assert.AreEqual(2, capabilitySetting.Discretes.Count);
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill2.Name));
+			Assert.IsTrue(capabilitySetting.Discretes.Contains(skill3.Name));
+
+			// Remove all skills
+			person.RemoveSkill(skill2);
+			person.RemoveSkill(skill3);
+			person = TestContext.Api.People.Update(person);
+
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			capabilitySetting = resource.Capabilities.SingleOrDefault();
+			Assert.IsNull(capabilitySetting);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonDeprecatedInBookableTeam_DeprecatesResource()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+
+			// Deprecate person
+			person = TestContext.Api.People.Deprecate(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(PersonState.Deprecated, person.State);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			// Verify resource is deprecated
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(ResourceState.Deprecated, resource.State);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenDeprecatedBookablePersonDeleted_DeletesResource()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resourceId = person.ResourceId;
+			var resource = TestContext.PlanApi.Resources.Read(resourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(ResourceState.Complete, resource.State);
+
+			// Deprecate and delete person
+			person = TestContext.Api.People.Deprecate(person);
+			Assert.AreEqual(PersonState.Deprecated, person.State);
+
+			TestContext.Api.People.Delete(person);
+
+			// Verify resource is deleted
+			resource = TestContext.PlanApi.Resources.Read(resourceId);
+			Assert.IsNull(resource);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenPersonMovedBetweenBookableTeams_UpdatesResourcePoolAssignment()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team1 = new Team
+			{
+				Name = $"{prefix}_Team 1",
+			};
+			var team2 = new Team
+			{
+				Name = $"{prefix}_Team 2",
+			};
+			objectCreator.CreateTeams([team1, team2]);
+			TestContext.Api.Teams.Activate([team1.Id, team2.Id]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team1));
+			person = objectCreator.CreatePerson(person);
+			person = TestContext.Api.People.Activate(person);
+
+			// Make both teams bookable
+			var teams = TestContext.Api.Teams.MakeBookable([team1.Id, team2.Id]);
+			team1 = teams.SingleOrDefault(x => x.Id == team1.Id);
+			team2 = teams.SingleOrDefault(x => x.Id == team2.Id);
+			Assert.IsNotNull(team1);
+			Assert.IsNotNull(team2);
+			Assert.AreNotEqual(Guid.Empty, team1.ResourcePoolId);
+			Assert.AreNotEqual(Guid.Empty, team2.ResourcePoolId);
+
+			// Verify person resource is in team 1's pool
+			person = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(person);
+			Assert.AreNotEqual(Guid.Empty, person.ResourceId);
+
+			var resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(1, resource.ResourcePoolIds.Count);
+			Assert.IsTrue(resource.ResourcePoolIds.Contains(team1.ResourcePoolId));
+
+			// Move person from team 1 to team 2
+			var membershipToRemove = person.TeamMemberships.Single(x => x.TeamId == team1.Id);
+			person.RemoveTeamMembership(membershipToRemove);
+			person.AddTeamMembership(new TeamMembership(team2));
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+
+			// Verify resource pool assignment updated
+			resource = TestContext.PlanApi.Resources.Read(person.ResourceId);
+			Assert.IsNotNull(resource);
+			Assert.AreEqual(1, resource.ResourcePoolIds.Count);
+			Assert.IsTrue(resource.ResourcePoolIds.Contains(team2.ResourcePoolId));
+			Assert.IsFalse(resource.ResourcePoolIds.Contains(team1.ResourcePoolId));
+		}
 	}
 }
