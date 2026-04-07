@@ -9,6 +9,9 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
+	using CoreResource = Skyline.DataMiner.Net.Messages.Resource;
+	using CoreResourcePool = Skyline.DataMiner.Net.Messages.ResourcePool;
+
 	internal class TestObjectCreator : IDisposable
 	{
 		private readonly IntegrationTestContext testContext;
@@ -30,6 +33,10 @@
 		private readonly HashSet<Guid> createdResourcePoolIds = new HashSet<Guid>();
 
 		private readonly HashSet<Guid> createdResourceIds = new HashSet<Guid>();
+
+		private readonly HashSet<Guid> createdCoreResourcePoolIds = new HashSet<Guid>();
+
+		private readonly HashSet<Guid> createdCoreResourceIds = new HashSet<Guid>();
 
 		public TestObjectCreator(IntegrationTestContext testContext)
 		{
@@ -117,6 +124,24 @@
 			try
 			{
 				ResourcePoolsCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				CoreResourcesCleanup();
+			}
+			catch
+			{
+				// Ignore cleanup errors
+			}
+
+			try
+			{
+				CoreResourcePoolsCleanup();
 			}
 			catch
 			{
@@ -436,6 +461,38 @@
 			}
 		}
 
+		public void CreateCoreResource(CoreResource resource)
+		{
+			foreach (var created in testContext.ResourceManagerHelper.AddOrUpdateResources(resource))
+			{
+				createdCoreResourceIds.Add(created.ID);
+			}
+		}
+
+		public void CreateCoreResources(IEnumerable<CoreResource> resources)
+		{
+			foreach (var created in testContext.ResourceManagerHelper.AddOrUpdateResources(resources.ToArray()))
+			{
+				createdCoreResourceIds.Add(created.ID);
+			}
+		}
+
+		public void CreateCoreResourcePool(CoreResourcePool resourcePool)
+		{
+			foreach (var created in testContext.ResourceManagerHelper.AddOrUpdateResourcePools(resourcePool))
+			{
+				createdCoreResourcePoolIds.Add(created.ID);
+			}
+		}
+
+		public void CreateCoreResourcePools(IEnumerable<CoreResourcePool> resourcePools)
+		{
+			foreach (var created in testContext.ResourceManagerHelper.AddOrUpdateResourcePools(resourcePools.ToArray()))
+			{
+				createdCoreResourcePoolIds.Add(created.ID);
+			}
+		}
+
 		private void PeopleCleanup()
 		{
 			var people = Api.People.Read(createdPersonIds.ToArray());
@@ -575,6 +632,26 @@
 			}
 
 			PlanApi.ResourcePools.Delete(createdResourcePoolIds.ToArray());
+		}
+
+		private void CoreResourcesCleanup()
+		{
+			if (createdCoreResourceIds.Count == 0)
+			{
+				return;
+			}
+
+			testContext.ResourceManagerHelper.RemoveResources(createdCoreResourceIds.Select(x => new CoreResource(x)).ToArray());
+		}
+
+		private void CoreResourcePoolsCleanup()
+		{
+			if (createdCoreResourcePoolIds.Count == 0)
+			{
+				return;
+			}
+
+			testContext.ResourceManagerHelper.RemoveResourcePools(createdCoreResourcePoolIds.Select(x => new CoreResourcePool(x)).ToArray());
 		}
 	}
 }

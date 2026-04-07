@@ -6,9 +6,15 @@
 	using RT_PeopleAndOrganizations.RegressionTests;
 
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
+
+	using SLDataGateway.API.Repositories.MessageHandlers.TracingUtil;
+
+	using CoreResource = Skyline.DataMiner.Net.Messages.Resource;
+	using CoreResourcePool = Skyline.DataMiner.Net.Messages.ResourcePool;
 
 	[TestClass]
 	[TestCategory("IntegrationTest")]
@@ -78,7 +84,7 @@
 		public void MakeBookable_WhenNameUpdated_SynchronizesResourcePoolName()
 		{
 			var prefix = Guid.NewGuid();
-			var name= $"{prefix}_Team";
+			var name = $"{prefix}_Team";
 
 			var team = new Team
 			{
@@ -196,7 +202,7 @@
 
 			var resourcePool = new ResourcePool
 			{
-				Name =team1.Name,
+				Name = team1.Name,
 			};
 			resourcePool = objectCreator.CreateResourcePool(resourcePool);
 
@@ -234,6 +240,100 @@
 			Assert.IsNotNull(teamMakeBookableError);
 			Assert.AreEqual("Name is already in use.", teamMakeBookableError.ErrorMessage);
 			Assert.AreEqual(team1.Id, teamMakeBookableError.Id);
+
+			// Verify that the resource pool was not created for team 1
+			team1 = TestContext.Api.Teams.Read(team1.Id);
+			Assert.IsNotNull(team1);
+			Assert.AreEqual(Guid.Empty, team1.ResourcePoolId);
+
+			// Verify that the resource pool was created for team 2
+			team2 = TestContext.Api.Teams.Read(team2.Id);
+			Assert.IsNotNull(team2);
+			Assert.AreNotEqual(Guid.Empty, team2.ResourcePoolId);
+
+			var resourcePool2 = TestContext.PlanApi.ResourcePools.Read(team2.ResourcePoolId);
+			Assert.IsNotNull(resourcePool2);
+			Assert.AreEqual(team2.Name, resourcePool2.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool2.State);
+			Assert.AreEqual(0, resourcePool2.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool2.LinkedResourcePools.Count);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenCoreResourcePoolNameExists_ThrowsExceptionForConflictingTeam()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team1 = new Team
+			{
+				Name = $"{prefix}_Team 1",
+			};
+			var team2 = new Team
+			{
+				Name = $"{prefix}_Team 2",
+			};
+			objectCreator.CreateTeams([team1, team2]);
+
+			var resourcePool = new CoreResourcePool
+			{
+				Name = team1.Name,
+			};
+			objectCreator.CreateCoreResourcePool(resourcePool);
+
+			// Activate
+			TestContext.Api.Teams.Activate([team1.Id, team2.Id]);
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable([team1.Id, team2.Id]);
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(team2.Id));
+
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(team1.Id));
+
+			if (!expectedException.Result.TraceDataPerItem.TryGetValue(team1.Id, out var traceData))
+			{
+				Assert.Fail("Expected trace data for the unsuccessful item was not found.");
+			}
+
+			Assert.AreEqual(1, traceData.ErrorData.Count);
+			var teamError = traceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamMakeBookableError = teamError as TeamMakeBookableError;
+			Assert.IsNotNull(teamMakeBookableError);
+			Assert.AreEqual("Name is already in use.", teamMakeBookableError.ErrorMessage);
+			Assert.AreEqual(team1.Id, teamMakeBookableError.Id);
+
+			// Verify that the resource pool was not created for team 1
+			team1 = TestContext.Api.Teams.Read(team1.Id);
+			Assert.IsNotNull(team1);
+			Assert.AreEqual(Guid.Empty, team1.ResourcePoolId);
+
+			var resourcePool1 = TestContext.PlanApi.ResourcePools.Read(ResourcePoolExposers.Name.Equal(team1.Name)).FirstOrDefault();
+			Assert.IsNull(resourcePool1);
+
+			// Verify that the resource pool was created for team 2
+			team2 = TestContext.Api.Teams.Read(team2.Id);
+			Assert.IsNotNull(team2);
+			Assert.AreNotEqual(Guid.Empty, team2.ResourcePoolId);
+
+			var resourcePool2 = TestContext.PlanApi.ResourcePools.Read(team2.ResourcePoolId);
+			Assert.IsNotNull(resourcePool2);
+			Assert.AreEqual(team2.Name, resourcePool2.Name);
+			Assert.AreEqual(ResourcePoolState.Complete, resourcePool2.State);
+			Assert.AreEqual(0, resourcePool2.Capabilities.Count);
+			Assert.AreEqual(0, resourcePool2.LinkedResourcePools.Count);
 		}
 
 		[TestMethod]
@@ -626,7 +726,147 @@
 		}
 
 		[TestMethod]
-		public void test3()
+		public void MakeBookable_WhenResourcePoolNameExists_DoesNotCreateResourcesForMembers()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person1 = new Person()
+			{
+				Name = $"{prefix}_Person 1",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			var person2 = new Person()
+			{
+				Name = $"{prefix}_Person 2",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			var person3 = new Person()
+			{
+				Name = $"{prefix}_Person 3",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			objectCreator.CreatePeople([person1, person2, person3]);
+			TestContext.Api.People.Activate([person1.Id, person2.Id, person3.Id]);
+
+			var resourcePool = new ResourcePool
+			{
+				Name = team.Name,
+			};
+			resourcePool = objectCreator.CreateResourcePool(resourcePool);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamMakeBookableError = teamError as TeamMakeBookableError;
+			Assert.IsNotNull(teamMakeBookableError);
+			Assert.AreEqual("Name is already in use.", teamMakeBookableError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamMakeBookableError.Id);
+
+			// Verify that the resource pool was not created for team
+			team = TestContext.Api.Teams.Read(team.Id);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(Guid.Empty, team.ResourcePoolId);
+
+			// Verify that people are not available
+			var people = TestContext.Api.People.Read([person1.Id, person2.Id, person3.Id]);
+			Assert.IsTrue(people.All(x => x.ResourceId == Guid.Empty));
+
+			var resources = TestContext.PlanApi.Resources.Read(new ORFilterElement<Resource>(people.Select(x => ResourceExposers.Name.Equal(x.Name)).ToArray())).ToList();
+			Assert.AreEqual(0, resources.Count);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenCoreResourcePoolNameExists_DoesNotCreateResourcesForMembers()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team()
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+			team = TestContext.Api.Teams.Activate(team);
+
+			var person1 = new Person()
+			{
+				Name = $"{prefix}_Person 1",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			var person2 = new Person()
+			{
+				Name = $"{prefix}_Person 2",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			var person3 = new Person()
+			{
+				Name = $"{prefix}_Person 3",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			objectCreator.CreatePeople([person1, person2, person3]);
+			TestContext.Api.People.Activate([person1.Id, person2.Id, person3.Id]);
+
+			var resourcePool = new CoreResourcePool
+			{
+				Name = team.Name,
+			};
+			objectCreator.CreateCoreResourcePool(resourcePool);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamMakeBookableError = teamError as TeamMakeBookableError;
+			Assert.IsNotNull(teamMakeBookableError);
+			Assert.AreEqual("Name is already in use.", teamMakeBookableError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamMakeBookableError.Id);
+
+			// Verify that the resource pool was not created for team
+			team = TestContext.Api.Teams.Read(team.Id);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(Guid.Empty, team.ResourcePoolId);
+
+			// Verify that people are not available
+			var people = TestContext.Api.People.Read([person1.Id, person2.Id, person3.Id]);
+			Assert.IsTrue(people.All(x => x.ResourceId == Guid.Empty));
+
+			var resources = TestContext.PlanApi.Resources.Read(new ORFilterElement<Resource>(people.Select(x => ResourceExposers.Name.Equal(x.Name)).ToArray())).ToList();
+			Assert.AreEqual(0, resources.Count);
+		}
+
+		[TestMethod]
+		public void MakeBookable_WhenBulkOperationAndSharedMemberConflictsWithUnmanagedResource_FailsAffectedTeamsOnly()
 		{
 			/*
 			 * Make T1, T2 and T3 bookable in bulk.
@@ -635,10 +875,400 @@
 			 *		|-> P2 (X)	|-> P2 (X)	|-> p5
 			 *		|-> P3		|-> P5		|-> p6
 			 * */
+
+			var prefix = Guid.NewGuid();
+
+			var team1 = new Team()
+			{
+				Name = $"{prefix}_Team 1",
+			};
+			var team2 = new Team()
+			{
+				Name = $"{prefix}_Team 2",
+			};
+			var team3 = new Team()
+			{
+				Name = $"{prefix}_Team 3",
+			};
+			objectCreator.CreateTeams([team1, team2, team3]);
+			TestContext.Api.Teams.Activate([team1.Id, team2.Id, team3.Id]);
+
+			var person1 = new Person()
+			{
+				Name = $"{prefix}_Person 1",
+			}
+			.AddTeamMembership(new TeamMembership(team1));
+			var person2 = new Person()
+			{
+				Name = $"{prefix}_Person 2",
+			}
+			.AddTeamMembership(new TeamMembership(team1))
+			.AddTeamMembership(new TeamMembership(team2));
+			var person3 = new Person()
+			{
+				Name = $"{prefix}_Person 3",
+			}
+			.AddTeamMembership(new TeamMembership(team1));
+			var person4 = new Person()
+			{
+				Name = $"{prefix}_Person 4",
+			}
+			.AddTeamMembership(new TeamMembership(team2))
+			.AddTeamMembership(new TeamMembership(team3));
+			var person5 = new Person()
+			{
+				Name = $"{prefix}_Person 5",
+			}
+			.AddTeamMembership(new TeamMembership(team2))
+			.AddTeamMembership(new TeamMembership(team3));
+			var person6 = new Person()
+			{
+				Name = $"{prefix}_Person 6",
+			}
+			.AddTeamMembership(new TeamMembership(team3));
+			objectCreator.CreatePeople([person1, person2, person3, person4, person5, person6]);
+			TestContext.Api.People.Activate([person1.Id, person2.Id, person3.Id, person4.Id, person5.Id, person6.Id]);
+
+			var resource = new UnmanagedResource
+			{
+				Name = person2.Name,
+			};
+			resource = objectCreator.CreateResource(resource);
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable([team1.Id, team2.Id, team3.Id]);
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(team3.Id));
+
+			Assert.AreEqual(2, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(team1.Id));
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(team2.Id));
+
+			if (!expectedException.Result.TraceDataPerItem.ContainsKey(team1.Id))
+			{
+				Assert.Fail("Expected trace data for team 1 was not found.");
+			}
+
+			if (!expectedException.Result.TraceDataPerItem.ContainsKey(team2.Id))
+			{
+				Assert.Fail("Expected trace data for team 2 was not found.");
+			}
+
+			foreach (var kvp in expectedException.Result.TraceDataPerItem)
+			{
+				var teamId = kvp.Key;
+				var traceData = kvp.Value;
+
+				Assert.AreEqual(2, traceData.ErrorData.Count);
+				var teamError = traceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+				Assert.IsNotNull(teamError);
+				var teamMakeBookableError = teamError as TeamMakeBookableError;
+				Assert.IsNotNull(teamMakeBookableError);
+				Assert.AreEqual("Failed to create resource for 1 person(s) associated with this team, so the team cannot be made bookable.", teamMakeBookableError.ErrorMessage);
+				Assert.AreEqual(teamId, teamMakeBookableError.Id);
+
+				var personError = traceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+				Assert.IsNotNull(personError);
+				var personMakeBookableError = personError as PersonMakeBookableError;
+				Assert.IsNotNull(personMakeBookableError);
+				Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+				Assert.AreEqual(person2.Id, personMakeBookableError.Id);
+			}
+
+			// Verify that the resource pool was not created for team 1 and team 2
+			var teams = TestContext.Api.Teams.Read([team1.Id, team2.Id, team3.Id]);
+			var resourcePools = TestContext.PlanApi.ResourcePools.Read(new ORFilterElement<ResourcePool>(teams.Select(x => ResourcePoolExposers.Name.Equal(x.Name)).ToArray()));
+
+			team1 = teams.SingleOrDefault(x => x.Id == team1.Id);
+			Assert.IsNotNull(team1);
+			Assert.AreEqual(Guid.Empty, team1.ResourcePoolId);
+			Assert.AreEqual(false, team1.IsBookable);
+			var pool1 = resourcePools.SingleOrDefault(x => x.Name == team1.Name);
+			Assert.IsNull(pool1);
+
+			team2 = teams.SingleOrDefault(x => x.Id == team2.Id);
+			Assert.IsNotNull(team2);
+			Assert.AreEqual(Guid.Empty, team2.ResourcePoolId);
+			Assert.AreEqual(false, team2.IsBookable);
+			var pool2 = resourcePools.SingleOrDefault(x => x.Name == team2.Name);
+			Assert.IsNull(pool2);
+
+			team3 = teams.SingleOrDefault(x => x.Id == team3.Id);
+			Assert.IsNotNull(team3);
+			Assert.AreNotEqual(Guid.Empty, team3.ResourcePoolId);
+			Assert.AreEqual(true, team3.IsBookable);
+			var pool3 = resourcePools.SingleOrDefault(x => x.Name == team3.Name);
+			Assert.IsNotNull(pool3);
+			Assert.AreEqual(pool3.Id, team3.ResourcePoolId);
+			Assert.AreEqual(ResourcePoolState.Complete, pool3.State);
+
+			// Verify that resources were not created for person 1, person 2 and person 3
+			var people = TestContext.Api.People.Read([person1.Id, person2.Id, person3.Id, person4.Id, person5.Id, person6.Id]);
+			var resources = TestContext.PlanApi.Resources.Read(new ORFilterElement<Resource>(people.Select(x => ResourceExposers.Name.Equal(x.Name)).ToArray())).ToList();
+
+			person1 = people.SingleOrDefault(x => x.Id == person1.Id);
+			Assert.IsNotNull(person1);
+			Assert.AreEqual(Guid.Empty, person1.ResourceId);
+			var resource1 = resources.SingleOrDefault(x => x.Name == person1.Name);
+			Assert.IsNull(resource1);
+
+			person2 = people.SingleOrDefault(x => x.Id == person2.Id);
+			Assert.IsNotNull(person2);
+			Assert.AreEqual(Guid.Empty, person2.ResourceId);
+
+			person3 = people.SingleOrDefault(x => x.Id == person3.Id);
+			Assert.IsNotNull(person3);
+			Assert.AreEqual(Guid.Empty, person3.ResourceId);
+			var resource3 = resources.SingleOrDefault(x => x.Name == person3.Name);
+			Assert.IsNull(resource3);
+
+			person4 = people.SingleOrDefault(x => x.Id == person4.Id);
+			Assert.IsNotNull(person4);
+			Assert.AreNotEqual(Guid.Empty, person4.ResourceId);
+			Assert.AreEqual(2, person4.TeamMemberships.Count);
+			var resource4 = resources.SingleOrDefault(x => x.Name == person4.Name);
+			Assert.IsNotNull(resource4);
+			Assert.AreEqual(resource4.Id, person4.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource4.State);
+			Assert.AreEqual(1, resource4.ResourcePoolIds.Count);
+			Assert.IsTrue(resource4.ResourcePoolIds.Contains(pool3.Id));
+
+			person5 = people.SingleOrDefault(x => x.Id == person5.Id);
+			Assert.IsNotNull(person5);
+			Assert.AreNotEqual(Guid.Empty, person5.ResourceId);
+			Assert.AreEqual(2, person5.TeamMemberships.Count);
+			var resource5 = resources.SingleOrDefault(x => x.Name == person5.Name);
+			Assert.IsNotNull(resource5);
+			Assert.AreEqual(resource5.Id, person5.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource5.State);
+			Assert.AreEqual(1, resource5.ResourcePoolIds.Count);
+			Assert.IsTrue(resource5.ResourcePoolIds.Contains(pool3.Id));
+
+			person6 = people.SingleOrDefault(x => x.Id == person6.Id);
+			Assert.IsNotNull(person6);
+			Assert.AreNotEqual(Guid.Empty, person6.ResourceId);
+			Assert.AreEqual(1, person6.TeamMemberships.Count);
+			var resource6 = resources.SingleOrDefault(x => x.Name == person6.Name);
+			Assert.IsNotNull(resource6);
+			Assert.AreEqual(resource6.Id, person6.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource6.State);
+			Assert.AreEqual(1, resource6.ResourcePoolIds.Count);
+			Assert.IsTrue(resource6.ResourcePoolIds.Contains(pool3.Id));
 		}
 
 		[TestMethod]
-		public void test4()
+		public void MakeBookable_WhenBulkOperationAndSharedMemberConflictsWithCoreResource_FailsAffectedTeamsOnly()
+		{
+			/*
+			 * Make T1, T2 and T3 bookable in bulk.
+			 *		T1			T2			T3
+			 *		|-> P1		|-> P4		|-> P4
+			 *		|-> P2 (X)	|-> P2 (X)	|-> p5
+			 *		|-> P3		|-> P5		|-> p6
+			 * */
+
+			var prefix = Guid.NewGuid();
+
+			var team1 = new Team()
+			{
+				Name = $"{prefix}_Team 1",
+			};
+			var team2 = new Team()
+			{
+				Name = $"{prefix}_Team 2",
+			};
+			var team3 = new Team()
+			{
+				Name = $"{prefix}_Team 3",
+			};
+			objectCreator.CreateTeams([team1, team2, team3]);
+			TestContext.Api.Teams.Activate([team1.Id, team2.Id, team3.Id]);
+
+			var person1 = new Person()
+			{
+				Name = $"{prefix}_Person 1",
+			}
+			.AddTeamMembership(new TeamMembership(team1));
+			var person2 = new Person()
+			{
+				Name = $"{prefix}_Person 2",
+			}
+			.AddTeamMembership(new TeamMembership(team1))
+			.AddTeamMembership(new TeamMembership(team2));
+			var person3 = new Person()
+			{
+				Name = $"{prefix}_Person 3",
+			}
+			.AddTeamMembership(new TeamMembership(team1));
+			var person4 = new Person()
+			{
+				Name = $"{prefix}_Person 4",
+			}
+			.AddTeamMembership(new TeamMembership(team2))
+			.AddTeamMembership(new TeamMembership(team3));
+			var person5 = new Person()
+			{
+				Name = $"{prefix}_Person 5",
+			}
+			.AddTeamMembership(new TeamMembership(team2))
+			.AddTeamMembership(new TeamMembership(team3));
+			var person6 = new Person()
+			{
+				Name = $"{prefix}_Person 6",
+			}
+			.AddTeamMembership(new TeamMembership(team3));
+			objectCreator.CreatePeople([person1, person2, person3, person4, person5, person6]);
+			TestContext.Api.People.Activate([person1.Id, person2.Id, person3.Id, person4.Id, person5.Id, person6.Id]);
+
+			var resource = new CoreResource
+			{
+				Name = person2.Name,
+			};
+			objectCreator.CreateCoreResource(resource);
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.MakeBookable([team1.Id, team2.Id, team3.Id]);
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(team3.Id));
+
+			Assert.AreEqual(2, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(team1.Id));
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(team2.Id));
+
+			if (!expectedException.Result.TraceDataPerItem.ContainsKey(team1.Id))
+			{
+				Assert.Fail("Expected trace data for team 1 was not found.");
+			}
+
+			if (!expectedException.Result.TraceDataPerItem.ContainsKey(team2.Id))
+			{
+				Assert.Fail("Expected trace data for team 2 was not found.");
+			}
+
+			foreach (var kvp in expectedException.Result.TraceDataPerItem)
+			{
+				var teamId = kvp.Key;
+				var traceData = kvp.Value;
+
+				Assert.AreEqual(2, traceData.ErrorData.Count);
+				var teamError = traceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+				Assert.IsNotNull(teamError);
+				var teamMakeBookableError = teamError as TeamMakeBookableError;
+				Assert.IsNotNull(teamMakeBookableError);
+				Assert.AreEqual("Failed to complete resource for 1 person(s) associated with this team, so the team cannot be made bookable.", teamMakeBookableError.ErrorMessage);
+				Assert.AreEqual(teamId, teamMakeBookableError.Id);
+
+				var personError = traceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+				Assert.IsNotNull(personError);
+				var personMakeBookableError = personError as PersonMakeBookableError;
+				Assert.IsNotNull(personMakeBookableError);
+				Assert.AreEqual("Name is already in use.", personMakeBookableError.ErrorMessage);
+				Assert.AreEqual(person2.Id, personMakeBookableError.Id);
+			}
+
+			// Verify that the resource pool was not created for team 1 and team 2
+			var teams = TestContext.Api.Teams.Read([team1.Id, team2.Id, team3.Id]);
+			var resourcePools = TestContext.PlanApi.ResourcePools.Read(new ORFilterElement<ResourcePool>(teams.Select(x => ResourcePoolExposers.Name.Equal(x.Name)).ToArray()));
+
+			team1 = teams.SingleOrDefault(x => x.Id == team1.Id);
+			Assert.IsNotNull(team1);
+			Assert.AreEqual(Guid.Empty, team1.ResourcePoolId);
+			Assert.AreEqual(false, team1.IsBookable);
+			var pool1 = resourcePools.SingleOrDefault(x => x.Name == team1.Name);
+			Assert.IsNull(pool1);
+
+			team2 = teams.SingleOrDefault(x => x.Id == team2.Id);
+			Assert.IsNotNull(team2);
+			Assert.AreEqual(Guid.Empty, team2.ResourcePoolId);
+			Assert.AreEqual(false, team2.IsBookable);
+			var pool2 = resourcePools.SingleOrDefault(x => x.Name == team2.Name);
+			Assert.IsNull(pool2);
+
+			team3 = teams.SingleOrDefault(x => x.Id == team3.Id);
+			Assert.IsNotNull(team3);
+			Assert.AreNotEqual(Guid.Empty, team3.ResourcePoolId);
+			Assert.AreEqual(true, team3.IsBookable);
+			var pool3 = resourcePools.SingleOrDefault(x => x.Name == team3.Name);
+			Assert.IsNotNull(pool3);
+			Assert.AreEqual(pool3.Id, team3.ResourcePoolId);
+			Assert.AreEqual(ResourcePoolState.Complete, pool3.State);
+
+			// Verify that resources were not created for person 1, person 2 and person 3
+			var people = TestContext.Api.People.Read([person1.Id, person2.Id, person3.Id, person4.Id, person5.Id, person6.Id]);
+			var resources = TestContext.PlanApi.Resources.Read(new ORFilterElement<Resource>(people.Select(x => ResourceExposers.Name.Equal(x.Name)).ToArray())).ToList();
+
+			person1 = people.SingleOrDefault(x => x.Id == person1.Id);
+			Assert.IsNotNull(person1);
+			Assert.AreEqual(Guid.Empty, person1.ResourceId);
+			var resource1 = resources.SingleOrDefault(x => x.Name == person1.Name);
+			Assert.IsNull(resource1);
+
+			person2 = people.SingleOrDefault(x => x.Id == person2.Id);
+			Assert.IsNotNull(person2);
+			Assert.AreEqual(Guid.Empty, person2.ResourceId);
+
+			person3 = people.SingleOrDefault(x => x.Id == person3.Id);
+			Assert.IsNotNull(person3);
+			Assert.AreEqual(Guid.Empty, person3.ResourceId);
+			var resource3 = resources.SingleOrDefault(x => x.Name == person3.Name);
+			Assert.IsNull(resource3);
+
+			person4 = people.SingleOrDefault(x => x.Id == person4.Id);
+			Assert.IsNotNull(person4);
+			Assert.AreNotEqual(Guid.Empty, person4.ResourceId);
+			Assert.AreEqual(2, person4.TeamMemberships.Count);
+			var resource4 = resources.SingleOrDefault(x => x.Name == person4.Name);
+			Assert.IsNotNull(resource4);
+			Assert.AreEqual(resource4.Id, person4.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource4.State);
+			Assert.AreEqual(1, resource4.ResourcePoolIds.Count);
+			Assert.IsTrue(resource4.ResourcePoolIds.Contains(pool3.Id));
+
+			person5 = people.SingleOrDefault(x => x.Id == person5.Id);
+			Assert.IsNotNull(person5);
+			Assert.AreNotEqual(Guid.Empty, person5.ResourceId);
+			Assert.AreEqual(2, person5.TeamMemberships.Count);
+			var resource5 = resources.SingleOrDefault(x => x.Name == person5.Name);
+			Assert.IsNotNull(resource5);
+			Assert.AreEqual(resource5.Id, person5.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource5.State);
+			Assert.AreEqual(1, resource5.ResourcePoolIds.Count);
+			Assert.IsTrue(resource5.ResourcePoolIds.Contains(pool3.Id));
+
+			person6 = people.SingleOrDefault(x => x.Id == person6.Id);
+			Assert.IsNotNull(person6);
+			Assert.AreNotEqual(Guid.Empty, person6.ResourceId);
+			Assert.AreEqual(1, person6.TeamMemberships.Count);
+			var resource6 = resources.SingleOrDefault(x => x.Name == person6.Name);
+			Assert.IsNotNull(resource6);
+			Assert.AreEqual(resource6.Id, person6.ResourceId);
+			Assert.AreEqual(ResourceState.Complete, resource6.State);
+			Assert.AreEqual(1, resource6.ResourcePoolIds.Count);
+			Assert.IsTrue(resource6.ResourcePoolIds.Contains(pool3.Id));
+		}
+
+		[TestMethod]
+		public void test5()
 		{
 			var prefix = Guid.NewGuid();
 

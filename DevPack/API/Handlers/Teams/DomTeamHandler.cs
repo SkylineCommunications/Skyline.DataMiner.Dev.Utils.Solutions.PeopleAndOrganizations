@@ -630,6 +630,49 @@
 					PassTraceData(id, traceData);
 				}
 			}
+
+			var teamIdsWithFailures = createResult.UnsuccessfulIds.ToHashSet();
+
+			var toDeprecatePersonIds = new HashSet<Guid>();
+			foreach (var personMapping in mapper.PersonsById.Values)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personMapping.Person.Id, out var teams))
+				{
+					continue;
+				}
+
+				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
+				{
+					toDeprecatePersonIds.Add(personMapping.Person.Id);
+				}
+			}
+
+			if (toDeprecatePersonIds.Count == 0)
+			{
+				return;
+			}
+
+			var toDeprecatePeople = mapper.PersonsById
+				.Where(x => toDeprecatePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+
+			api.Logger.Warning(this, $"Reverting {toDeprecatePeople.Count} person(s) due to resource pool creation failures for their associated teams.");
+
+			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecatePeople, out var deprecateResult))
+			{
+				api.Logger.Error(this, $"Failed to deprecate resources for {deprecateResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool creation failures.", [deprecateResult.UnsuccessfulIds.ToArray()]);
+			}
+
+			var toDeletePersonIds = deprecateResult.SuccessfulIds.ToList();
+			var toDeletePeople = mapper.PersonsById
+				.Where(x => toDeletePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDelete(api, toDeletePeople, out var deleteResult))
+			{
+				api.Logger.Error(this, $"Failed to delete resources for {deleteResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool creation failures.", [deleteResult.UnsuccessfulIds.ToArray()]);
+			}
 		}
 
 		private void CompleteResourcePoolsForBookableTeams(TeamPersonBookableMapper mapper)
@@ -654,6 +697,53 @@
 				{
 					PassTraceData(id, traceData);
 				}
+			}
+
+			var teamIdsWithFailures = completeResult.UnsuccessfulIds.ToHashSet();
+
+			var toDeprecatePersonIds = new HashSet<Guid>();
+			foreach (var personMapping in mapper.PersonsById.Values)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personMapping.Person.Id, out var teams))
+				{
+					continue;
+				}
+
+				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
+				{
+					toDeprecatePersonIds.Add(personMapping.Person.Id);
+				}
+			}
+
+			var toDeprecatePeople = mapper.PersonsById
+				.Where(x => toDeprecatePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+
+			api.Logger.Warning(this, $"Reverting {toDeprecatePeople.Count} person(s) due to resource pool completion failures for their associated teams.");
+
+			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecatePeople, out var deprecatePeopleResult))
+			{
+				api.Logger.Error(this, $"Failed to deprecate resources for {deprecatePeopleResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool completion failures.", [deprecatePeopleResult.UnsuccessfulIds.ToArray()]);
+			}
+
+			var toDeletePersonIds = deprecatePeopleResult.SuccessfulIds.ToList();
+			var toDeletePeople = mapper.PersonsById
+				.Where(x => toDeletePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDelete(api, toDeletePeople, out var deletePeopleResult))
+			{
+				api.Logger.Error(this, $"Failed to delete resources for {deletePeopleResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool completion failures.", [deletePeopleResult.UnsuccessfulIds.ToArray()]);
+			}
+
+			var toDeleteTeams = mapper.TeamsById
+				.Where(x => teamIdsWithFailures.Contains(x.Key))
+				.Select(x => x.Value)
+				.ToList();
+			if (!MediaOpsResourcePoolHandler.TryDelete(api, toDeleteTeams, out var deleteTeamsResults))
+			{
+				api.Logger.Error(this, $"Failed to delete {deleteTeamsResults.UnsuccessfulIds.Count} team(s) that had resource pool completion failures.", [deleteTeamsResults.UnsuccessfulIds.ToArray()]);
 			}
 		}
 
