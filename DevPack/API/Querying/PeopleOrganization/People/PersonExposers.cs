@@ -72,7 +72,7 @@
 		internal static readonly Exposer<Person, Guid> ResourceId = new Exposer<Person, Guid>((obj) => obj.ResourceId, "ResourceId");
 
 		/// <summary>
-		/// Gets an exposer for the <see cref="Person.ResourceId"/> property.
+		/// Gets an exposer indicating whether a resource is linked to the person.
 		/// </summary>
 		internal static readonly Exposer<Person, bool> HasResourceId = new Exposer<Person, bool>("HasResourceId");
 
