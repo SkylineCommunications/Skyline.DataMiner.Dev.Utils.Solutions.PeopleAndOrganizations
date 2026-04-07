@@ -1968,6 +1968,13 @@
 			Assert.IsNotNull(resource);
 			Assert.AreEqual(ResourceState.Complete, resource.State);
 
+			// Remove person from team
+			var membershipToRemove = person.TeamMemberships.First();
+			person.RemoveTeamMembership(membershipToRemove);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+
 			// Deprecate person
 			person = TestContext.Api.People.Deprecate(person);
 			Assert.IsNotNull(person);
@@ -2014,6 +2021,13 @@
 			var resource = TestContext.PlanApi.Resources.Read(resourceId);
 			Assert.IsNotNull(resource);
 			Assert.AreEqual(ResourceState.Complete, resource.State);
+
+			// Remove person from team
+			var membershipToRemove = person.TeamMemberships.First();
+			person.RemoveTeamMembership(membershipToRemove);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
 
 			// Deprecate and delete person
 			person = TestContext.Api.People.Deprecate(person);
