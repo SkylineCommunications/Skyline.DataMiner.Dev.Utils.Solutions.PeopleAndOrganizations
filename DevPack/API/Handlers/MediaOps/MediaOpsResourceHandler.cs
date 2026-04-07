@@ -70,64 +70,20 @@
 			var resourcesToCreateOrUpdate = new List<Resource>();
 			foreach (var mapping in PersonResourceMapping.GetMappings(api, apiPeople))
 			{
-				var person = mapping.Person;
-				var resource = mapping.Resource;
-
-				SyncPersonWithResource(person, resource);
-				resourcesToCreateOrUpdate.Add(resource);
-
-				personsByResourceId[resource.Id] = person;
+				SyncPersonWithResource(mapping.Person, mapping.Resource);
+				resourcesToCreateOrUpdate.Add(mapping.Resource);
+				personsByResourceId[mapping.Resource.Id] = mapping.Person;
 			}
 
 			try
 			{
 				var resources = api.PlanApi.Resources.CreateOrUpdate(resourcesToCreateOrUpdate);
-				HandleSuccess(resources.Select(x => x.Id).ToList());
+				HandlePersonResourceCreated(personsByResourceId, resources.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> resourceIds)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					person.ResourceId = resourceId;
-
-					ReportSuccess(person);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> resourceIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(resourceId, out var traceData))
-					{
-						foreach (var error in ComposePersonErrors(person.Id, traceData))
-						{
-							ReportError(person.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(person.Id);
-					}
-				}
+				HandlePersonResourceCreated(personsByResourceId, ex.Result.SuccessfulIds.ToList());
+				HandlePersonResourceFailures(personsByResourceId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -158,50 +114,12 @@
 			try
 			{
 				var resources = api.PlanApi.Resources.Complete(personsByResourceId.Keys);
-				HandleSuccess(resources.Select(x => x.Id).ToList());
+				HandlePersonResourceSuccess(personsByResourceId, resources.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> resourceIds)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					ReportSuccess(person);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> resourceIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(resourceId, out var traceData))
-					{
-						foreach (var error in ComposePersonErrors(person.Id, traceData))
-						{
-							ReportError(person.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(person.Id);
-					}
-				}
+				HandlePersonResourceSuccess(personsByResourceId, ex.Result.SuccessfulIds.ToList());
+				HandlePersonResourceFailures(personsByResourceId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -232,50 +150,12 @@
 			try
 			{
 				var resources = api.PlanApi.Resources.Deprecate(personsByResourceId.Keys);
-				HandleSuccess(resources.Select(x => x.Id).ToList());
+				HandlePersonResourceSuccess(personsByResourceId, resources.Select(x => x.Id).ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
-			}
-
-			void HandleSuccess(ICollection<Guid> resourceIds)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					ReportSuccess(person);
-				}
-			}
-
-			void HandleFailure(ICollection<Guid> resourceIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
-			{
-				foreach (var resourceId in resourceIds)
-				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					if (traceDataPerItem.TryGetValue(resourceId, out var traceData))
-					{
-						foreach (var error in ComposePersonErrors(person.Id, traceData))
-						{
-							ReportError(person.Id, error);
-						}
-					}
-					else
-					{
-						ReportError(person.Id);
-					}
-				}
+				HandlePersonResourceSuccess(personsByResourceId, ex.Result.SuccessfulIds.ToList());
+				HandlePersonResourceFailures(personsByResourceId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
 		}
 
@@ -306,49 +186,64 @@
 			try
 			{
 				api.PlanApi.Resources.Delete(personsByResourceId.Keys);
-				HandleSuccess(personsByResourceId.Keys);
+				HandlePersonResourceSuccess(personsByResourceId, personsByResourceId.Keys.ToList());
 			}
 			catch (MediaOpsBulkException<Guid> ex)
 			{
-				HandleSuccess(ex.Result.SuccessfulIds.ToList());
-				HandleFailure(ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
+				HandlePersonResourceSuccess(personsByResourceId, ex.Result.SuccessfulIds.ToList());
+				HandlePersonResourceFailures(personsByResourceId, ex.Result.UnsuccessfulIds.ToList(), ex.Result.TraceDataPerItem);
 			}
+		}
 
-			void HandleSuccess(ICollection<Guid> resourceIds)
+		private void HandlePersonResourceCreated(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds)
+		{
+			foreach (var resourceId in resourceIds)
 			{
-				foreach (var resourceId in resourceIds)
+				if (!personsByResourceId.TryGetValue(resourceId, out var person))
 				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
-
-					ReportSuccess(person);
+					api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
+					continue;
 				}
+
+				person.ResourceId = resourceId;
+				ReportSuccess(person);
 			}
+		}
 
-			void HandleFailure(ICollection<Guid> resourceIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+		private void HandlePersonResourceSuccess(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds)
+		{
+			foreach (var resourceId in resourceIds)
 			{
-				foreach (var resourceId in resourceIds)
+				if (!personsByResourceId.TryGetValue(resourceId, out var person))
 				{
-					if (!personsByResourceId.TryGetValue(resourceId, out var person))
-					{
-						api.Logger.Error(this, $"Received failure result for Resource ID '{resourceId}' that cannot be mapped to a person.");
-						continue;
-					}
+					api.Logger.Error(this, $"Received success result for Resource ID '{resourceId}' that cannot be mapped to a person.");
+					continue;
+				}
 
-					if (traceDataPerItem.TryGetValue(resourceId, out var traceData))
+				ReportSuccess(person);
+			}
+		}
+
+		private void HandlePersonResourceFailures(Dictionary<Guid, Person> personsByResourceId, ICollection<Guid> resourceIds, IReadOnlyDictionary<Guid, MediaOpsTraceData> traceDataPerItem)
+		{
+			foreach (var resourceId in resourceIds)
+			{
+				if (!personsByResourceId.TryGetValue(resourceId, out var person))
+				{
+					api.Logger.Error(this, $"Received failure result for Resource ID '{resourceId}' that cannot be mapped to a person.");
+					continue;
+				}
+
+				if (traceDataPerItem.TryGetValue(resourceId, out var traceData))
+				{
+					foreach (var error in ComposePersonErrors(person.Id, traceData))
 					{
-						foreach (var error in ComposePersonErrors(person.Id, traceData))
-						{
-							ReportError(person.Id, error);
-						}
+						ReportError(person.Id, error);
 					}
-					else
-					{
-						ReportError(person.Id);
-					}
+				}
+				else
+				{
+					ReportError(person.Id);
 				}
 			}
 		}

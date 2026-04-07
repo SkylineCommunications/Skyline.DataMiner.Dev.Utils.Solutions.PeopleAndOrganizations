@@ -435,61 +435,10 @@
 				return;
 			}
 
-			var teamIdsWithFailures = new HashSet<Guid>();
-			foreach (var personId in createResult.UnsuccessfulIds)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
-				{
-					continue;
-				}
+			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, createResult.UnsuccessfulIds);
+			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, createResult.UnsuccessfulIds, createResult.TraceDataPerItem, "create");
 
-				foreach (var team in teams)
-				{
-					teamIdsWithFailures.Add(team.Id);
-				}
-			}
-
-			foreach (var teamId in teamIdsWithFailures)
-			{
-				if (!mapper.PersonsByTeamId.TryGetValue(teamId, out var people))
-				{
-					continue;
-				}
-
-				var failedPeople = people.Where(x => createResult.UnsuccessfulIds.Contains(x.Person.Id)).ToList();
-
-				var error = new TeamMakeBookableError
-				{
-					ErrorMessage = $"Failed to create resource for {failedPeople.Count} person(s) associated with this team, so the team cannot be made bookable.",
-					Id = teamId,
-				};
-				ReportError(teamId, error);
-
-				foreach (var person in failedPeople)
-				{
-					if (!createResult.TraceDataPerItem.TryGetValue(person.Person.Id, out var traceData))
-					{
-						continue;
-					}
-
-					PassTraceData(teamId, traceData);
-				}
-			}
-
-			var toDeleteIds = new HashSet<Guid>();
-			foreach (var personId in createResult.SuccessfulIds)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
-				{
-					continue;
-				}
-
-				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
-				{
-					toDeleteIds.Add(personId);
-				}
-			}
-
+			var toDeleteIds = GetPersonIdsOnlyLinkedToFailedTeams(mapper, createResult.SuccessfulIds, teamIdsWithFailures);
 			if (toDeleteIds.Count == 0)
 			{
 				return;
@@ -527,61 +476,10 @@
 				return;
 			}
 
-			var teamIdsWithFailures = new HashSet<Guid>();
-			foreach (var personId in completeResult.UnsuccessfulIds)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
-				{
-					continue;
-				}
+			var teamIdsWithFailures = GetTeamIdsFromPersonFailures(mapper, completeResult.UnsuccessfulIds);
+			PropagatePersonFailuresToTeams(mapper, teamIdsWithFailures, completeResult.UnsuccessfulIds, completeResult.TraceDataPerItem, "complete");
 
-				foreach (var team in teams)
-				{
-					teamIdsWithFailures.Add(team.Id);
-				}
-			}
-
-			foreach (var teamId in teamIdsWithFailures)
-			{
-				if (!mapper.PersonsByTeamId.TryGetValue(teamId, out var people))
-				{
-					continue;
-				}
-
-				var failedPeople = people.Where(x => completeResult.UnsuccessfulIds.Contains(x.Person.Id)).ToList();
-
-				var error = new TeamMakeBookableError
-				{
-					ErrorMessage = $"Failed to complete resource for {failedPeople.Count} person(s) associated with this team, so the team cannot be made bookable.",
-					Id = teamId,
-				};
-				ReportError(teamId, error);
-
-				foreach (var person in failedPeople)
-				{
-					if (!completeResult.TraceDataPerItem.TryGetValue(person.Person.Id, out var traceData))
-					{
-						continue;
-					}
-
-					PassTraceData(teamId, traceData);
-				}
-			}
-
-			var toDeprecateIds = new HashSet<Guid>();
-			foreach (var personId in completeResult.SuccessfulIds)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
-				{
-					continue;
-				}
-
-				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
-				{
-					toDeprecateIds.Add(personId);
-				}
-			}
-
+			var toDeprecateIds = GetPersonIdsOnlyLinkedToFailedTeams(mapper, completeResult.SuccessfulIds, teamIdsWithFailures);
 			if (toDeprecateIds.Count == 0)
 			{
 				return;
@@ -632,47 +530,7 @@
 			}
 
 			var teamIdsWithFailures = createResult.UnsuccessfulIds.ToHashSet();
-
-			var toDeprecatePersonIds = new HashSet<Guid>();
-			foreach (var personMapping in mapper.PersonsById.Values)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personMapping.Person.Id, out var teams))
-				{
-					continue;
-				}
-
-				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
-				{
-					toDeprecatePersonIds.Add(personMapping.Person.Id);
-				}
-			}
-
-			if (toDeprecatePersonIds.Count == 0)
-			{
-				return;
-			}
-
-			var toDeprecatePeople = mapper.PersonsById
-				.Where(x => toDeprecatePersonIds.Contains(x.Key))
-				.Select(x => x.Value.Person)
-				.ToList();
-
-			api.Logger.Warning(this, $"Reverting {toDeprecatePeople.Count} person(s) due to resource pool creation failures for their associated teams.");
-
-			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecatePeople, out var deprecateResult))
-			{
-				api.Logger.Error(this, $"Failed to deprecate resources for {deprecateResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool creation failures.", [deprecateResult.UnsuccessfulIds.ToArray()]);
-			}
-
-			var toDeletePersonIds = deprecateResult.SuccessfulIds.ToList();
-			var toDeletePeople = mapper.PersonsById
-				.Where(x => toDeletePersonIds.Contains(x.Key))
-				.Select(x => x.Value.Person)
-				.ToList();
-			if (!MediaOpsResourceHandler.TryDelete(api, toDeletePeople, out var deleteResult))
-			{
-				api.Logger.Error(this, $"Failed to delete resources for {deleteResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool creation failures.", [deleteResult.UnsuccessfulIds.ToArray()]);
-			}
+			RevertPeopleForFailedTeams(mapper, teamIdsWithFailures, "creation");
 		}
 
 		private void CompleteResourcePoolsForBookableTeams(TeamPersonBookableMapper mapper)
@@ -700,42 +558,7 @@
 			}
 
 			var teamIdsWithFailures = completeResult.UnsuccessfulIds.ToHashSet();
-
-			var toDeprecatePersonIds = new HashSet<Guid>();
-			foreach (var personMapping in mapper.PersonsById.Values)
-			{
-				if (!mapper.TeamsByPersonId.TryGetValue(personMapping.Person.Id, out var teams))
-				{
-					continue;
-				}
-
-				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
-				{
-					toDeprecatePersonIds.Add(personMapping.Person.Id);
-				}
-			}
-
-			var toDeprecatePeople = mapper.PersonsById
-				.Where(x => toDeprecatePersonIds.Contains(x.Key))
-				.Select(x => x.Value.Person)
-				.ToList();
-
-			api.Logger.Warning(this, $"Reverting {toDeprecatePeople.Count} person(s) due to resource pool completion failures for their associated teams.");
-
-			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecatePeople, out var deprecatePeopleResult))
-			{
-				api.Logger.Error(this, $"Failed to deprecate resources for {deprecatePeopleResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool completion failures.", [deprecatePeopleResult.UnsuccessfulIds.ToArray()]);
-			}
-
-			var toDeletePersonIds = deprecatePeopleResult.SuccessfulIds.ToList();
-			var toDeletePeople = mapper.PersonsById
-				.Where(x => toDeletePersonIds.Contains(x.Key))
-				.Select(x => x.Value.Person)
-				.ToList();
-			if (!MediaOpsResourceHandler.TryDelete(api, toDeletePeople, out var deletePeopleResult))
-			{
-				api.Logger.Error(this, $"Failed to delete resources for {deletePeopleResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool completion failures.", [deletePeopleResult.UnsuccessfulIds.ToArray()]);
-			}
+			RevertPeopleForFailedTeams(mapper, teamIdsWithFailures, "completion");
 
 			var toDeleteTeams = mapper.TeamsById
 				.Where(x => teamIdsWithFailures.Contains(x.Key))
@@ -784,6 +607,105 @@
 			if (directUpdates.Count > 0)
 			{
 				MediaOpsResourceHandler.TryCreateOrUpdate(api, directUpdates, out var result);
+			}
+		}
+
+		private HashSet<Guid> GetTeamIdsFromPersonFailures(TeamPersonBookableMapper mapper, ICollection<Guid> failedPersonIds)
+		{
+			var teamIdsWithFailures = new HashSet<Guid>();
+			foreach (var personId in failedPersonIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				foreach (var team in teams)
+				{
+					teamIdsWithFailures.Add(team.Id);
+				}
+			}
+
+			return teamIdsWithFailures;
+		}
+
+		private void PropagatePersonFailuresToTeams(TeamPersonBookableMapper mapper, HashSet<Guid> teamIdsWithFailures, ICollection<Guid> failedPersonIds, IReadOnlyDictionary<Guid, PeopleAndOrganizationsTraceData> traceDataPerItem, string actionVerb)
+		{
+			foreach (var teamId in teamIdsWithFailures)
+			{
+				if (!mapper.PersonsByTeamId.TryGetValue(teamId, out var people))
+				{
+					continue;
+				}
+
+				var failedPeople = people.Where(x => failedPersonIds.Contains(x.Person.Id)).ToList();
+
+				var error = new TeamMakeBookableError
+				{
+					ErrorMessage = $"Failed to {actionVerb} resource for {failedPeople.Count} person(s) associated with this team, so the team cannot be made bookable.",
+					Id = teamId,
+				};
+				ReportError(teamId, error);
+
+				foreach (var person in failedPeople)
+				{
+					if (!traceDataPerItem.TryGetValue(person.Person.Id, out var traceData))
+					{
+						continue;
+					}
+
+					PassTraceData(teamId, traceData);
+				}
+			}
+		}
+
+		private static HashSet<Guid> GetPersonIdsOnlyLinkedToFailedTeams(TeamPersonBookableMapper mapper, IEnumerable<Guid> personIds, HashSet<Guid> teamIdsWithFailures)
+		{
+			var result = new HashSet<Guid>();
+			foreach (var personId in personIds)
+			{
+				if (!mapper.TeamsByPersonId.TryGetValue(personId, out var teams))
+				{
+					continue;
+				}
+
+				if (teams.All(t => teamIdsWithFailures.Contains(t.Id)))
+				{
+					result.Add(personId);
+				}
+			}
+
+			return result;
+		}
+
+		private void RevertPeopleForFailedTeams(TeamPersonBookableMapper mapper, HashSet<Guid> teamIdsWithFailures, string operationName)
+		{
+			var toDeprecatePersonIds = GetPersonIdsOnlyLinkedToFailedTeams(mapper, mapper.PersonsById.Keys, teamIdsWithFailures);
+			if (toDeprecatePersonIds.Count == 0)
+			{
+				return;
+			}
+
+			var toDeprecatePeople = mapper.PersonsById
+				.Where(x => toDeprecatePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+
+			api.Logger.Warning(this, $"Reverting {toDeprecatePeople.Count} person(s) due to resource pool {operationName} failures for their associated teams.");
+
+			if (!MediaOpsResourceHandler.TryDeprecate(api, toDeprecatePeople, out var deprecateResult))
+			{
+				api.Logger.Error(this, $"Failed to deprecate resources for {deprecateResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool {operationName} failures.", [deprecateResult.UnsuccessfulIds.ToArray()]);
+			}
+
+			var toDeletePersonIds = deprecateResult.SuccessfulIds.ToList();
+			var toDeletePeople = mapper.PersonsById
+				.Where(x => toDeletePersonIds.Contains(x.Key))
+				.Select(x => x.Value.Person)
+				.ToList();
+			if (!MediaOpsResourceHandler.TryDelete(api, toDeletePeople, out var deleteResult))
+			{
+				api.Logger.Error(this, $"Failed to delete resources for {deleteResult.UnsuccessfulIds.Count} person(s) that were associated only with teams that had resource pool {operationName} failures.", [deleteResult.UnsuccessfulIds.ToArray()]);
 			}
 		}
 
