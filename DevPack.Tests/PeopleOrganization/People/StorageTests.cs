@@ -3,7 +3,6 @@
 	using System.Linq;
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache;
 
 	[TestClass]
 	public sealed class StorageTests
@@ -15,8 +14,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team()
 			{
 				Name = "Team 1",
@@ -25,7 +22,7 @@
 			{
 				Name = "Team 2",
 			};
-			cache.SetCache<Team>([team1, team2]);
+			person.Cache.SetCache<Team>([team1, team2]);
 
 			var organization1 = new Organization()
 			{
@@ -35,15 +32,15 @@
 			{
 				Name = "Organization 2",
 			};
-			cache.SetCache<Organization>([organization1, organization2]);
+			person.Cache.SetCache<Organization>([organization1, organization2]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(2, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id));
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team2.Id));
 
-			var cachedOrganizations = cache.GetFromCache<Organization>().ToList();
+			var cachedOrganizations = person.Cache.GetFromCache<Organization>().ToList();
 			Assert.IsNotNull(cachedOrganizations);
 			Assert.AreEqual(2, cachedOrganizations.Count);
 			Assert.IsTrue(cachedOrganizations.Exists(x => x.Id == organization1.Id));
@@ -57,8 +54,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team()
 			{
 				Name = "Team 1",
@@ -67,9 +62,9 @@
 			{
 				Name = "Team 2",
 			};
-			cache.SetCache<Team>([team1, team2]);
+			person.Cache.SetCache<Team>([team1, team2]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(2, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id && x.Name == "Team 1"));
@@ -80,9 +75,9 @@
 			{
 				Name = "Team 3",
 			};
-			cache.SetCache<Team>([team1, team3]);
+			person.Cache.SetCache<Team>([team1, team3]);
 
-			cachedTeams = cache.GetFromCache<Team>().ToList();
+			cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(2, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id && x.Name == "Updated Team 1"));
@@ -96,11 +91,9 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			try
 			{
-				cache.SetCache<Team>(null);
+				person.Cache.SetCache<Team>(null);
 			}
 			catch (ArgumentNullException)
 			{
@@ -118,10 +111,9 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-			cache.SetCache<Team>([]);
+			person.Cache.SetCache<Team>([]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.AreEqual(0, cachedTeams.Count);
 		}
 
@@ -132,14 +124,12 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team();
 			var team2 = new Team();
 
 			try
 			{
-				cache.SetCache<Team?>([team1, null, team2, null]);
+				person.Cache.SetCache<Team?>([team1, null, team2, null]);
 			}
 			catch (ArgumentException)
 			{
@@ -157,8 +147,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team();
 			var team2 = new Team();
 
@@ -167,7 +155,7 @@
 
 			try
 			{
-				cache.SetCache<ApiObject>([team1, team2, organization1, organization2]);
+				person.Cache.SetCache<ApiObject>([team1, team2, organization1, organization2]);
 			}
 			catch (InvalidOperationException ex)
 			{
@@ -185,8 +173,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team()
 			{
 				Name = "Team 1",
@@ -195,7 +181,7 @@
 			{
 				Name = "Team 2",
 			};
-			cache.AddToCache<Team>([team1, team2]);
+			person.Cache.AddToCache<Team>([team1, team2]);
 
 			var organization1 = new Organization()
 			{
@@ -205,15 +191,15 @@
 			{
 				Name = "Organization 2",
 			};
-			cache.AddToCache<Organization>([organization1, organization2]);
+			person.Cache.AddToCache<Organization>([organization1, organization2]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(2, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id));
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team2.Id));
 
-			var cachedOrganizations = cache.GetFromCache<Organization>().ToList();
+			var cachedOrganizations = person.Cache.GetFromCache<Organization>().ToList();
 			Assert.IsNotNull(cachedOrganizations);
 			Assert.AreEqual(2, cachedOrganizations.Count);
 			Assert.IsTrue(cachedOrganizations.Exists(x => x.Id == organization1.Id));
@@ -227,8 +213,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team()
 			{
 				Name = "Team 1",
@@ -237,9 +221,9 @@
 			{
 				Name = "Team 2",
 			};
-			cache.AddToCache<Team>([team1, team2]);
+			person.Cache.AddToCache<Team>([team1, team2]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(2, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id && x.Name == "Team 1"));
@@ -250,9 +234,9 @@
 			{
 				Name = "Team 3",
 			};
-			cache.AddToCache<Team>([team1, team3]);
+			person.Cache.AddToCache<Team>([team1, team3]);
 
-			cachedTeams = cache.GetFromCache<Team>().ToList();
+			cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.IsNotNull(cachedTeams);
 			Assert.AreEqual(3, cachedTeams.Count);
 			Assert.IsTrue(cachedTeams.Exists(x => x.Id == team1.Id && x.Name == "Updated Team 1"));
@@ -267,11 +251,9 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			try
 			{
-				cache.AddToCache<Team>(null);
+				person.Cache.AddToCache<Team>(null);
 			}
 			catch (ArgumentNullException)
 			{
@@ -289,10 +271,9 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-			cache.AddToCache<Team>([]);
+			person.Cache.AddToCache<Team>([]);
 
-			var cachedTeams = cache.GetFromCache<Team>().ToList();
+			var cachedTeams = person.Cache.GetFromCache<Team>().ToList();
 			Assert.AreEqual(0, cachedTeams.Count);
 		}
 
@@ -303,14 +284,12 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team();
 			var team2 = new Team();
 
 			try
 			{
-				cache.AddToCache<Team?>([team1, null, team2, null]);
+				person.Cache.AddToCache<Team?>([team1, null, team2, null]);
 			}
 			catch (ArgumentException)
 			{
@@ -328,8 +307,6 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team();
 			var team2 = new Team();
 
@@ -338,7 +315,7 @@
 
 			try
 			{
-				cache.AddToCache<ApiObject>([team1, team2, organization1, organization2]);
+				person.Cache.AddToCache<ApiObject>([team1, team2, organization1, organization2]);
 			}
 			catch (InvalidOperationException ex)
 			{
@@ -356,13 +333,11 @@
 			{
 				Name = "Test Person",
 			};
-			var cache = (ITemporaryCache<ApiObject>)person;
-
 			var team1 = new Team();
 			var team2 = new Team();
-			cache.SetCache<Team>([team1, team2]);
+			person.Cache.SetCache<Team>([team1, team2]);
 
-			var cachedOrganizations = cache.GetFromCache<Organization>().ToList();
+			var cachedOrganizations = person.Cache.GetFromCache<Organization>().ToList();
 			Assert.IsNotNull(cachedOrganizations);
 			Assert.AreEqual(0, cachedOrganizations.Count);
 		}

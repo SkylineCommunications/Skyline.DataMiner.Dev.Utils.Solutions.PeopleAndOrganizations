@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
-	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -13,9 +12,9 @@
 	/// <summary>
 	/// Represents a person in People and Organizations.
 	/// </summary>
-	public class Person : ApiObject, ITemporaryCache<ApiObject>
+	public class Person : ApiObject
 	{
-		private readonly ConcurrentDictionary<Type, List<ApiObject>> localCache = new();
+		private readonly PersonCache cache = new PersonCache();
 
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
@@ -108,6 +107,8 @@
 		public IReadOnlyCollection<TeamMembership> TeamMemberships => teamMemberships;
 
 		internal Guid ResourceId { get; set; }
+
+		internal PersonCache Cache => cache;
 
 		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
 
@@ -349,96 +350,5 @@
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum, PersonState>(instance.Status);
 		}
 
-		void ITemporaryCache<ApiObject>.SetCache<T>(IEnumerable<T> objects)
-		{
-			var type = typeof(T);
-			if (type == typeof(ApiObject))
-			{
-				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
-			}
-
-			if (objects == null)
-			{
-				throw new ArgumentNullException(nameof(objects));
-			}
-
-			if (!objects.Any())
-			{
-				return;
-			}
-
-			if (objects.Any(o => o == null))
-			{
-				throw new ArgumentException("objects collection contains null values", nameof(objects));
-			}
-
-			if (!localCache.TryGetValue(type, out var cachedObjects))
-			{
-				cachedObjects = new List<ApiObject>();
-				localCache.TryAdd(type, cachedObjects);
-			}
-
-			cachedObjects.Clear();
-			cachedObjects.AddRange(objects.Cast<ApiObject>());
-		}
-
-		void ITemporaryCache<ApiObject>.AddToCache<T>(IEnumerable<T> objects)
-		{
-			var type = typeof(T);
-			if (type == typeof(ApiObject))
-			{
-				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
-			}
-
-			if (objects == null)
-			{
-				throw new ArgumentNullException(nameof(objects));
-			}
-
-			if (!objects.Any())
-			{
-				return;
-			}
-
-			if (objects.Any(o => o == null))
-			{
-				throw new ArgumentException("objects collection contains null values", nameof(objects));
-			}
-
-			if (!localCache.TryGetValue(type, out var cachedObjects))
-			{
-				cachedObjects = new List<ApiObject>(objects.Cast<ApiObject>());
-				localCache.TryAdd(type, cachedObjects);
-
-				return;
-			}
-
-			var cachedObjectsById = cachedObjects.ToDictionary(o => o.Id);
-			foreach (var apiObject in objects.Cast<ApiObject>())
-			{
-				if (cachedObjectsById.ContainsKey(apiObject.Id))
-				{
-					cachedObjects.Remove(cachedObjectsById[apiObject.Id]);
-				}
-
-				cachedObjects.Add(apiObject);
-			}
-		}
-
-		IEnumerable<T> ITemporaryCache<ApiObject>.GetFromCache<T>()
-		{
-			var type = typeof(T);
-			if (type == typeof(ApiObject))
-			{
-				throw new InvalidOperationException("Cannot use ApiObject directly. Use a derived type.");
-			}
-
-			if (!localCache.TryGetValue(typeof(T), out var cachedObjects))
-			{
-				return Enumerable.Empty<T>();
-			}
-
-			return cachedObjects.OfType<T>();
-		}
 	}
 }
