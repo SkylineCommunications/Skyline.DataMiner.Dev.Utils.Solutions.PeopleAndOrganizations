@@ -804,5 +804,97 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 			Assert.IsNotNull(person);
 			Assert.AreEqual(experience2.Id, person.ExperienceId);
 		}
+
+		[TestMethod]
+		public void AssignSkill()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			// Assign skill
+			person.AddSkill(skill);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.Skills.Count);
+			Assert.AreEqual(skill.Name, person.Skills.Single().Name);
+		}
+
+		[TestMethod]
+		public void UpdateSkills()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			objectCreator.CreateSkills([skill1, skill2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddSkill(skill1);
+			person = objectCreator.CreatePerson(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.Skills.Count);
+			Assert.AreEqual(skill1.Name, person.Skills.Single().Name);
+
+			// Add another skill
+			person.AddSkill(skill2);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(2, person.Skills.Count);
+			Assert.IsTrue(person.Skills.Any(s => s.Name == skill1.Name));
+			Assert.IsTrue(person.Skills.Any(s => s.Name == skill2.Name));
+
+			// Remove a skill
+			person.RemoveSkill(skill1);
+
+			person = TestContext.Api.People.Update(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.Skills.Count);
+			Assert.IsTrue(person.Skills.Any(s => s.Name == skill2.Name));
+		}
+
+		[TestMethod]
+		public void AddSkillMultipleTimesDoesNotThrowException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddSkill(skill)
+			.AddSkill(skill);
+			person = objectCreator.CreatePerson(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.Skills.Count);
+			Assert.AreEqual(skill.Name, person.Skills.Single().Name);
+		}
 	}
 }
