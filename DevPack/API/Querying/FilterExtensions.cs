@@ -109,4 +109,38 @@
 				(obj) => Convert.ToInt32(exposer.internalFunc(obj)).CompareTo(Convert.ToInt32(value)) >= 0);
 		}
 	}
+
+	/// <summary>
+	/// Provides extension methods for creating type filters on exposers.
+	/// </summary>
+	public static class TypeFilterExtensions
+	{
+		/// <summary>
+		/// Creates a filter that checks if the exposed field equals the specified value.
+		/// </summary>
+		/// <typeparam name="TFilter">The type of the filter.</typeparam>
+		/// <typeparam name="TField">The type of the field being compared. Must be a Type.</typeparam>
+		/// <param name="exposer">The exposer that identifies the field to filter on.</param>
+		/// <param name="value">The value to compare against.</param>
+		/// <returns>A <see cref="ManagedFilter{TFilter, TField}"/> configured for equality comparison.</returns>
+		public static ManagedFilter<TFilter, TField> Equal<TFilter, TField>(this Exposer<TFilter, TField> exposer, TField value)
+			where TField : Type
+		{
+			return exposer.UncheckedEqual(value);
+		}
+
+		/// <summary>
+		/// Creates a filter that checks if the exposed field does not equal the specified value.
+		/// </summary>
+		/// <typeparam name="TFilter">The type of the filter.</typeparam>
+		/// <typeparam name="TField">The type of the field being compared. Must be an Type.</typeparam>
+		/// <param name="exposer">The exposer that identifies the field to filter on.</param>
+		/// <param name="value">The value to compare against.</param>
+		/// <returns>A <see cref="ManagedFilter{TFilter, TField}"/> configured for inequality comparison.</returns>
+		public static ManagedFilter<TFilter, TField> NotEqual<TFilter, TField>(this Exposer<TFilter, TField> exposer, TField value)
+			where TField : Type
+		{
+			return exposer.UncheckedNotEqual(value);
+		}
+	}
 }

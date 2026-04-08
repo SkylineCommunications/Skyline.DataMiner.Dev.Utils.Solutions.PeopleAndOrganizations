@@ -5,7 +5,7 @@
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
 
-	internal class DomInstanceApiObjectValidator<T> : ApiObjectValidator<T, Guid> where T : DomInstanceBase
+	internal class DomInstanceApiObjectValidator<T> : ObjectValidator<T, Guid> where T : DomInstanceBase
 	{
 		private readonly List<Guid> successfulIds = new List<Guid>();
 

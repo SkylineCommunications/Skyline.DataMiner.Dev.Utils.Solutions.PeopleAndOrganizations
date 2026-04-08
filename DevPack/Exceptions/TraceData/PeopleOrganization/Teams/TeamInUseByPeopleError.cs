@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>
-	/// Represents an error that occurs when attempting to delete a team that is currently in use by one or multiple people.
+	/// Represents an error that occurs when attempting to deprecate a team that is currently in use by one or multiple people.
 	/// </summary>
 	public class TeamInUseByPeopleError : TeamInUseError
 	{

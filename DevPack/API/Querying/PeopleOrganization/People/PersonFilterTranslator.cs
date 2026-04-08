@@ -25,6 +25,8 @@
 			[PersonExposers.ExperienceId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel), comparer, (Guid)value),
 			[PersonExposers.OrganizationId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03), comparer, (Guid)value),
 			[PersonExposers.State.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.StatusId, comparer, ConvertPersonState((PersonState)value)),
+			[PersonExposers.ResourceId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource), comparer, (Guid)value),
+			[PersonExposers.HasResourceId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.KeyExists(SlcPeople_OrganizationsIds.Sections.Resource.LinkedResource.Id.ToString()), comparer, (bool)value),
 			[PersonExposers.TeamMemberships.TeamId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.Team.Team_144d3379), comparer, (Guid)value),
 			[PersonExposers.TeamMemberships.RoleId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.Team.TeamRole), comparer, (Guid)value),
 		};

@@ -67,6 +67,16 @@
 		public static readonly Exposer<Person, PersonState> State = new Exposer<Person, PersonState>((obj) => obj.State, "State");
 
 		/// <summary>
+		/// Gets an exposer for the <see cref="Person.ResourceId"/> property.
+		/// </summary>
+		internal static readonly Exposer<Person, Guid> ResourceId = new Exposer<Person, Guid>((obj) => obj.ResourceId, "ResourceId");
+
+		/// <summary>
+		/// Gets an exposer indicating whether a resource is linked to the person.
+		/// </summary>
+		internal static readonly Exposer<Person, bool> HasResourceId = new Exposer<Person, bool>("HasResourceId");
+
+		/// <summary>
 		/// Provides exposers for querying and filtering team memberships.
 		/// </summary>
 		public static class TeamMemberships

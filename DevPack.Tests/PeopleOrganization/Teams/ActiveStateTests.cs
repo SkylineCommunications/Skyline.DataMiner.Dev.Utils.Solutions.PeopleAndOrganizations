@@ -128,6 +128,32 @@
 		}
 
 		[TestMethod]
+		public void MakeBookable()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Make bookable
+			team = TestContext.Api.Teams.MakeBookable(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(TeamState.Active, team.State);
+			Assert.AreNotEqual(Guid.Empty, team.ResourcePoolId);
+			Assert.AreEqual(true, team.IsBookable);
+
+			var domTeam = TestContext.PeopleOrganizationsDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(team.Id)).SingleOrDefault();
+			Assert.IsNotNull(domTeam);
+			Assert.AreEqual(Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Active, domTeam.StatusId);
+		}
+
+		[TestMethod]
 		public void UpdateName()
 		{
 			var prefix = Guid.NewGuid();

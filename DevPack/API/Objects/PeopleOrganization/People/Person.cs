@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
@@ -13,6 +14,8 @@
 	/// </summary>
 	public class Person : ApiObject
 	{
+		private readonly ApiObjectCache apiObjectCache = new ApiObjectCache();
+
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
 
@@ -103,7 +106,9 @@
 		/// </summary>
 		public IReadOnlyCollection<TeamMembership> TeamMemberships => teamMemberships;
 
-		internal Guid ResourceId { get; private set; }
+		internal Guid ResourceId { get; set; }
+
+		internal ApiObjectCache ApiObjectCache => apiObjectCache;
 
 		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
 
@@ -301,6 +306,7 @@
 			updatedInstance.ContactInfo.Country = Country.HasValue ? EnumExtensions.MapEnum<Country, StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Enums.Country>(Country.Value) : null;
 
 			updatedInstance.Organization.OrganizationId = OrganizationId;
+			updatedInstance.Resource.LinkedResource = ResourceId != Guid.Empty ? ResourceId : null;
 
 			updatedInstance.Team.Clear();
 			foreach (var teamMembership in teamMemberships)
@@ -343,5 +349,6 @@
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum, PersonState>(instance.Status);
 		}
+
 	}
 }

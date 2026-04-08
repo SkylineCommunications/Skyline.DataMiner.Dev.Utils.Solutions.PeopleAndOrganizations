@@ -4,6 +4,7 @@
 
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
@@ -25,6 +26,8 @@
 			Dms = connection.GetDms() ?? throw new NullReferenceException("Unable to get DMS");
 
 			PeopleOrganizationsDomHelper = new DomHelper(connection.HandleMessages, "(slc)people_organizations") ?? throw new NullReferenceException("Unable to create PeopleOrganizationsDomHelper");
+
+			ResourceManagerHelper = new ResourceManagerHelper(connection.HandleSingleResponseMessage) ?? throw new NullReferenceException("Unable to create ResourceManagerHelper");
 		}
 
 		public IPeopleAndOrganizationsApi Api { get; private set; }
@@ -34,6 +37,8 @@
 		public IDms Dms { get; private set; }
 
 		public DomHelper PeopleOrganizationsDomHelper { get; private set; }
+
+		public ResourceManagerHelper ResourceManagerHelper { get; private set; }
 
 		public void Dispose()
 		{

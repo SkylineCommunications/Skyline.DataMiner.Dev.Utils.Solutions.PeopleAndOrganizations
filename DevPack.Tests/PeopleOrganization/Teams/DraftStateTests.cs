@@ -106,6 +106,40 @@
 		}
 
 		[TestMethod]
+		public void MakeBookableThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			// Make bookable
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				team = TestContext.Api.Teams.MakeBookable(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamInvalidStateError = teamError as TeamInvalidStateError;
+			Assert.IsNotNull(teamInvalidStateError);
+			Assert.AreEqual("Not allowed to make a team bookable that is not in Active state.", teamInvalidStateError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamInvalidStateError.Id);
+		}
+
+		[TestMethod]
 		public void UpdateName()
 		{
 			var prefix = Guid.NewGuid();

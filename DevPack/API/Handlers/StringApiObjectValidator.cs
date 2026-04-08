@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 	/// Example validator for objects identified by string IDs instead of Guids.
 	/// </summary>
 	/// <typeparam name="T">The type of object being validated.</typeparam>
-	internal class StringApiObjectValidator<T> : ApiObjectValidator<T, string>
+	internal class StringApiObjectValidator<T> : ObjectValidator<T, string>
 	{
 		private readonly List<string> successfulIds = new List<string>();
 		private readonly Func<T, string> idExtractor;

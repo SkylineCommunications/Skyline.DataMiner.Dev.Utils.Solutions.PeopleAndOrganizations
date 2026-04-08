@@ -246,6 +246,58 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 			return result.SuccessfulItems.Select(x => new Team(x)).ToList();
 		}
 
+		public Team MakeBookable(Team team)
+		{
+			if (team == null)
+			{
+				throw new ArgumentNullException(nameof(team));
+			}
+
+			return MakeBookable(team.Id);
+		}
+
+		public Team MakeBookable(Guid teamId)
+		{
+			var team = Read(teamId);
+			if (team == null)
+			{
+				return null;
+			}
+
+			if (!DomTeamHandler.TryMakeBookable(Api, [team], out var result))
+			{
+				result.ThrowSingleException(team.Id);
+			}
+
+			return new Team(result.SuccessfulItems.Single());
+		}
+
+		public IReadOnlyCollection<Team> MakeBookable(IEnumerable<Team> teams)
+		{
+			if (teams == null)
+			{
+				throw new ArgumentNullException(nameof(teams));
+			}
+
+			return MakeBookable(teams.Select(x => x.Id).ToArray());
+		}
+
+		public IReadOnlyCollection<Team> MakeBookable(IEnumerable<Guid> teamIds)
+		{
+			if (teamIds == null)
+			{
+				throw new ArgumentNullException(nameof(teamIds));
+			}
+
+			var teams = Read(teamIds);
+			if (!DomTeamHandler.TryMakeBookable(Api, teams?.ToList(), out var result))
+			{
+				result.ThrowBulkException();
+			}
+
+			return result.SuccessfulItems.Select(x => new Team(x)).ToList();
+		}
+
 		public IEnumerable<Team> Read()
 		{
 			return Read(new TRUEFilterElement<Team>());

@@ -60,7 +60,7 @@
 		/// <summary>
 		/// Gets a value indicating whether the team is bookable.
 		/// </summary>
-		public bool IsBookable { get; private set; }
+		public bool IsBookable { get; internal set; }
 
 		/// <summary>
 		/// Gets the state of the team.
@@ -72,7 +72,7 @@
 		/// </summary>
 		public IReadOnlyCollection<Skill> Skills => skills;
 
-		internal Guid ResourcePoolId { get; private set; }
+		internal Guid ResourcePoolId { get; set; }
 
 		internal StoragePeopleAndOrganizations.TeamsInstance OriginalInstance => originalInstance;
 
@@ -202,7 +202,10 @@
 			updatedInstance.TeamInformation.TeamName = Name;
 			updatedInstance.TeamInformation.TeamEmail = Email;
 			updatedInstance.TeamInformation.TeamDescription = Description;
+			updatedInstance.TeamInformation.Bookable = IsBookable;
 			updatedInstance.TeamInformation.Skills = skills.Select(s => s.Name);
+
+			updatedInstance.ResourcePool.LinkedResourcePool = ResourcePoolId != Guid.Empty ? ResourcePoolId : null;
 
 			return updatedInstance;
 		}
