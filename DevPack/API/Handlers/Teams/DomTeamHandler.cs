@@ -593,7 +593,7 @@
 					continue;
 				}
 
-				((Cache.ITemporaryCache<ApiObject>)person.Person).SetCache<Team>(teams);
+				person.Person.ApiObjectCache.SetCache<Team>(teams);
 			}
 
 			var domUpdates = peopleToUpdate.Where(x => !x.HadResourceIdWhenLoaded).Select(x => x.Person).ToList();
