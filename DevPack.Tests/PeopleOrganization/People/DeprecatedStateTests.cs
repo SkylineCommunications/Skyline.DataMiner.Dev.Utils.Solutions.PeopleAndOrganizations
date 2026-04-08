@@ -1242,5 +1242,157 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
 			Assert.AreEqual(person.Id, personInvalidStateError.Id);
 		}
+
+		[TestMethod]
+		public void AssignSkillThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Assign skill
+			person.AddSkill(skill);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void UpdateSkillsThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			objectCreator.CreateSkills([skill1, skill2]);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddSkill(skill1);
+			person = objectCreator.CreatePerson(person);
+			Assert.IsNotNull(person);
+			Assert.AreEqual(1, person.Skills.Count);
+			Assert.AreEqual(skill1.Name, person.Skills.Single().Name);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Add another skill
+			person.AddSkill(skill2);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void AddSkillMultipleTimesThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			};
+			person = objectCreator.CreatePerson(person);
+
+			// Activate
+			person = TestContext.Api.People.Activate(person);
+
+			// Deprecate
+			person = TestContext.Api.People.Deprecate(person);
+
+			// Assign skill multiple times
+			person.SetSkills(new[] { skill, skill, skill });
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				person = TestContext.Api.People.Update(person);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var personError = expectedException.TraceData.ErrorData.OfType<PersonError>().SingleOrDefault();
+			Assert.IsNotNull(personError);
+
+			var personInvalidStateError = personError as PersonInvalidStateError;
+			Assert.IsNotNull(personInvalidStateError);
+			Assert.AreEqual("Not allowed to update a person that is not in Draft or Active state.", personInvalidStateError.ErrorMessage);
+			Assert.AreEqual(person.Id, personInvalidStateError.Id);
+		}
 	}
 }

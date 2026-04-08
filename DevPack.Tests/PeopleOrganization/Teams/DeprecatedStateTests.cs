@@ -362,5 +362,157 @@
 			Assert.AreEqual("Not allowed to update a team that is not in Draft or Active state.", teamInvalidStateError.ErrorMessage);
 			Assert.AreEqual(team.Id, teamInvalidStateError.Id);
 		}
+
+		[TestMethod]
+		public void AssignSkillThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Deprecate
+			team = TestContext.Api.Teams.Deprecate(team);
+
+			// Assign skill
+			team.AddSkill(skill);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				team = TestContext.Api.Teams.Update(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamInvalidStateError = teamError as TeamInvalidStateError;
+			Assert.IsNotNull(teamInvalidStateError);
+			Assert.AreEqual("Not allowed to update a team that is not in Draft or Active state.", teamInvalidStateError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void UpdateSkillsThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			objectCreator.CreateSkills([skill1, skill2]);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			}
+			.AddSkill(skill1);
+			team = objectCreator.CreateTeam(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(1, team.Skills.Count);
+			Assert.AreEqual(skill1.Name, team.Skills.Single().Name);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Deprecate
+			team = TestContext.Api.Teams.Deprecate(team);
+
+			// Add another skill
+			team.AddSkill(skill2);
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				team = TestContext.Api.Teams.Update(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamInvalidStateError = teamError as TeamInvalidStateError;
+			Assert.IsNotNull(teamInvalidStateError);
+			Assert.AreEqual("Not allowed to update a team that is not in Draft or Active state.", teamInvalidStateError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamInvalidStateError.Id);
+		}
+
+		[TestMethod]
+		public void AddSkillMultipleTimesThrowsException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Deprecate
+			team = TestContext.Api.Teams.Deprecate(team);
+
+			// Assign skill multiple times
+			team.SetSkills(new[] { skill, skill, skill });
+
+			PeopleAndOrganizationsException? expectedException = null;
+			try
+			{
+				team = TestContext.Api.Teams.Update(team);
+			}
+			catch (PeopleAndOrganizationsException ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(1, expectedException.TraceData.ErrorData.Count);
+			var teamError = expectedException.TraceData.ErrorData.OfType<TeamError>().SingleOrDefault();
+			Assert.IsNotNull(teamError);
+
+			var teamInvalidStateError = teamError as TeamInvalidStateError;
+			Assert.IsNotNull(teamInvalidStateError);
+			Assert.AreEqual("Not allowed to update a team that is not in Draft or Active state.", teamInvalidStateError.ErrorMessage);
+			Assert.AreEqual(team.Id, teamInvalidStateError.Id);
+		}
 	}
 }

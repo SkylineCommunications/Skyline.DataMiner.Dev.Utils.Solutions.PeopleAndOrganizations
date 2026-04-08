@@ -253,5 +253,109 @@
 			Assert.IsNotNull(team);
 			Assert.AreEqual(updatedDescription, team.Description);
 		}
+
+		[TestMethod]
+		public void AssignSkill()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Assign skill
+			team.AddSkill(skill);
+
+			team = TestContext.Api.Teams.Update(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(1, team.Skills.Count);
+			Assert.AreEqual(skill.Name, team.Skills.Single().Name);
+		}
+
+		[TestMethod]
+		public void UpdateSkills()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill1 = new Skill
+			{
+				Name = $"{prefix}_Skill 1",
+			};
+			var skill2 = new Skill
+			{
+				Name = $"{prefix}_Skill 2",
+			};
+			objectCreator.CreateSkills([skill1, skill2]);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			}
+			.AddSkill(skill1);
+			team = objectCreator.CreateTeam(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(1, team.Skills.Count);
+			Assert.AreEqual(skill1.Name, team.Skills.Single().Name);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Add another skill
+			team.AddSkill(skill2);
+
+			team = TestContext.Api.Teams.Update(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(2, team.Skills.Count);
+			Assert.IsTrue(team.Skills.Any(s => s.Name == skill1.Name));
+			Assert.IsTrue(team.Skills.Any(s => s.Name == skill2.Name));
+
+			// Remove a skill
+			team.RemoveSkill(skill1);
+
+			team = TestContext.Api.Teams.Update(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(1, team.Skills.Count);
+			Assert.IsTrue(team.Skills.Any(s => s.Name == skill2.Name));
+		}
+
+		[TestMethod]
+		public void AddSkillMultipleTimesDoesNotThrowException()
+		{
+			var prefix = Guid.NewGuid();
+
+			var skill = new Skill
+			{
+				Name = $"{prefix}_Skill",
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			// Activate
+			team = TestContext.Api.Teams.Activate(team);
+
+			// Assign skill multiple times
+			team.SetSkills(new[] { skill, skill, skill });
+
+			team = TestContext.Api.Teams.Update(team);
+			Assert.IsNotNull(team);
+			Assert.AreEqual(1, team.Skills.Count);
+			Assert.AreEqual(skill.Name, team.Skills.Single().Name);
+		}
 	}
 }
