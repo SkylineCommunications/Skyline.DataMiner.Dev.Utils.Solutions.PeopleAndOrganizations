@@ -27,7 +27,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache
 
 			var objectList = objects.ToList();
 
-			if (!objectList.Any())
+			if (objectList.Count == 0)
 			{
 				return;
 			}
@@ -56,7 +56,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache
 
 			var objectList = objects.Cast<ApiObject>().ToList();
 
-			if (!objectList.Any())
+			if (objectList.Count == 0)
 			{
 				return;
 			}
