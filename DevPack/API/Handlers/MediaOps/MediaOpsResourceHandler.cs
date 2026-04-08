@@ -315,7 +315,7 @@
 		private bool SyncPools(Person person, Resource resource)
 		{
 			var teamIds = person.TeamMemberships.Select(x => x.TeamId).ToList();
-			var cachedTeamsById = person.Cache.GetFromCache<Team>().ToDictionary(x => x.Id);
+			var cachedTeamsById = person.ApiObjectCache.GetFromCache<Team>().ToDictionary(x => x.Id);
 
 			var missingTeamIds = teamIds.Where(x => !cachedTeamsById.ContainsKey(x));
 			var teams = api.Teams.Read(missingTeamIds).ToList();

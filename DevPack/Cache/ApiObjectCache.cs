@@ -7,12 +7,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
-	internal sealed class PersonCache
+	internal class ApiObjectCache : ITemporaryCache<ApiObject>
 	{
 		private readonly ConcurrentDictionary<Type, IReadOnlyList<ApiObject>> cache = new();
 
 		public void SetCache<T>(IEnumerable<T> objects)
-			where T : ApiObject
 		{
 			var type = typeof(T);
 			if (type == typeof(ApiObject))
@@ -41,7 +40,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache
 		}
 
 		public void AddToCache<T>(IEnumerable<T> objects)
-			where T : ApiObject
 		{
 			var type = typeof(T);
 			if (type == typeof(ApiObject))
@@ -90,7 +88,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache
 		}
 
 		public IEnumerable<T> GetFromCache<T>()
-			where T : ApiObject
 		{
 			var type = typeof(T);
 			if (type == typeof(ApiObject))

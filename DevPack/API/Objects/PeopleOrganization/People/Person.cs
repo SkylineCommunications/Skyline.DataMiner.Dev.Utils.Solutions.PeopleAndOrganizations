@@ -14,7 +14,7 @@
 	/// </summary>
 	public class Person : ApiObject
 	{
-		private readonly PersonCache cache = new PersonCache();
+		private readonly ApiObjectCache apiObjectCache = new ApiObjectCache();
 
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
@@ -108,7 +108,7 @@
 
 		internal Guid ResourceId { get; set; }
 
-		internal PersonCache Cache => cache;
+		internal ApiObjectCache ApiObjectCache => apiObjectCache;
 
 		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
 
