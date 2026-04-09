@@ -14,7 +14,7 @@
 
 	internal class LockManager
 	{
-		private const string LockManagerElementName = "People and Organizations Lock Manager";
+		private const string LockManagerElementName = "PNO Lock Manager";
 		private const int MaxSleepTime = 5000; // 5 seconds
 
 		private static readonly Random Random = new Random();
