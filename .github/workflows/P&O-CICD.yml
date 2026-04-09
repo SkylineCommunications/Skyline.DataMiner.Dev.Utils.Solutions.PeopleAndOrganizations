@@ -1,4 +1,4 @@
-name: P&O CICD
+name: "P&O CICD"
 
 on:
   workflow_dispatch:
@@ -73,3 +73,13 @@ jobs:
       sonarCloudProjectName: SkylineCommunications_Skyline.DataMiner.Solutions.PeopleAndOrganizations
     secrets:
       nugetApiKey: ${{ secrets.NUGETAPIKEY_GITHUB }}
+
+  public_release:
+    name: Public Release
+    if: github.ref_type == 'tag' && !contains(github.ref_name, '-') #Stable tags (e.g. 1.2.3)
+    needs: nuget_validation
+    uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/NuGet Solution Master Workflow.yml@main
+    with:
+      sonarCloudProjectName: SkylineCommunications_Skyline.DataMiner.Solutions.PeopleAndOrganizations
+    secrets:
+      nugetApiKey: ${{ secrets.NUGETAPIKEY }}
