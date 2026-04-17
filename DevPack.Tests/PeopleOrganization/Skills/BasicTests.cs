@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Linq;
+	using System.Xml.Linq;
 
 	using RT_PeopleAndOrganizations.RegressionTests;
 
@@ -174,6 +175,23 @@
 			}
 
 			Assert.Fail("Expected exception was not thrown.");
+		}
+
+		[TestMethod]
+		public void ReadAll_ReturnsCorrectSkill()
+		{
+			var prefix = Guid.NewGuid();
+			string name = $"{prefix}_Skill";
+
+			var skill = new Skill
+			{
+				Name = name,
+			};
+			skill = objectCreator.CreateSkill(skill);
+
+			skill = TestContext.Api.Skills.Read().Where(x => x.Name.Equals(name)).SingleOrDefault();
+			Assert.IsNotNull(skill);
+			Assert.IsFalse(skill.IsNew);
 		}
 	}
 }

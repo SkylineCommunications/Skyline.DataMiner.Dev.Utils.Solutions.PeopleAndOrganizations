@@ -47,7 +47,7 @@
 		{
 			var handler = new SkillHandler(api);
 			var skillsCapability = handler.GetSkillsCapability();
-			return skillsCapability.Discretes.Select(name => new Skill { Name = name }).ToList();
+			return skillsCapability.Discretes.Select(name => new Skill(name)).ToList();
 		}
 
 		private void CreateOrUpdate(ICollection<Skill> apiSkills)
