@@ -14,7 +14,7 @@ var api = connection.GetPeopleAndOrganizationsApi();
 // Or use the extension method:
 var api = engine.GetPeopleAndOrganizationsApi(); // For automation scripts
 var api = protocol.GetPeopleAndOrganizationsApi(); // For protocols
-var api = dms.GetPeopleAndOrganizationsApi(); // For GQI data sources
+var api = gqiDms.GetPeopleAndOrganizationsApi(); // For GQI data sources
 ```
 
 ## Access Repositories
