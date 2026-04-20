@@ -25,7 +25,7 @@ The `PeopleAndOrganizationsApi` class is the main entry point to the People and 
 
 It exposes:
 
-- **Repositories** for reading/writing DOM-backed objects (Organizations, People, Teams, Experience, Categories, Roles, Skills)
+- **Repositories** for reading/writing organizations, people, teams, experience, categories, roles, and skills
 - **State management** for transitioning people, teams, and organizations through lifecycle states
 - **Logging** for custom logging integration
 
