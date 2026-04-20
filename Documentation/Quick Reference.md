@@ -55,9 +55,34 @@ var people = api.People.Read(new[] { id1, id2, id3 });
 var allPeople = api.People.Read();
 ```
 
+### Reading with Exposers
+
+Use exposers when you want to query only matching instances:
+
+```csharp
+using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+
+// Active people
+var activePeople = api.People.Read(PersonExposers.State.Equal(PersonState.Active));
+
+// People that belong to a specific organization
+var organizationPeople = api.People.Read(PersonExposers.OrganizationId.Equal(organizationId));
+```
+
+```csharp
+using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+
+// Teams with names containing "Broadcast"
+var broadcastTeams = api.Teams.Read(TeamExposers.Name.Contains("Broadcast"));
+
+// Organizations in a specific category
+var categorizedOrganizations = api.Organizations.Read(OrganizationExposers.CategoryId.Equal(categoryId));
+```
+
 ### Paged Reading
 
-For large datasets, use paged reading to process data in batches:
+For large datasets, use paged reading to process data in batches.
+When you only need matching instances, prefer exposer-based filtering (`Read(filter)` / `ReadPaged(filter, pageSize)`), which queries the database directly and can be more performant.
 
 ```csharp
 using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
