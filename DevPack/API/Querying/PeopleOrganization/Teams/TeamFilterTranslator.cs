@@ -10,7 +10,9 @@
 
 	internal class TeamFilterTranslator : DomInstanceFilterTranslator<Team>
 	{
-		private readonly FilterElement<DomInstance> roleDomDefinitionFilter = DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id);
+		private readonly FilterElement<DomInstance> roleDomDefinitionFilter =
+			DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id)
+			.AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Edit));
 		private readonly Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> handlers = new Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>>
 		{
 			[TeamExposers.Id.fieldName] = HandleGuid,
