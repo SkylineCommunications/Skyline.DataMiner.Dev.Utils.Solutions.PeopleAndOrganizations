@@ -58,7 +58,7 @@
 				x => GetOrganizationIterator(x));
 		}
 
-		public IEnumerable<OrganizationsInstance> GetOrganizations<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
+		public IEnumerable<OrganizationsInstance> GetOrganizations<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
 		{
 			if (values == null)
 			{
@@ -72,7 +72,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Edit, includeEditState),
+				filter,
 				x => GetOrganizationIterator(x));
 		}
 
@@ -108,7 +108,7 @@
 				x => GetTeamIterator(x));
 		}
 
-		public IEnumerable<TeamsInstance> GetTeams<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
+		public IEnumerable<TeamsInstance> GetTeams<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
 		{
 			if (values == null)
 			{
@@ -122,7 +122,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Edit, includeEditState),
+				filter,
 				x => GetTeamIterator(x));
 		}
 
@@ -158,7 +158,7 @@
 				x => GetPersonIterator(x));
 		}
 
-		public IEnumerable<PeopleInstance> GetPeople<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
+		public IEnumerable<PeopleInstance> GetPeople<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
 		{
 			if (values == null)
 			{
@@ -172,7 +172,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.Edit, includeEditState),
+				filter,
 				x => GetPersonIterator(x));
 		}
 
@@ -468,16 +468,6 @@
 		private IEnumerable<ExperienceInstance> GetExperienceIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new ExperienceInstance(instance));
-		}
-
-		private static FilterElement<DomInstance> ApplyEditStateFilter(FilterElement<DomInstance> filter, string editStateId, bool includeEditState)
-		{
-			if (includeEditState)
-			{
-				return filter;
-			}
-
-			return filter.AND(DomInstanceExposers.StatusId.NotEqual(editStateId));
 		}
 	}
 }
