@@ -955,7 +955,7 @@
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Teams.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamName).Equal(name));
 
-			var domTeamsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(apiTeams.Select(x => x.Name), Filter)
+			var domTeamsByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(apiTeams.Select(x => x.Name), Filter, includeEditState: true)
 				.GroupBy(x => x.TeamInformation.TeamName)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomTeam>)x.ToList());
 

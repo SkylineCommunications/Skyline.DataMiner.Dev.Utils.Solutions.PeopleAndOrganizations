@@ -58,7 +58,7 @@
 				x => GetOrganizationIterator(x));
 		}
 
-		public IEnumerable<OrganizationsInstance> GetOrganizations<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		public IEnumerable<OrganizationsInstance> GetOrganizations<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
 		{
 			if (values == null)
 			{
@@ -72,7 +72,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Edit)),
 				x => GetOrganizationIterator(x));
 		}
 
@@ -108,7 +108,7 @@
 				x => GetTeamIterator(x));
 		}
 
-		public IEnumerable<TeamsInstance> GetTeams<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		public IEnumerable<TeamsInstance> GetTeams<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
 		{
 			if (values == null)
 			{
@@ -122,7 +122,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Edit)),
 				x => GetTeamIterator(x));
 		}
 
@@ -158,7 +158,7 @@
 				x => GetPersonIterator(x));
 		}
 
-		public IEnumerable<PeopleInstance> GetPeople<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter)
+		public IEnumerable<PeopleInstance> GetPeople<T>(IEnumerable<T> values, Func<T, FilterElement<DomInstance>> filter, bool includeEditState = false)
 		{
 			if (values == null)
 			{
@@ -172,7 +172,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.Edit)),
 				x => GetPersonIterator(x));
 		}
 

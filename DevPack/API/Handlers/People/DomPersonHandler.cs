@@ -773,7 +773,7 @@
 				DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id)
 				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName).Equal(name));
 
-			var domPeopleByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(apiPeople.Select(x => x.Name), Filter)
+			var domPeopleByName = api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(apiPeople.Select(x => x.Name), Filter, includeEditState: true)
 				.GroupBy(x => x.PeopleInformation.FullName)
 				.ToDictionary(x => x.Key, x => (IReadOnlyCollection<DomPerson>)x.ToList());
 
