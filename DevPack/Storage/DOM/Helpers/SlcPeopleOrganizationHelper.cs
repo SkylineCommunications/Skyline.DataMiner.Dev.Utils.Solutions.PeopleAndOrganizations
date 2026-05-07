@@ -72,7 +72,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Edit)),
+				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.Edit, includeEditState),
 				x => GetOrganizationIterator(x));
 		}
 
@@ -122,7 +122,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Edit)),
+				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.Edit, includeEditState),
 				x => GetTeamIterator(x));
 		}
 
@@ -172,7 +172,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => includeEditState ? filter(x) : filter(x).AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.Edit)),
+				x => ApplyEditStateFilter(filter(x), SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.Edit, includeEditState),
 				x => GetPersonIterator(x));
 		}
 
@@ -468,6 +468,16 @@
 		private IEnumerable<ExperienceInstance> GetExperienceIterator(FilterElement<DomInstance> filter)
 		{
 			return InstanceFactory.ReadAndCreateInstances(DomHelper, filter, instance => new ExperienceInstance(instance));
+		}
+
+		private static FilterElement<DomInstance> ApplyEditStateFilter(FilterElement<DomInstance> filter, string editStateId, bool includeEditState)
+		{
+			if (includeEditState)
+			{
+				return filter;
+			}
+
+			return filter.AND(DomInstanceExposers.StatusId.NotEqual(editStateId));
 		}
 	}
 }
