@@ -72,7 +72,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				filter,
 				x => GetOrganizationIterator(x));
 		}
 
@@ -122,7 +122,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				filter,
 				x => GetTeamIterator(x));
 		}
 
@@ -172,7 +172,7 @@
 
 			return FilterQueryExecutor.RetrieveFilteredItems(
 				values.Distinct(),
-				x => filter(x),
+				filter,
 				x => GetPersonIterator(x));
 		}
 

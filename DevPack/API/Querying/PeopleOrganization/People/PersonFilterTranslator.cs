@@ -11,7 +11,9 @@
 
 	internal class PersonFilterTranslator : DomInstanceFilterTranslator<Person>
 	{
-		private readonly FilterElement<DomInstance> personDomDefinitionFilter = DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id);
+		private readonly FilterElement<DomInstance> personDomDefinitionFilter =
+			DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id)
+			.AND(DomInstanceExposers.StatusId.NotEqual(SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.Edit));
 		private readonly Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> handlers = new Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>>
 		{
 			[PersonExposers.Id.fieldName] = HandleGuid,
