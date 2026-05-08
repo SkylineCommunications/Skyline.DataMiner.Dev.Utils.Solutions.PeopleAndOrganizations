@@ -11,6 +11,7 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
 	[TestClass]
+	[DoNotParallelize]
 	[TestCategory("IntegrationTest")]
 	public sealed class DraftStateTests : IDisposable
 	{
