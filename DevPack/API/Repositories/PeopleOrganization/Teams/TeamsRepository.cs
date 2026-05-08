@@ -7,6 +7,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 	using Skyline.DataMiner.Net.Jobs;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Utils.DOM.Extensions;
 
 	using SLDataGateway.API.Types.Querying;
 
@@ -77,6 +78,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		public long Count(FilterElement<Team> filter)
 		{
+			if (filter.isEmpty())
+			{
+				return 0;
+			}
+
 			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
 		}
 
@@ -335,6 +341,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 			if (filter == null)
 			{
 				throw new ArgumentNullException(nameof(filter));
+			}
+
+			if (filter.isEmpty())
+			{
+				return Enumerable.Empty<Team>();
 			}
 
 			var teams = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(filterTranslator.Translate(filter));

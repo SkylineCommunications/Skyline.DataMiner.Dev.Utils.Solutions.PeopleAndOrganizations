@@ -11,6 +11,8 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
+	using SLDataGateway.API.Querying;
+
 	[TestClass]
 	[TestCategory("IntegrationTest")]
 	public sealed class BasicTests : IDisposable
@@ -150,6 +152,39 @@
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var teams = TestContext.Api.Teams.Read(new List<Guid>());
+			Assert.IsNotNull(teams);
+			Assert.AreEqual(0, teams.Count());
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyFilterReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Team>(idsToRetrieve.Select(x => TeamExposers.Id.Equal(x)).ToArray());
+
+			var teams = TestContext.Api.Teams.Read(emptyFilter);
+			Assert.IsNotNull(teams);
+			Assert.AreEqual(0, teams.Count());
+		}
+
+		[TestMethod]
+		public void CountWithEmptyFilterReturnsZero()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Team>(idsToRetrieve.Select(x => TeamExposers.Id.Equal(x)).ToArray());
+
+			var count = TestContext.Api.Teams.Count(emptyFilter);
+			Assert.AreEqual(0, count);
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyQueryReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Team>(idsToRetrieve.Select(x => TeamExposers.Id.Equal(x)).ToArray());
+			var queryWithEmptyFilter = emptyFilter.ToQuery();
+
+			var teams = TestContext.Api.Teams.Read(queryWithEmptyFilter);
 			Assert.IsNotNull(teams);
 			Assert.AreEqual(0, teams.Count());
 		}

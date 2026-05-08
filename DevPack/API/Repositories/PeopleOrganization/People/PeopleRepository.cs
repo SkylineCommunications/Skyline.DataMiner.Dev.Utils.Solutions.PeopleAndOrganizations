@@ -7,6 +7,7 @@
 	using Skyline.DataMiner.Net.Jobs;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Utils.DOM.Extensions;
 
 	using SLDataGateway.API.Types.Querying;
 
@@ -77,6 +78,11 @@
 
 		public long Count(FilterElement<Person> filter)
 		{
+			if (filter.isEmpty())
+			{
+				return 0;
+			}
+
 			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
 		}
 
@@ -283,6 +289,11 @@
 			if (filter == null)
 			{
 				throw new ArgumentNullException(nameof(filter));
+			}
+
+			if (filter.isEmpty())
+			{
+				return Enumerable.Empty<Person>();
 			}
 
 			var people = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(filterTranslator.Translate(filter));

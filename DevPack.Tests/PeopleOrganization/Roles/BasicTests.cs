@@ -10,6 +10,8 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Roles
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
+	using SLDataGateway.API.Querying;
+
 	[TestClass]
 	[TestCategory("IntegrationTest")]
 	public sealed class BasicTests : IDisposable
@@ -327,6 +329,39 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Roles
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var roles = TestContext.Api.Roles.Read(new List<Guid>());
+			Assert.IsNotNull(roles);
+			Assert.AreEqual(0, roles.Count());
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyFilterReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Role>(idsToRetrieve.Select(x => RoleExposers.Id.Equal(x)).ToArray());
+
+			var roles = TestContext.Api.Roles.Read(emptyFilter);
+			Assert.IsNotNull(roles);
+			Assert.AreEqual(0, roles.Count());
+		}
+
+		[TestMethod]
+		public void CountWithEmptyFilterReturnsZero()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Role>(idsToRetrieve.Select(x => RoleExposers.Id.Equal(x)).ToArray());
+
+			var count = TestContext.Api.Roles.Count(emptyFilter);
+			Assert.AreEqual(0, count);
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyQueryReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Role>(idsToRetrieve.Select(x => RoleExposers.Id.Equal(x)).ToArray());
+			var queryWithEmptyFilter = emptyFilter.ToQuery();
+
+			var roles = TestContext.Api.Roles.Read(queryWithEmptyFilter);
 			Assert.IsNotNull(roles);
 			Assert.AreEqual(0, roles.Count());
 		}
