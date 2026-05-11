@@ -5,6 +5,7 @@
 	using System.Linq;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.DOM.Extensions;
 
 	using SLDataGateway.API.Types.Querying;
 
@@ -143,6 +144,11 @@
 			if (filter == null)
 			{
 				throw new ArgumentNullException(nameof(filter));
+			}
+
+			if (filter.isEmpty())
+			{
+				return Enumerable.Empty<Skill>();
 			}
 
 			return skillFilterTranslator.FilterSkills(SkillHandler.ReadAll(Api), filter);

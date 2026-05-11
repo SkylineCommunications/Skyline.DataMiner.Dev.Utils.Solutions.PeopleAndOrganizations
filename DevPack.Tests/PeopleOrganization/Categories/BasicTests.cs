@@ -10,6 +10,8 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
+	using SLDataGateway.API.Querying;
+
 	[TestClass]
 	[TestCategory("IntegrationTest")]
 	public sealed class BasicTests : IDisposable
@@ -327,6 +329,39 @@
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var categories = TestContext.Api.Categories.Read(new List<Guid>());
+			Assert.IsNotNull(categories);
+			Assert.AreEqual(0, categories.Count());
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyFilterReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Category>(idsToRetrieve.Select(x => CategoryExposers.Id.Equal(x)).ToArray());
+
+			var categories = TestContext.Api.Categories.Read(emptyFilter);
+			Assert.IsNotNull(categories);
+			Assert.AreEqual(0, categories.Count());
+		}
+
+		[TestMethod]
+		public void CountWithEmptyFilterReturnsZero()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Category>(idsToRetrieve.Select(x => CategoryExposers.Id.Equal(x)).ToArray());
+
+			var count = TestContext.Api.Categories.Count(emptyFilter);
+			Assert.AreEqual(0, count);
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyQueryReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Category>(idsToRetrieve.Select(x => CategoryExposers.Id.Equal(x)).ToArray());
+			var queryWithEmptyFilter = emptyFilter.ToQuery();
+
+			var categories = TestContext.Api.Categories.Read(queryWithEmptyFilter);
 			Assert.IsNotNull(categories);
 			Assert.AreEqual(0, categories.Count());
 		}

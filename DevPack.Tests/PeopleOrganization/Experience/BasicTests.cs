@@ -10,6 +10,8 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Exceptions;
 
+	using SLDataGateway.API.Querying;
+
 	[TestClass]
 	[TestCategory("IntegrationTest")]
 	public sealed class BasicTests : IDisposable
@@ -327,6 +329,39 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var experience = TestContext.Api.Experience.Read(new List<Guid>());
+			Assert.IsNotNull(experience);
+			Assert.AreEqual(0, experience.Count());
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyFilterReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Experience>(idsToRetrieve.Select(x => ExperienceExposers.Id.Equal(x)).ToArray());
+
+			var experience = TestContext.Api.Experience.Read(emptyFilter);
+			Assert.IsNotNull(experience);
+			Assert.AreEqual(0, experience.Count());
+		}
+
+		[TestMethod]
+		public void CountWithEmptyFilterReturnsZero()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Experience>(idsToRetrieve.Select(x => ExperienceExposers.Id.Equal(x)).ToArray());
+
+			var count = TestContext.Api.Experience.Count(emptyFilter);
+			Assert.AreEqual(0, count);
+		}
+
+		[TestMethod]
+		public void ReadWithEmptyQueryReturnsEmptyList()
+		{
+			var idsToRetrieve = new Guid[0];
+			var emptyFilter = new ORFilterElement<Experience>(idsToRetrieve.Select(x => ExperienceExposers.Id.Equal(x)).ToArray());
+			var queryWithEmptyFilter = emptyFilter.ToQuery();
+
+			var experience = TestContext.Api.Experience.Read(queryWithEmptyFilter);
 			Assert.IsNotNull(experience);
 			Assert.AreEqual(0, experience.Count());
 		}
