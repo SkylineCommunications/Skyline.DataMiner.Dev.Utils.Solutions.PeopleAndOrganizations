@@ -342,7 +342,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		}
 
 		[TestMethod]
-		public void BulkUpdateWithChangedAndUnchangedExperienceReturnsTwoExperience()
+		public void BulkUpdateWithChangedAndUnchangedExperienceReturnsTwoExperiences()
 		{
 			var prefix = Guid.NewGuid();
 
