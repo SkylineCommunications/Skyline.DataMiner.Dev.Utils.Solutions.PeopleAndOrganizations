@@ -399,6 +399,12 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		private IEnumerable<DomChangeResults> GetExperienceWithChangesIterator(ICollection<Experience> apiExperience)
 		{
+			var unchangedExperience = apiExperience
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedExperience);
+
 			var experienceRequiringValidation = apiExperience.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (experienceRequiringValidation.Count == 0)
 			{

@@ -612,6 +612,12 @@
 
 		private IEnumerable<DomChangeResults> GetOrganizationsWithChangesIterator(ICollection<Organization> apiOrganizations)
 		{
+			var unchangedOrganizations = apiOrganizations
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedOrganizations);
+
 			var organizationsRequiringValidation = apiOrganizations.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (organizationsRequiringValidation.Count == 0)
 			{

@@ -1099,6 +1099,12 @@
 
 		private IEnumerable<DomChangeResults> GetTeamsWithChangesIterator(ICollection<Team> apiTeams)
 		{
+			var unchangedTeams = apiTeams
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedTeams);
+
 			var teamsRequiringValidation = apiTeams.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (teamsRequiringValidation.Count == 0)
 			{

@@ -149,6 +149,95 @@
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedTeam()
+		{
+			var team = new Team
+			{
+				Name = $"{Guid.NewGuid()}_Team",
+			};
+
+			team = objectCreator.CreateTeam(team);
+
+			var originalTeam = TestContext.Api.Teams.Read(team.Id);
+			var updatedTeam = TestContext.Api.Teams.Update(originalTeam);
+
+			Assert.AreEqual(originalTeam, updatedTeam);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedTeamReturnsTwoTeams()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedTeam = new Team { Name = $"{prefix}_Changed" };
+			var unchangedTeam = new Team { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateTeams([changedTeam, unchangedTeam]);
+
+			var changedToUpdate = TestContext.Api.Teams.Read(changedTeam.Id);
+			var unchangedToUpdate = TestContext.Api.Teams.Read(unchangedTeam.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedTeams = TestContext.Api.Teams.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedTeams.Count);
+			Assert.IsTrue(updatedTeams.Any(x => x.Id == changedTeam.Id));
+			Assert.IsTrue(updatedTeams.Any(x => x.Id == unchangedTeam.Id));
+
+			var changedAfterUpdate = TestContext.Api.Teams.Read(changedTeam.Id);
+			var unchangedAfterUpdate = TestContext.Api.Teams.Read(unchangedTeam.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedTeam.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedTeamReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedTeam = new Team { Name = $"{prefix}_Changed" };
+			var invalidTeam = new Team { Name = $"{prefix}_Invalid" };
+			var unchangedTeam = new Team { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateTeams([changedTeam, invalidTeam, unchangedTeam]);
+
+			var changedToUpdate = TestContext.Api.Teams.Read(changedTeam.Id);
+			var invalidToUpdate = TestContext.Api.Teams.Read(invalidTeam.Id);
+			var unchangedToUpdate = TestContext.Api.Teams.Read(unchangedTeam.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Teams.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedTeam.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedTeam.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidTeam.Id));
+
+			var changedAfterUpdate = TestContext.Api.Teams.Read(changedTeam.Id);
+			var invalidAfterUpdate = TestContext.Api.Teams.Read(invalidTeam.Id);
+			var unchangedAfterUpdate = TestContext.Api.Teams.Read(unchangedTeam.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidTeam.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedTeam.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var teams = TestContext.Api.Teams.Read(new List<Guid>());

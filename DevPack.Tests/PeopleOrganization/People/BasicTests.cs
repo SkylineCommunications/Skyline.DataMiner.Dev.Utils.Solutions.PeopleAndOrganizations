@@ -147,6 +147,95 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.People
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedPerson()
+		{
+			var person = new Person
+			{
+				Name = $"{Guid.NewGuid()}_Person",
+			};
+
+			person = objectCreator.CreatePerson(person);
+
+			var originalPerson = TestContext.Api.People.Read(person.Id);
+			var updatedPerson = TestContext.Api.People.Update(originalPerson);
+
+			Assert.AreEqual(originalPerson, updatedPerson);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedPersonReturnsTwoPeople()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedPerson = new Person { Name = $"{prefix}_Changed" };
+			var unchangedPerson = new Person { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreatePeople([changedPerson, unchangedPerson]);
+
+			var changedToUpdate = TestContext.Api.People.Read(changedPerson.Id);
+			var unchangedToUpdate = TestContext.Api.People.Read(unchangedPerson.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedPeople = TestContext.Api.People.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedPeople.Count);
+			Assert.IsTrue(updatedPeople.Any(x => x.Id == changedPerson.Id));
+			Assert.IsTrue(updatedPeople.Any(x => x.Id == unchangedPerson.Id));
+
+			var changedAfterUpdate = TestContext.Api.People.Read(changedPerson.Id);
+			var unchangedAfterUpdate = TestContext.Api.People.Read(unchangedPerson.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedPerson.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedPersonReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedPerson = new Person { Name = $"{prefix}_Changed" };
+			var invalidPerson = new Person { Name = $"{prefix}_Invalid" };
+			var unchangedPerson = new Person { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreatePeople([changedPerson, invalidPerson, unchangedPerson]);
+
+			var changedToUpdate = TestContext.Api.People.Read(changedPerson.Id);
+			var invalidToUpdate = TestContext.Api.People.Read(invalidPerson.Id);
+			var unchangedToUpdate = TestContext.Api.People.Read(unchangedPerson.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.People.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedPerson.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedPerson.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidPerson.Id));
+
+			var changedAfterUpdate = TestContext.Api.People.Read(changedPerson.Id);
+			var invalidAfterUpdate = TestContext.Api.People.Read(invalidPerson.Id);
+			var unchangedAfterUpdate = TestContext.Api.People.Read(unchangedPerson.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidPerson.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedPerson.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var people = TestContext.Api.People.Read(new List<Guid>());

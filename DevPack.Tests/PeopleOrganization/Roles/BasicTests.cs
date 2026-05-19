@@ -326,6 +326,95 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Roles
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedRole()
+		{
+			var role = new Role
+			{
+				Name = $"{Guid.NewGuid()}_Role",
+			};
+
+			role = objectCreator.CreateRole(role);
+
+			var originalRole = TestContext.Api.Roles.Read(role.Id);
+			var updatedRole = TestContext.Api.Roles.Update(originalRole);
+
+			Assert.AreEqual(originalRole, updatedRole);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedRoleReturnsTwoRoles()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedRole = new Role { Name = $"{prefix}_Changed" };
+			var unchangedRole = new Role { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateRoles([changedRole, unchangedRole]);
+
+			var changedToUpdate = TestContext.Api.Roles.Read(changedRole.Id);
+			var unchangedToUpdate = TestContext.Api.Roles.Read(unchangedRole.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedRoles = TestContext.Api.Roles.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedRoles.Count);
+			Assert.IsTrue(updatedRoles.Any(x => x.Id == changedRole.Id));
+			Assert.IsTrue(updatedRoles.Any(x => x.Id == unchangedRole.Id));
+
+			var changedAfterUpdate = TestContext.Api.Roles.Read(changedRole.Id);
+			var unchangedAfterUpdate = TestContext.Api.Roles.Read(unchangedRole.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedRole.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedRoleReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedRole = new Role { Name = $"{prefix}_Changed" };
+			var invalidRole = new Role { Name = $"{prefix}_Invalid" };
+			var unchangedRole = new Role { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateRoles([changedRole, invalidRole, unchangedRole]);
+
+			var changedToUpdate = TestContext.Api.Roles.Read(changedRole.Id);
+			var invalidToUpdate = TestContext.Api.Roles.Read(invalidRole.Id);
+			var unchangedToUpdate = TestContext.Api.Roles.Read(unchangedRole.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Roles.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedRole.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedRole.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidRole.Id));
+
+			var changedAfterUpdate = TestContext.Api.Roles.Read(changedRole.Id);
+			var invalidAfterUpdate = TestContext.Api.Roles.Read(invalidRole.Id);
+			var unchangedAfterUpdate = TestContext.Api.Roles.Read(unchangedRole.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidRole.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedRole.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var roles = TestContext.Api.Roles.Read(new List<Guid>());
