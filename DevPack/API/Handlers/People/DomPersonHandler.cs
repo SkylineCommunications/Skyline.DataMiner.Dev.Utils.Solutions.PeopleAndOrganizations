@@ -1075,6 +1075,12 @@
 
 		private IEnumerable<DomChangeResults> GetPeopleWithChangesIterator(ICollection<Person> apiPeople)
 		{
+			var unchangedPeople = apiPeople
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedPeople);
+
 			var peopleRequiringValidation = apiPeople.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (peopleRequiringValidation.Count == 0)
 			{

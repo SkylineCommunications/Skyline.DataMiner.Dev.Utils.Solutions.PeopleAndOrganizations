@@ -400,6 +400,12 @@
 
 		private IEnumerable<DomChangeResults> GetRolesWithChangesIterator(ICollection<Role> apiRoles)
 		{
+			var unchangedRoles = apiRoles
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedRoles);
+
 			var rolesRequiringValidation = apiRoles.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (rolesRequiringValidation.Count == 0)
 			{

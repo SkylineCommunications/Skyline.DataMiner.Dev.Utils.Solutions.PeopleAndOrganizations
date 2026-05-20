@@ -326,6 +326,95 @@
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedCategory()
+		{
+			var category = new Category
+			{
+				Name = $"{Guid.NewGuid()}_Category",
+			};
+
+			category = objectCreator.CreateCategory(category);
+
+			var originalCategory = TestContext.Api.Categories.Read(category.Id);
+			var updatedCategory = TestContext.Api.Categories.Update(originalCategory);
+
+			Assert.AreEqual(originalCategory, updatedCategory);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedCategoryReturnsTwoCategories()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedCategory = new Category { Name = $"{prefix}_Changed" };
+			var unchangedCategory = new Category { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateCategories([changedCategory, unchangedCategory]);
+
+			var changedToUpdate = TestContext.Api.Categories.Read(changedCategory.Id);
+			var unchangedToUpdate = TestContext.Api.Categories.Read(unchangedCategory.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedCategories = TestContext.Api.Categories.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedCategories.Count);
+			Assert.IsTrue(updatedCategories.Any(x => x.Id == changedCategory.Id));
+			Assert.IsTrue(updatedCategories.Any(x => x.Id == unchangedCategory.Id));
+
+			var changedAfterUpdate = TestContext.Api.Categories.Read(changedCategory.Id);
+			var unchangedAfterUpdate = TestContext.Api.Categories.Read(unchangedCategory.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedCategory.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedCategoryReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedCategory = new Category { Name = $"{prefix}_Changed" };
+			var invalidCategory = new Category { Name = $"{prefix}_Invalid" };
+			var unchangedCategory = new Category { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateCategories([changedCategory, invalidCategory, unchangedCategory]);
+
+			var changedToUpdate = TestContext.Api.Categories.Read(changedCategory.Id);
+			var invalidToUpdate = TestContext.Api.Categories.Read(invalidCategory.Id);
+			var unchangedToUpdate = TestContext.Api.Categories.Read(unchangedCategory.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Categories.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedCategory.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedCategory.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidCategory.Id));
+
+			var changedAfterUpdate = TestContext.Api.Categories.Read(changedCategory.Id);
+			var invalidAfterUpdate = TestContext.Api.Categories.Read(invalidCategory.Id);
+			var unchangedAfterUpdate = TestContext.Api.Categories.Read(unchangedCategory.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidCategory.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedCategory.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var categories = TestContext.Api.Categories.Read(new List<Guid>());

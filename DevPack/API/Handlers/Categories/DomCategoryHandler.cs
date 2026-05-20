@@ -399,6 +399,12 @@
 
 		private IEnumerable<DomChangeResults> GetCategoriesWithChangesIterator(ICollection<Category> apiCategories)
 		{
+			var unchangedCategories = apiCategories
+				.Where(x => !x.IsNew && !x.HasChanges)
+				.Select(x => x.OriginalInstance)
+				.ToList();
+			ReportSuccess(unchangedCategories);
+
 			var categoriesRequiringValidation = apiCategories.Where(x => !x.IsNew && x.HasChanges).ToList();
 			if (categoriesRequiringValidation.Count == 0)
 			{

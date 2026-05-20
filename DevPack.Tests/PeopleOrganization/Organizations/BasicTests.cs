@@ -149,6 +149,95 @@
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedOrganization()
+		{
+			var organization = new Organization
+			{
+				Name = $"{Guid.NewGuid()}_Organization",
+			};
+
+			organization = objectCreator.CreateOrganization(organization);
+
+			var originalOrganization = TestContext.Api.Organizations.Read(organization.Id);
+			var updatedOrganization = TestContext.Api.Organizations.Update(originalOrganization);
+
+			Assert.AreEqual(originalOrganization, updatedOrganization);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedOrganizationReturnsTwoOrganizations()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedOrganization = new Organization { Name = $"{prefix}_Changed" };
+			var unchangedOrganization = new Organization { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateOrganizations([changedOrganization, unchangedOrganization]);
+
+			var changedToUpdate = TestContext.Api.Organizations.Read(changedOrganization.Id);
+			var unchangedToUpdate = TestContext.Api.Organizations.Read(unchangedOrganization.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedOrganizations = TestContext.Api.Organizations.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedOrganizations.Count);
+			Assert.IsTrue(updatedOrganizations.Any(x => x.Id == changedOrganization.Id));
+			Assert.IsTrue(updatedOrganizations.Any(x => x.Id == unchangedOrganization.Id));
+
+			var changedAfterUpdate = TestContext.Api.Organizations.Read(changedOrganization.Id);
+			var unchangedAfterUpdate = TestContext.Api.Organizations.Read(unchangedOrganization.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedOrganization.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedOrganizationReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedOrganization = new Organization { Name = $"{prefix}_Changed" };
+			var invalidOrganization = new Organization { Name = $"{prefix}_Invalid" };
+			var unchangedOrganization = new Organization { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateOrganizations([changedOrganization, invalidOrganization, unchangedOrganization]);
+
+			var changedToUpdate = TestContext.Api.Organizations.Read(changedOrganization.Id);
+			var invalidToUpdate = TestContext.Api.Organizations.Read(invalidOrganization.Id);
+			var unchangedToUpdate = TestContext.Api.Organizations.Read(unchangedOrganization.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Organizations.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedOrganization.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedOrganization.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidOrganization.Id));
+
+			var changedAfterUpdate = TestContext.Api.Organizations.Read(changedOrganization.Id);
+			var invalidAfterUpdate = TestContext.Api.Organizations.Read(invalidOrganization.Id);
+			var unchangedAfterUpdate = TestContext.Api.Organizations.Read(unchangedOrganization.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidOrganization.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedOrganization.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var organizations = TestContext.Api.Organizations.Read(new List<Guid>());

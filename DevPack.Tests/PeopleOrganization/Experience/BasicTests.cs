@@ -326,6 +326,95 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		}
 
 		[TestMethod]
+		public void UpdateUnmodifiedExperience()
+		{
+			var experience = new Experience
+			{
+				Name = $"{Guid.NewGuid()}_Experience",
+			};
+
+			experience = objectCreator.CreateExperience(experience);
+
+			var originalExperience = TestContext.Api.Experience.Read(experience.Id);
+			var updatedExperience = TestContext.Api.Experience.Update(originalExperience);
+
+			Assert.AreEqual(originalExperience, updatedExperience);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedAndUnchangedExperienceReturnsTwoExperiences()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedExperience = new Experience { Name = $"{prefix}_Changed" };
+			var unchangedExperience = new Experience { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateExperience([changedExperience, unchangedExperience]);
+
+			var changedToUpdate = TestContext.Api.Experience.Read(changedExperience.Id);
+			var unchangedToUpdate = TestContext.Api.Experience.Read(unchangedExperience.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+
+			var updatedExperience = TestContext.Api.Experience.Update(new[] { changedToUpdate, unchangedToUpdate });
+
+			Assert.AreEqual(2, updatedExperience.Count);
+			Assert.IsTrue(updatedExperience.Any(x => x.Id == changedExperience.Id));
+			Assert.IsTrue(updatedExperience.Any(x => x.Id == unchangedExperience.Id));
+
+			var changedAfterUpdate = TestContext.Api.Experience.Read(changedExperience.Id);
+			var unchangedAfterUpdate = TestContext.Api.Experience.Read(unchangedExperience.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(unchangedExperience.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
+		public void BulkUpdateWithChangedInvalidAndUnchangedExperienceReturnsTwoSuccessfulIds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var changedExperience = new Experience { Name = $"{prefix}_Changed" };
+			var invalidExperience = new Experience { Name = $"{prefix}_Invalid" };
+			var unchangedExperience = new Experience { Name = $"{prefix}_Unchanged" };
+
+			objectCreator.CreateExperience([changedExperience, invalidExperience, unchangedExperience]);
+
+			var changedToUpdate = TestContext.Api.Experience.Read(changedExperience.Id);
+			var invalidToUpdate = TestContext.Api.Experience.Read(invalidExperience.Id);
+			var unchangedToUpdate = TestContext.Api.Experience.Read(unchangedExperience.Id);
+
+			changedToUpdate.Name = $"{prefix}_Changed_Updated";
+			invalidToUpdate.Name = string.Empty;
+
+			PeopleAndOrganizationsBulkException<Guid>? expectedException = null;
+			try
+			{
+				TestContext.Api.Experience.Update(new[] { changedToUpdate, invalidToUpdate, unchangedToUpdate });
+			}
+			catch (PeopleAndOrganizationsBulkException<Guid> ex)
+			{
+				expectedException = ex;
+			}
+
+			Assert.IsNotNull(expectedException, "Expected exception was not thrown.");
+
+			Assert.AreEqual(2, expectedException.Result.SuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(changedExperience.Id));
+			Assert.IsTrue(expectedException.Result.SuccessfulIds.Contains(unchangedExperience.Id));
+			Assert.AreEqual(1, expectedException.Result.UnsuccessfulIds.Count);
+			Assert.IsTrue(expectedException.Result.UnsuccessfulIds.Contains(invalidExperience.Id));
+
+			var changedAfterUpdate = TestContext.Api.Experience.Read(changedExperience.Id);
+			var invalidAfterUpdate = TestContext.Api.Experience.Read(invalidExperience.Id);
+			var unchangedAfterUpdate = TestContext.Api.Experience.Read(unchangedExperience.Id);
+
+			Assert.AreEqual(changedToUpdate.Name, changedAfterUpdate.Name);
+			Assert.AreEqual(invalidExperience.Name, invalidAfterUpdate.Name);
+			Assert.AreEqual(unchangedExperience.Name, unchangedAfterUpdate.Name);
+		}
+
+		[TestMethod]
 		public void ReadWithEmptyListReturnsEmptyList()
 		{
 			var experience = TestContext.Api.Experience.Read(new List<Guid>());
