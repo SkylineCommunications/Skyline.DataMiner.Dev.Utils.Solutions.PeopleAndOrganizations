@@ -8,6 +8,7 @@
   <Folder Name="/Tests/">
     <Project Path="DevPack.Tests/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Tests.csproj" />
   </Folder>
+  <Project Path="DevPack.Abstractions/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Abstractions.csproj" />
   <Project Path="DevPack.Automation/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Automation.csproj" />
   <Project Path="DevPack.GQI/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.GQI.csproj" />
   <Project Path="DevPack.Protocol/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol.csproj" />

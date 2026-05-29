@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>anycpu</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <OutputType>Library</OutputType>
+    <AssemblyTitle>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Abstractions</AssemblyTitle>
+    <Product>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Abstractions</Product>
+    <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Abstractions</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.Solutions.PeopleAndOrganizations</RootNamespace>
+
+    <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Abstractions</PackageId>
+    <PackageTags>Skyline;DataMiner</PackageTags>
+    <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>Icon.png</PackageIcon>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+    <Authors>SkylineCommunications</Authors>
+    <Company>Skyline Communications</Company>
+    <Description>Provides abstractions for the People and Organizations API.</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Solutions.PeopleAndOrganizations</RepositoryUrl>
+    <Deterministic>false</Deterministic>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="" />
+    <None Include="..\DevPack\LICENSE.txt" Link="LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="..\DevPack\nuget\Icon.png" Link="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.5.11.1" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" Version="1.0.1" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DevPack\API\ApiObject.cs" Link="API\ApiObject.cs" />
+    <Compile Include="..\DevPack\API\TrackableObject.cs" Link="API\TrackableObject.cs" />
+    <Compile Include="..\DevPack\API\IPeopleAndOrganizationsApi.cs" Link="API\IPeopleAndOrganizationsApi.cs" />
+    <Compile Include="..\DevPack\API\Repositories\I*.cs" Link="API\Repositories\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\API\Repositories\PeopleOrganization\**\I*.cs" Link="API\Repositories\PeopleOrganization\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\API\Objects\PeopleOrganization\**\*.cs" Link="API\Objects\PeopleOrganization\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\API\Querying\FilterExtensions.cs" Link="API\Querying\FilterExtensions.cs" />
+    <Compile Include="..\DevPack\API\Querying\FilterElementFactory.cs" Link="API\Querying\FilterElementFactory.cs" />
+    <Compile Include="..\DevPack\API\Querying\UniversalComparer.cs" Link="API\Querying\UniversalComparer.cs" />
+    <Compile Include="..\DevPack\API\Querying\PeopleOrganization\**\*Exposers.cs" Link="API\Querying\PeopleOrganization\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\Exceptions\PeopleAndOrganizationsException.cs" Link="Exceptions\PeopleAndOrganizationsException.cs" />
+    <Compile Include="..\DevPack\Exceptions\PeopleAndOrganizationsBulkException.cs" Link="Exceptions\PeopleAndOrganizationsBulkException.cs" />
+    <Compile Include="..\DevPack\Exceptions\TraceData\BulkOperationResult.cs" Link="Exceptions\TraceData\BulkOperationResult.cs" />
+    <Compile Include="..\DevPack\Exceptions\TraceData\IBulkOperationResult.cs" Link="Exceptions\TraceData\IBulkOperationResult.cs" />
+    <Compile Include="..\DevPack\Exceptions\TraceData\PeopleAndOrganizationsErrorData.cs" Link="Exceptions\TraceData\PeopleAndOrganizationsErrorData.cs" />
+    <Compile Include="..\DevPack\Exceptions\TraceData\PeopleAndOrganizationsTraceData.cs" Link="Exceptions\TraceData\PeopleAndOrganizationsTraceData.cs" />
+    <Compile Include="..\DevPack\Exceptions\TraceData\PeopleOrganization\**\*.cs" Link="Exceptions\TraceData\PeopleOrganization\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
+    <Compile Include="..\DevPack\Cache\*.cs" Link="Cache\%(Filename)%(Extension)" />
+    <Compile Include="..\DevPack\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
+    <Compile Include="..\DevPack\Storage\DOM\Model\GenericGeneratedDomCode.cs" Link="Storage\DOM\Model\GenericGeneratedDomCode.cs" />
+    <Compile Include="..\DevPack\Storage\DOM\Model\slcPeopleOrganizationsGeneratedDomCode.cs" Link="Storage\DOM\Model\slcPeopleOrganizationsGeneratedDomCode.cs" />
+    <Compile Include="..\DevPack\Storage\DOM\Model\PeopleOrganization\*.cs" Link="Storage\DOM\Model\PeopleOrganization\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>
