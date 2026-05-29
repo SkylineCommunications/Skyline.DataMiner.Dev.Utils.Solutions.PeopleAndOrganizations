@@ -2,15 +2,19 @@
 {
 	using System;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents a role in People and Organizations.
 	/// </summary>
 	public class Role : ApiObject
 	{
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.RoleInstance originalInstance;
 		private StoragePeopleAndOrganizations.RoleInstance updatedInstance;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Role"/> class.
@@ -30,18 +34,22 @@
 			HasUserDefinedId = true;
 		}
 
+#if !ABSTRACTIONS
 		internal Role(StoragePeopleAndOrganizations.RoleInstance instance) : base(instance.ID.Id)
 		{
 			ParseInstance(instance);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets or sets the name of the role that a person has in a team.
 		/// </summary>
 		public override string Name { get; set; }
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.RoleInstance OriginalInstance => originalInstance;
+#endif
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
@@ -72,6 +80,7 @@
 				   Name == other.Name;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.RoleInstance GetInstanceWithChanges()
 		{
 			if (updatedInstance == null)
@@ -90,5 +99,6 @@
 
 			Name = instance.RoleInformation.Role;
 		}
+#endif
 	}
 }

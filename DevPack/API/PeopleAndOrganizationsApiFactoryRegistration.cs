@@ -1,25 +1,22 @@
 namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
-using System.Runtime.CompilerServices;
-
 internal static class PeopleAndOrganizationsApiFactoryRegistration
 {
-[ModuleInitializer]
-internal static void Register()
+private static readonly object _syncRoot = new object();
+private static bool isRegistered;
+
+internal static void EnsureRegistered()
 {
+lock (_syncRoot)
+{
+if (isRegistered)
+{
+return;
+}
+
 PeopleAndOrganizationsApiFactory.Register(connection => new PeopleAndOrganizationsApi(connection));
+isRegistered = true;
 }
 }
 }
-
-namespace System.Runtime.CompilerServices
-{
-#if !NET5_0_OR_GREATER
-using System;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal sealed class ModuleInitializerAttribute : Attribute
-{
-}
-#endif
 }

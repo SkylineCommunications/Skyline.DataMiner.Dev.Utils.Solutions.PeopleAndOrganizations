@@ -27,6 +27,7 @@
     <Deterministic>false</Deterministic>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);ABSTRACTIONS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -65,8 +66,5 @@
     <Compile Include="..\DevPack\Logging\ILogger.cs" Link="Logging\ILogger.cs" />
     <Compile Include="..\DevPack\Cache\*.cs" Link="Cache\%(Filename)%(Extension)" />
     <Compile Include="..\DevPack\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
-    <Compile Include="..\DevPack\Storage\DOM\Model\GenericGeneratedDomCode.cs" Link="Storage\DOM\Model\GenericGeneratedDomCode.cs" />
-    <Compile Include="..\DevPack\Storage\DOM\Model\slcPeopleOrganizationsGeneratedDomCode.cs" Link="Storage\DOM\Model\slcPeopleOrganizationsGeneratedDomCode.cs" />
-    <Compile Include="..\DevPack\Storage\DOM\Model\PeopleOrganization\*.cs" Link="Storage\DOM\Model\PeopleOrganization\%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

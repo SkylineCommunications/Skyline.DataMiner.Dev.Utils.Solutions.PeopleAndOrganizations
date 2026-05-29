@@ -6,7 +6,9 @@
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents a team in People and Organizations.
@@ -15,8 +17,10 @@
 	{
 		private readonly HashSet<Skill> skills = new HashSet<Skill>();
 
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.TeamsInstance originalInstance;
 		private StoragePeopleAndOrganizations.TeamsInstance updatedInstance;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Team"/> class.
@@ -36,11 +40,13 @@
 			HasUserDefinedId = true;
 		}
 
+#if !ABSTRACTIONS
 		internal Team(StoragePeopleAndOrganizations.TeamsInstance instance) : base(instance.ID.Id)
 		{
 			ParseInstance(instance);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets or sets the name of the team.
@@ -74,7 +80,9 @@
 
 		internal Guid ResourcePoolId { get; set; }
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.TeamsInstance OriginalInstance => originalInstance;
+#endif
 
 		/// <summary>
 		/// Adds the specified skill to the team.
@@ -192,6 +200,7 @@
 			return true;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.TeamsInstance GetInstanceWithChanges()
 		{
 			if (updatedInstance == null)
@@ -224,5 +233,6 @@
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.StatusesEnum, TeamState>(instance.Status);
 		}
+#endif
 	}
 }

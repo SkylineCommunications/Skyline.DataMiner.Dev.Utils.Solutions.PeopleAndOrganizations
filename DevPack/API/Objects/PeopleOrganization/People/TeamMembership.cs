@@ -2,15 +2,19 @@
 {
 	using System;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents a team membership.
 	/// </summary>
 	public class TeamMembership : TrackableObject
 	{
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.TeamSection originalSection;
 		private StoragePeopleAndOrganizations.TeamSection updatedSection;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TeamMembership"/> class with the team.
@@ -36,11 +40,13 @@
 			IsNew = true;
 		}
 
+#if !ABSTRACTIONS
 		internal TeamMembership(StoragePeopleAndOrganizations.TeamSection section)
 		{
 			ParseSection(section);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets the unique identifier of the team.
@@ -52,7 +58,9 @@
 		/// </summary>
 		public Guid RoleId { get; set; }
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.TeamSection OriginalSection => originalSection;
+#endif
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
@@ -82,6 +90,7 @@
 				&& RoleId == other.RoleId;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.TeamSection GetSectionWithChanges()
 		{
 			if (updatedSection == null)
@@ -102,5 +111,6 @@
 			TeamId = section.Team_144d3379 ?? Guid.Empty;
 			RoleId = section.TeamRole ?? Guid.Empty;
 		}
+#endif
 	}
 }

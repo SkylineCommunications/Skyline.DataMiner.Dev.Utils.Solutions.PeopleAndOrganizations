@@ -4,15 +4,19 @@
 
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents an organization in People and Organizations.
 	/// </summary>
 	public class Organization : ApiObject
 	{
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.OrganizationsInstance originalInstance;
 		private StoragePeopleAndOrganizations.OrganizationsInstance updatedInstance;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Organization"/> class.
@@ -32,11 +36,13 @@
 			HasUserDefinedId = true;
 		}
 
+#if !ABSTRACTIONS
 		internal Organization(StoragePeopleAndOrganizations.OrganizationsInstance instance) : base(instance.ID.Id)
 		{
 			ParseInstance(instance);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets or sets the name of the organization.
@@ -53,7 +59,9 @@
 		/// </summary>
 		public OrganizationState State { get; private set; }
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.OrganizationsInstance OriginalInstance => originalInstance;
+#endif
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
@@ -88,6 +96,7 @@
 				   State == other.State;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.OrganizationsInstance GetInstanceWithChanges()
 		{
 			if (updatedInstance == null)
@@ -110,5 +119,6 @@
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum, OrganizationState>(instance.Status);
 		}
+#endif
 	}
 }

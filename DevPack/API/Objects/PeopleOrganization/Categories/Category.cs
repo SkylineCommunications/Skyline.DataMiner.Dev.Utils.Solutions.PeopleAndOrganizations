@@ -2,15 +2,19 @@
 {
 	using System;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents a category in People and Organizations.
 	/// </summary>
 	public class Category : ApiObject
 	{
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.CategoryInstance originalInstance;
 		private StoragePeopleAndOrganizations.CategoryInstance updatedInstance;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Category"/> class.
@@ -30,18 +34,22 @@
 			HasUserDefinedId = true;
 		}
 
+#if !ABSTRACTIONS
 		internal Category(StoragePeopleAndOrganizations.CategoryInstance instance) : base(instance.ID.Id)
 		{
 			ParseInstance(instance);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets or sets the name of the category.
 		/// </summary>
 		public override string Name { get; set; }
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.CategoryInstance OriginalInstance => originalInstance;
+#endif
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
@@ -72,6 +80,7 @@
 				   Name == other.Name;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.CategoryInstance GetInstanceWithChanges()
 		{
 			if (updatedInstance == null)
@@ -90,5 +99,6 @@
 
 			Name = instance.CategoryInformation.Category;
 		}
+#endif
 	}
 }

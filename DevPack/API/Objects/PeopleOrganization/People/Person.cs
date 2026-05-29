@@ -7,7 +7,9 @@
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Cache;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Extensions;
 
+#if !ABSTRACTIONS
 	using StoragePeopleAndOrganizations = Storage.DOM.SlcPeople_Organizations;
+#endif
 
 	/// <summary>
 	/// Represents a person in People and Organizations.
@@ -19,8 +21,10 @@
 		private readonly HashSet<Skill> skills = [];
 		private readonly List<TeamMembership> teamMemberships = [];
 
+#if !ABSTRACTIONS
 		private StoragePeopleAndOrganizations.PeopleInstance originalInstance;
 		private StoragePeopleAndOrganizations.PeopleInstance updatedInstance;
+#endif
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Person"/> class.
@@ -40,11 +44,13 @@
 			HasUserDefinedId = true;
 		}
 
+#if !ABSTRACTIONS
 		internal Person(StoragePeopleAndOrganizations.PeopleInstance instance) : base(instance.ID.Id)
 		{
 			ParseInstance(instance);
 			InitTracking();
 		}
+#endif
 
 		/// <summary>
 		/// Gets or sets the full name of the person.
@@ -110,7 +116,9 @@
 
 		internal ApiObjectCache ApiObjectCache => apiObjectCache;
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.PeopleInstance OriginalInstance => originalInstance;
+#endif
 
 		/// <summary>
 		/// Adds the specified skill to the person.
@@ -197,6 +205,7 @@
 				throw new ArgumentNullException(nameof(teamMembership));
 			}
 
+#if !ABSTRACTIONS
 			if (teamMembership.OriginalSection == null)
 			{
 				return this;
@@ -207,6 +216,13 @@
 			{
 				return this;
 			}
+#else
+			var toRemove = teamMemberships.SingleOrDefault(x => x.TeamId == teamMembership.TeamId && x.RoleId == teamMembership.RoleId);
+			if (toRemove == null)
+			{
+				return this;
+			}
+#endif
 
 			teamMemberships.Remove(toRemove);
 			return this;
@@ -287,6 +303,7 @@
 			return true;
 		}
 
+#if !ABSTRACTIONS
 		internal StoragePeopleAndOrganizations.PeopleInstance GetInstanceWithChanges()
 		{
 			if (updatedInstance == null)
@@ -349,6 +366,7 @@
 
 			State = EnumExtensions.MapEnum<StoragePeopleAndOrganizations.SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum, PersonState>(instance.Status);
 		}
+#endif
 
 	}
 }

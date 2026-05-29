@@ -64,9 +64,6 @@
 <Compile Remove="Logging\ILogger.cs" />
 <Compile Remove="Cache\*.cs" />
 <Compile Remove="Extensions\EnumExtensions.cs" />
-<Compile Remove="Storage\DOM\Model\GenericGeneratedDomCode.cs" />
-<Compile Remove="Storage\DOM\Model\slcPeopleOrganizationsGeneratedDomCode.cs" />
-<Compile Remove="Storage\DOM\Model\PeopleOrganization\*.cs" />
 </ItemGroup>
 
 	<ItemGroup>
