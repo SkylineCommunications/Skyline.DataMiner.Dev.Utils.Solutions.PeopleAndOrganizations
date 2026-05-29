@@ -28,7 +28,7 @@ implementation = createImplementation;
 
 if (implementation == null)
 {
-throw new InvalidOperationException("No PeopleAndOrganizations API implementation has been registered. Ensure Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations is available before calling PeopleAndOrganizationsApiFactory.Create.");
+throw new InvalidOperationException("No PeopleAndOrganizations API implementation has been registered. Ensure Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations is loaded before calling PeopleAndOrganizationsApiFactory.Create.");
 }
 
 return implementation(connection);
