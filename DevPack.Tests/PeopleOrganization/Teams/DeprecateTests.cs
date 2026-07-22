@@ -72,5 +72,40 @@
 			Assert.AreEqual(1, teamInUseByPeopleError.PeopleIds.Count);
 			Assert.IsTrue(teamInUseByPeopleError.PeopleIds.Contains(person.Id));
 		}
+
+		[TestMethod]
+		public void WhenPeopleMembershipsForTeamAreRemoved_DeprecateSucceeds()
+		{
+			var prefix = Guid.NewGuid();
+
+			var team = new Team
+			{
+				Name = $"{prefix}_Team",
+			};
+			team = objectCreator.CreateTeam(team);
+
+			var person = new Person
+			{
+				Name = $"{prefix}_Person",
+			}
+			.AddTeamMembership(new TeamMembership(team));
+			person = objectCreator.CreatePerson(person);
+
+			team = TestContext.Api.Teams.Activate(team);
+			person = TestContext.Api.People.Activate(person);
+
+			var membershipToRemove = person.TeamMemberships.Single(x => x.TeamId == team.Id);
+			person.RemoveTeamMembership(membershipToRemove);
+			person = TestContext.Api.People.Update(person);
+
+			team = TestContext.Api.Teams.Deprecate(team);
+
+			Assert.IsNotNull(team);
+			Assert.AreEqual(TeamState.Deprecated, team.State);
+
+			var updatedPerson = TestContext.Api.People.Read(person.Id);
+			Assert.IsNotNull(updatedPerson);
+			Assert.IsFalse(updatedPerson.TeamMemberships.Any(x => x.TeamId == team.Id));
+		}
 	}
 }
