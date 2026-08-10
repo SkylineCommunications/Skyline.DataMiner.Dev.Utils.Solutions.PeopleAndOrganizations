@@ -191,8 +191,6 @@
 			}
 			else
 			{
-				Thread.Sleep(200); // Add some delay to simulate lock communication
-
 				foreach (var lockedObject in lockedObjects)
 				{
 					LockedObjectIds.TryRemove(lockedObject.LockId);
@@ -231,8 +229,6 @@
 			}
 			else
 			{
-				Thread.Sleep(200); // Add some delay to simulate lock communication
-
 				LockedObjectIds.TryRemove(lockObjectId);
 			}
 		}
