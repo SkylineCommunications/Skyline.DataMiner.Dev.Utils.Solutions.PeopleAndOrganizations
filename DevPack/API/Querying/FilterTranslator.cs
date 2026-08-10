@@ -7,13 +7,18 @@
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
+	using SLDataGateway.API.Querying;
+	using SLDataGateway.API.Types.Querying;
+
 	internal abstract class FilterTranslator<T, K> where T : ApiObject
 	{
 		protected FilterTranslator()
 		{
 		}
 
-		protected abstract Dictionary<string, Func<Comparer, object, FilterElement<K>>> Handlers { get; }
+		protected abstract Dictionary<string, Func<Comparer, object, FilterElement<K>>> FilterHandlers { get; }
+
+		protected abstract Dictionary<string, Func<SortOrder, bool, IOrderByElement>> OrderByHandlers { get; }
 
 		/// <summary>
 		/// Translates a filter element of type <typeparamref name="T"/> into a filter element for <see cref="DomInstance"/>.
@@ -22,7 +27,7 @@
 		/// <returns>A <see cref="FilterElement{DomInstance}"/> representing the translated filter.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="filter"/> is null.</exception>
 		/// <exception cref="NotSupportedException">Thrown when the filter type is not supported.</exception>
-		public virtual FilterElement<K> Translate(FilterElement<T> filter)
+		public virtual FilterElement<K> TranslateFilter(FilterElement<T> filter)
 		{
 			if (filter is null)
 			{
@@ -32,15 +37,15 @@
 			FilterElement<K> translated;
 			if (filter is ANDFilterElement<T> and)
 			{
-				translated = new ANDFilterElement<K>(and.subFilters.Select(Translate).ToArray());
+				translated = new ANDFilterElement<K>(and.subFilters.Select(TranslateFilter).ToArray());
 			}
 			else if (filter is ORFilterElement<T> or)
 			{
-				translated = new ORFilterElement<K>(or.subFilters.Select(Translate).ToArray());
+				translated = new ORFilterElement<K>(or.subFilters.Select(TranslateFilter).ToArray());
 			}
 			else if (filter is NOTFilterElement<T> not)
 			{
-				translated = new NOTFilterElement<K>(Translate(not));
+				translated = new NOTFilterElement<K>(TranslateFilter(not.original));
 			}
 			else if (filter is TRUEFilterElement<T>)
 			{
@@ -56,10 +61,34 @@
 			}
 			else
 			{
-				throw new NotSupportedException($"Unsupported filter: {filter}");
+				throw new NotSupportedException($"Translating filter '{filter}' is not implemented.");
 			}
 
 			return translated;
+		}
+
+		/// <summary>
+		/// Translates an order by of type <typeparamref name="T"/> into an order by for <typeparamref name="K"/>.
+		/// </summary>
+		/// <param name="order">The order by to translate.</param>
+		/// <returns>An <see cref="IOrderBy"/> representing the translated order by.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="order"/> is null.</exception>
+		/// <exception cref="NotSupportedException">Thrown when a field is not supported.</exception>
+		public virtual IOrderBy TranslateFullOrderBy(IOrderBy order)
+		{
+			if (order is null)
+			{
+				throw new ArgumentNullException(nameof(order));
+			}
+
+			var translatedElements = new List<IOrderByElement>();
+
+			foreach (var orderByElement in order.Elements)
+			{
+				translatedElements.Add(TranslateOrderBy(orderByElement));
+			}
+
+			return new OrderBy(translatedElements);
 		}
 
 		private FilterElement<K> TranslateFilter(ManagedFilterIdentifier managedFilter)
@@ -78,12 +107,36 @@
 
 		private FilterElement<K> CreateFilter(string fieldName, Comparer comparer, object value)
 		{
-			if (!Handlers.ContainsKey(fieldName))
+			if (!FilterHandlers.ContainsKey(fieldName))
 			{
-				throw new NotSupportedException(fieldName);
+				throw new NotSupportedException($"Creating a filter for field '{fieldName}' is not implemented.");
 			}
 
-			return Handlers[fieldName].Invoke(comparer, value);
+			return FilterHandlers[fieldName].Invoke(comparer, value);
+		}
+
+		private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
+		{
+			if (orderByElement is null)
+			{
+				throw new ArgumentNullException(nameof(orderByElement));
+			}
+
+			var fieldName = orderByElement.Exposer.fieldName;
+			var sortOrder = orderByElement.SortOrder;
+			var naturalSort = orderByElement.Options.NaturalSort;
+
+			return CreateOrderBy(fieldName, sortOrder, naturalSort);
+		}
+
+		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort)
+		{
+			if (!OrderByHandlers.ContainsKey(fieldName))
+			{
+				throw new NotSupportedException($"Creating an order by for field '{fieldName}' is not implemented.");
+			}
+
+			return OrderByHandlers[fieldName].Invoke(sortOrder, naturalSort);
 		}
 	}
 }

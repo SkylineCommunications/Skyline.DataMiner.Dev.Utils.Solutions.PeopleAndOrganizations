@@ -44,7 +44,7 @@
 		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.5.11.1" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" Version="1.0.1" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.MediaOps.Plan" Version="1.6.0-alpha008" />
-		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.5" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

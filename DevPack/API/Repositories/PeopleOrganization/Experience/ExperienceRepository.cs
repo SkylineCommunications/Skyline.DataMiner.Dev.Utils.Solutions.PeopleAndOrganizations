@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
@@ -29,17 +30,32 @@
 
 		public long Count(FilterElement<Experience> filter)
 		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
 			if (filter.isEmpty())
 			{
 				return 0;
 			}
 
-			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.TranslateFilter(filter));
 		}
 
 		public long Count(IQuery<Experience> query)
 		{
-			return Count(query.Filter);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return 0;
+			}
+
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(TranslateToDomQuery(query));
 		}
 
 		public IReadOnlyCollection<Experience> Create(IEnumerable<Experience> oToCreate)
@@ -195,7 +211,7 @@
 				return Enumerable.Empty<Experience>();
 			}
 
-			var experiences = Api.DomHelpers.SlcPeopleOrganizationHelper.GetExperience(filterTranslator.Translate(filter));
+			var experiences = Api.DomHelpers.SlcPeopleOrganizationHelper.GetExperience(filterTranslator.TranslateFilter(filter));
 			return experiences.Select(x => new Experience(x));
 		}
 
@@ -206,7 +222,13 @@
 				throw new ArgumentNullException(nameof(query));
 			}
 
-			return Read(query.Filter);
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<Experience>();
+			}
+
+			var experiences = Api.DomHelpers.SlcPeopleOrganizationHelper.GetExperience(TranslateToDomQuery(query));
+			return experiences.Select(x => new Experience(x));
 		}
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged()
@@ -226,7 +248,7 @@
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged(IQuery<Experience> query)
 		{
-			return ReadPaged(query.Filter);
+			return ReadPaged(query, PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged(FilterElement<Experience> filter, int pageSize)
@@ -246,7 +268,22 @@
 
 		public IEnumerable<IPagedResult<Experience>> ReadPaged(IQuery<Experience> query, int pageSize)
 		{
-			return ReadPaged(query.Filter, pageSize);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<IPagedResult<Experience>>();
+			}
+
+			return ReadPagedIterator(query, pageSize);
 		}
 
 		public IReadOnlyCollection<Experience> Update(IEnumerable<Experience> oToUpdate)
@@ -295,7 +332,7 @@
 		private IEnumerable<IPagedResult<Experience>> ReadPagedIterator(FilterElement<Experience> filter, int pageSize)
 		{
 			var pageNumber = 0;
-			var paramFilter = filterTranslator.Translate(filter);
+			var paramFilter = filterTranslator.TranslateFilter(filter);
 			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetExperiencePaged(paramFilter, pageSize);
 			var enumerator = items.GetEnumerator();
 			var hasNext = enumerator.MoveNext();
@@ -306,6 +343,32 @@
 				hasNext = enumerator.MoveNext();
 				yield return new PagedResult<Experience>(page.Select(x => new Experience(x)), pageNumber++, pageSize, hasNext);
 			}
+		}
+
+		private IEnumerable<IPagedResult<Experience>> ReadPagedIterator(IQuery<Experience> query, int pageSize)
+		{
+			var pageNumber = 0;
+			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetExperiencePaged(TranslateToDomQuery(query), pageSize);
+			var enumerator = items.GetEnumerator();
+			var hasNext = enumerator.MoveNext();
+
+			while (hasNext)
+			{
+				var page = enumerator.Current;
+				hasNext = enumerator.MoveNext();
+				yield return new PagedResult<Experience>(page.Select(x => new Experience(x)), pageNumber++, pageSize, hasNext);
+			}
+		}
+
+		private IQuery<DomInstance> TranslateToDomQuery(IQuery<Experience> query)
+		{
+			var domFilter = filterTranslator.TranslateFilter(query.Filter);
+			var domOrderBy = filterTranslator.TranslateFullOrderBy(query.Order);
+
+			return query
+				.WithFilter(domFilter)
+				.WithOrder(domOrderBy)
+				.WithLimit(query.Limit);
 		}
 	}
 }
