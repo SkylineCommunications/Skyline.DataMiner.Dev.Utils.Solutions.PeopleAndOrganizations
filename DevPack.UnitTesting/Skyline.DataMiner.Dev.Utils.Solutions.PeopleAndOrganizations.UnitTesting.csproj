@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<PlatformTarget>anycpu</PlatformTarget>
+		<LangVersion>latest</LangVersion>
+		<OutputType>Library</OutputType>
+		<AssemblyTitle>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting</AssemblyTitle>
+		<Product>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting</Product>
+		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting</AssemblyName>
+		<RootNamespace>Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting</RootNamespace>
+
+		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting</PackageId>
+		<PackageTags>Skyline;DataMiner</PackageTags>
+		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<Authors>SkylineCommunications</Authors>
+		<Company>Skyline Communications</Company>
+		<Description>Provides an in-memory simulated connection and helpers for unit and integration testing of People and Organizations.</Description>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Solutions.PeopleAndOrganizations</RepositoryUrl>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DevPack\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.5.11.1" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.5" />
+	</ItemGroup>
+</Project>

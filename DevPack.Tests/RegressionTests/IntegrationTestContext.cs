@@ -3,23 +3,26 @@
 	using System;
 
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
-
-	using DMConnection = Skyline.DataMiner.Net.Connection;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulation;
 
 	public sealed class IntegrationTestContext : IDisposable
 	{
-		private readonly DMConnection connection;
+		private readonly Config config;
+
+		private IConnection connection;
 
 		public IntegrationTestContext()
 		{
-			var config = Config.Load();
+			config = Config.Load();
 
-			connection = Skyline.DataMiner.Net.ConnectionSettings.GetConnection(config.BaseUrl) ?? throw new NullReferenceException("Unable to connect to DataMiner");
-			connection.Authenticate(config.Username, config.Password, config.Domain);
+			connection = config.UseRealDma
+				? CreateRealConnection(config)
+				: CreateSimulatedConnection();
 
 			Api = new PeopleAndOrganizationsApi(connection) ?? throw new NullReferenceException("Unable to create PeopleAndOrganizationsApi");
 			Api.SetLogger(new ConsoleLogger());
@@ -45,6 +48,22 @@
 		public void Dispose()
 		{
 			connection.Dispose();
+		}
+
+		private static IConnection CreateRealConnection(Config config)
+		{
+			var connection = Skyline.DataMiner.Net.ConnectionSettings.GetConnection(config.BaseUrl)
+				?? throw new NullReferenceException("Unable to connect to DataMiner");
+
+			connection.Authenticate(config.Username, config.Password, config.Domain);
+
+			return connection;
+		}
+
+		private static IConnection CreateSimulatedConnection()
+		{
+			var dms = PeopleAndOrganizationsSimulation.Create();
+			return dms.CreateConnection();
 		}
 	}
 }
