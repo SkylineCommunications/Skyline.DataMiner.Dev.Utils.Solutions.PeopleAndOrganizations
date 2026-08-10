@@ -33,7 +33,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Categories
 		[TestMethod]
 		public void ReadWithQueryOrdersResults()
 		{
-			var categories = CreateCategorys(out var filter);
+			var categories = CreateCategories(out var filter);
 
 			QueryAssert.Read(TestContext.Api.Categories, categories, filter.ToQuery().OrderBy(CategoryExposers.Name, false));
 			QueryAssert.Read(TestContext.Api.Categories, categories.AsEnumerable().Reverse().ToArray(), filter.ToQuery().OrderByDescending(CategoryExposers.Name, false));
@@ -42,7 +42,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Categories
 		[TestMethod]
 		public void ReadWithQueryLimitsResults()
 		{
-			var categories = CreateCategorys(out var filter);
+			var categories = CreateCategories(out var filter);
 
 			QueryAssert.Read(TestContext.Api.Categories, categories.Take(1).ToArray(), filter.ToQuery().OrderBy(CategoryExposers.Name, false).WithLimit(LimitBy.Default.WithLimit(1)));
 			QueryAssert.Read(TestContext.Api.Categories, categories.Take(3).ToArray(), filter.ToQuery().OrderBy(CategoryExposers.Name, false).WithLimit(LimitBy.Default.WithLimit(3)));
@@ -52,7 +52,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Categories
 		[TestMethod]
 		public void CountWithQuery()
 		{
-			var categories = CreateCategorys(out var filter);
+			var categories = CreateCategories(out var filter);
 
 			QueryAssert.Count(TestContext.Api.Categories, categories, filter.ToQuery().OrderBy(CategoryExposers.Name, false));
 			QueryAssert.Count(TestContext.Api.Categories, Array.Empty<Category>(), filter.AND(CategoryExposers.Name.Contains("Unknown")).ToQuery().OrderBy(CategoryExposers.Name, false));
@@ -61,13 +61,13 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Categories
 		[TestMethod]
 		public void ReadPagedWithQueryOrdersResults()
 		{
-			var categories = CreateCategorys(out var filter);
+			var categories = CreateCategories(out var filter);
 
 			QueryAssert.ReadPaged(TestContext.Api.Categories, categories, filter.ToQuery().OrderBy(CategoryExposers.Name, false));
 			QueryAssert.ReadPaged(TestContext.Api.Categories, categories.AsEnumerable().Reverse().ToArray(), filter.ToQuery().OrderByDescending(CategoryExposers.Name, false), 2);
 		}
 
-		private Category[] CreateCategorys(out FilterElement<Category> filter)
+		private Category[] CreateCategories(out FilterElement<Category> filter)
 		{
 			var prefix = Guid.NewGuid();
 

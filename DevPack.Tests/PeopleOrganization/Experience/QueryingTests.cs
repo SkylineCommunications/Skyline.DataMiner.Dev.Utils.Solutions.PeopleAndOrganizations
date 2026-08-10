@@ -33,7 +33,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		[TestMethod]
 		public void ReadWithQueryOrdersResults()
 		{
-			var experiences = CreateExperience(out var filter);
+			var experiences = CreateExperiences(out var filter);
 
 			QueryAssert.Read(TestContext.Api.Experience, experiences, filter.ToQuery().OrderBy(ExperienceExposers.Name, false));
 			QueryAssert.Read(TestContext.Api.Experience, experiences.AsEnumerable().Reverse().ToArray(), filter.ToQuery().OrderByDescending(ExperienceExposers.Name, false));
@@ -42,7 +42,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		[TestMethod]
 		public void ReadWithQueryLimitsResults()
 		{
-			var experiences = CreateExperience(out var filter);
+			var experiences = CreateExperiences(out var filter);
 
 			QueryAssert.Read(TestContext.Api.Experience, experiences.Take(1).ToArray(), filter.ToQuery().OrderBy(ExperienceExposers.Name, false).WithLimit(LimitBy.Default.WithLimit(1)));
 			QueryAssert.Read(TestContext.Api.Experience, experiences.Take(3).ToArray(), filter.ToQuery().OrderBy(ExperienceExposers.Name, false).WithLimit(LimitBy.Default.WithLimit(3)));
@@ -52,7 +52,7 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		[TestMethod]
 		public void CountWithQuery()
 		{
-			var experiences = CreateExperience(out var filter);
+			var experiences = CreateExperiences(out var filter);
 
 			QueryAssert.Count(TestContext.Api.Experience, experiences, filter.ToQuery().OrderBy(ExperienceExposers.Name, false));
 			QueryAssert.Count(TestContext.Api.Experience, Array.Empty<Experience>(), filter.AND(ExperienceExposers.Name.Contains("Unknown")).ToQuery().OrderBy(ExperienceExposers.Name, false));
@@ -61,13 +61,13 @@ namespace RT_PeopleAndOrganizations.PeopleOrganization.Experience
 		[TestMethod]
 		public void ReadPagedWithQueryOrdersResults()
 		{
-			var experiences = CreateExperience(out var filter);
+			var experiences = CreateExperiences(out var filter);
 
 			QueryAssert.ReadPaged(TestContext.Api.Experience, experiences, filter.ToQuery().OrderBy(ExperienceExposers.Name, false));
 			QueryAssert.ReadPaged(TestContext.Api.Experience, experiences.AsEnumerable().Reverse().ToArray(), filter.ToQuery().OrderByDescending(ExperienceExposers.Name, false), 2);
 		}
 
-		private Experience[] CreateExperience(out FilterElement<Experience> filter)
+		private Experience[] CreateExperiences(out FilterElement<Experience> filter)
 		{
 			var prefix = Guid.NewGuid();
 
