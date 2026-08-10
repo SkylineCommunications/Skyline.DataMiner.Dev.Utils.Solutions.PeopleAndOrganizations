@@ -140,7 +140,7 @@
 			}
 			catch (ArgumentException ex)
 			{
-				Assert.AreEqual("Name of skill cannot be null.\r\nParameter name: oToCreate", ex.Message);
+				Assert.AreEqual($"Name of skill cannot be null.{Environment.NewLine}Parameter name: oToCreate", ex.Message);
 				return;
 			}
 
