@@ -284,7 +284,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 			instance.StatusId = behavior.InitialStatusId;
 		}
 
-		internal void NotifySubscriptions(EventMessage eventMessage)		{
+		internal void NotifySubscriptions(EventMessage eventMessage)
+		{
 			if (eventMessage is null)
 			{
 				throw new ArgumentNullException(nameof(eventMessage));

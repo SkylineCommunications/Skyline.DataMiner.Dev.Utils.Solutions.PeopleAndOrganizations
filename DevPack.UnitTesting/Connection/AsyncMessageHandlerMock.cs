@@ -32,8 +32,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Connect
 				Messages = _connection.HandleMessages(messages),
 			};
 
-			MethodInfo dynMethod = GetType().GetMethod("SetResponse", BindingFlags.NonPublic | BindingFlags.Instance);
-			dynMethod.Invoke(this, new object[] { response });
+			MethodInfo dynMethod = progress.GetType().GetMethod("SetResponse", BindingFlags.NonPublic | BindingFlags.Instance);
+			dynMethod.Invoke(progress, new object[] { response });
 
 			return progress;
 		}
