@@ -24,6 +24,7 @@
 
 		private readonly SkylineLockManagerConnectorApi _lockapi;
 		private readonly ILogger _logger;
+		private readonly bool _useInMemoryLocks;
 
 		public LockManager(PeopleAndOrganizationsApi api)
 		{
@@ -34,6 +35,7 @@
 
 			_lockapi = new SkylineLockManagerConnectorApi(api.Connection, LockManagerElementName, new LockManagerLoggerFactory(api.Logger));
 			_logger = api.Logger;
+			_useInMemoryLocks = !DataMinerAgentHelper.IsRunningOnDataMinerAgent(_logger);
 		}
 
 		public bool TryLockAndExecute(string objectLockId, Action action, int maxSleepTime = MaxSleepTime)
@@ -151,7 +153,7 @@
 
 		private LockManagerApiResult<T> LockObjects<T>(ICollection<T> objectsToLock) where T : ApiObject
 		{
-			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			if (!_useInMemoryLocks)
 			{
 				var lockRequests = objectsToLock.Select(x => new LockObjectRequest
 				{
@@ -163,8 +165,6 @@
 			}
 			else
 			{
-				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, keeping locks in memory");
-
 				List<string> grantedObjectLocks = new List<string>();
 				foreach (var objectToLock in objectsToLock)
 				{
@@ -180,7 +180,7 @@
 
 		private void UnlockObjects<T>(ICollection<T> lockedObjects) where T : ApiObject
 		{
-			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			if (!_useInMemoryLocks)
 			{
 				var unlockRequests = lockedObjects.Select(x => new UnlockObjectRequest
 				{
@@ -191,8 +191,6 @@
 			}
 			else
 			{
-				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, unlocking locks from memory");
-
 				Thread.Sleep(200); // Add some delay to simulate lock communication
 
 				foreach (var lockedObject in lockedObjects)
@@ -204,7 +202,7 @@
 
 		private bool TryLockObject(string lockObjectId)
 		{
-			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			if (!_useInMemoryLocks)
 			{
 				var lockRequest = new LockObjectRequest
 				{
@@ -216,15 +214,13 @@
 			}
 			else
 			{
-				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, keeping locks in memory");
-
 				return LockedObjectIds.TryAdd(lockObjectId);
 			}
 		}
 
 		private void UnlockObject(string lockObjectId)
 		{
-			if (DataMinerAgentHelper.IsRunningOnDataMinerAgent())
+			if (!_useInMemoryLocks)
 			{
 				var unlockRequest = new UnlockObjectRequest
 				{
@@ -235,8 +231,6 @@
 			}
 			else
 			{
-				_logger.Warning(this, "This code isn't running on a DataMiner agent, unable to communicate with Lock Manager as NATS communication will fail, unlocking locks from memory");
-
 				Thread.Sleep(200); // Add some delay to simulate lock communication
 
 				LockedObjectIds.TryRemove(lockObjectId);
