@@ -15,6 +15,23 @@
 				throw new ArgumentNullException(nameof(configuration));
 			}
 
+			// By default the regression tests run against an in-memory simulated DataMiner System.
+			// To run them against a real DataMiner Agent, set PNO_USE_REAL_DMA to "true":
+			// dotnet user-secrets set "PNO_USE_REAL_DMA" "true"
+			var useRealDma = configuration["PNO_USE_REAL_DMA"];
+			UseRealDma = String.Equals(useRealDma, "true", StringComparison.OrdinalIgnoreCase)
+				|| String.Equals(useRealDma, "1", StringComparison.OrdinalIgnoreCase);
+
+			if (!UseRealDma)
+			{
+				// The simulated DataMiner System does not authenticate, so no credentials are needed.
+				Username = String.Empty;
+				Password = String.Empty;
+				Domain = String.Empty;
+				BaseUrl = String.Empty;
+				return;
+			}
+
 			// To set the credentials prefix locally, use the following command from the 'DevPack.Tests' folder:
 			// dotnet user-secrets set "CRED_PREFIX" "DATAMINER"
 			var prefixCredentials = configuration["CRED_PREFIX"];
@@ -42,6 +59,8 @@
 				BaseUrl = configuration[prefixCredentials + "_HOST"] ?? "localhost";
 			}
 		}
+
+		public bool UseRealDma { get; }
 
 		public string BaseUrl { get; }
 

@@ -24,12 +24,22 @@
 
 		public long Count(FilterElement<Skill> filter)
 		{
-			return Read(filter).Count();
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			return Read(filter).LongCount();
 		}
 
 		public long Count(IQuery<Skill> query)
 		{
-			return Count(query.Filter);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			return Read(query).LongCount();
 		}
 
 		public IReadOnlyCollection<Skill> Create(IEnumerable<Skill> oToCreate)
@@ -161,7 +171,16 @@
 				throw new ArgumentNullException(nameof(query));
 			}
 
-			return Read(query.Filter);
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<Skill>();
+			}
+
+			// Skills are not stored as separate objects, so the ordering and limiting are applied in memory.
+			var skills = skillFilterTranslator.FilterSkills(SkillHandler.ReadAll(Api), query.Filter);
+			var ordered = query.Order.ExecuteInMemory(skills);
+
+			return query.Limit.ExecuteInMemory(ordered);
 		}
 
 		public IEnumerable<Skill> Read()

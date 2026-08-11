@@ -1,10 +1,11 @@
-namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
+﻿namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
 	using Skyline.DataMiner.Net.Jobs;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
@@ -78,17 +79,32 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		public long Count(FilterElement<Team> filter)
 		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
 			if (filter.isEmpty())
 			{
 				return 0;
 			}
 
-			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.TranslateFilter(filter));
 		}
 
 		public long Count(IQuery<Team> query)
 		{
-			return Count(query.Filter);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return 0;
+			}
+
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(TranslateToDomQuery(query));
 		}
 
 		public IReadOnlyCollection<Team> Create(IEnumerable<Team> oToCreate)
@@ -348,7 +364,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				return Enumerable.Empty<Team>();
 			}
 
-			var teams = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(filterTranslator.Translate(filter));
+			var teams = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(filterTranslator.TranslateFilter(filter));
 			return teams.Select(x => new Team(x));
 		}
 
@@ -359,7 +375,13 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				throw new ArgumentNullException(nameof(query));
 			}
 
-			return Read(query.Filter);
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<Team>();
+			}
+
+			var teams = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeams(TranslateToDomQuery(query));
+			return teams.Select(x => new Team(x));
 		}
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged()
@@ -379,7 +401,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged(IQuery<Team> query)
 		{
-			return ReadPaged(query.Filter);
+			return ReadPaged(query, PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged(FilterElement<Team> filter, int pageSize)
@@ -399,7 +421,22 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 
 		public IEnumerable<IPagedResult<Team>> ReadPaged(IQuery<Team> query, int pageSize)
 		{
-			return ReadPaged(query.Filter, pageSize);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<IPagedResult<Team>>();
+			}
+
+			return ReadPagedIterator(query, pageSize);
 		}
 
 		public IReadOnlyCollection<Team> Update(IEnumerable<Team> oToUpdate)
@@ -448,7 +485,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 		private IEnumerable<IPagedResult<Team>> ReadPagedIterator(FilterElement<Team> filter, int pageSize)
 		{
 			var pageNumber = 0;
-			var paramFilter = filterTranslator.Translate(filter);
+			var paramFilter = filterTranslator.TranslateFilter(filter);
 			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeamsPaged(paramFilter, pageSize);
 			var enumerator = items.GetEnumerator();
 			var hasNext = enumerator.MoveNext();
@@ -459,6 +496,32 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.API
 				hasNext = enumerator.MoveNext();
 				yield return new PagedResult<Team>(page.Select(x => new Team(x)), pageNumber++, pageSize, hasNext);
 			}
+		}
+
+		private IEnumerable<IPagedResult<Team>> ReadPagedIterator(IQuery<Team> query, int pageSize)
+		{
+			var pageNumber = 0;
+			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetTeamsPaged(TranslateToDomQuery(query), pageSize);
+			var enumerator = items.GetEnumerator();
+			var hasNext = enumerator.MoveNext();
+
+			while (hasNext)
+			{
+				var page = enumerator.Current;
+				hasNext = enumerator.MoveNext();
+				yield return new PagedResult<Team>(page.Select(x => new Team(x)), pageNumber++, pageSize, hasNext);
+			}
+		}
+
+		private IQuery<DomInstance> TranslateToDomQuery(IQuery<Team> query)
+		{
+			var domFilter = filterTranslator.TranslateFilter(query.Filter);
+			var domOrderBy = filterTranslator.TranslateFullOrderBy(query.Order);
+
+			return query
+				.WithFilter(domFilter)
+				.WithOrder(domOrderBy)
+				.WithLimit(query.Limit);
 		}
 	}
 }

@@ -31,6 +31,7 @@
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Tests" />
+		<InternalsVisibleTo Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting" />
 	</ItemGroup>
 
 	<ItemGroup>

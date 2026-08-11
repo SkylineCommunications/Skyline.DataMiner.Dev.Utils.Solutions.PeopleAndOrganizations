@@ -5,6 +5,7 @@
 	using System.Linq;
 
 	using Skyline.DataMiner.Net.Jobs;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
@@ -78,17 +79,32 @@
 
 		public long Count(FilterElement<Person> filter)
 		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
 			if (filter.isEmpty())
 			{
 				return 0;
 			}
 
-			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.TranslateFilter(filter));
 		}
 
 		public long Count(IQuery<Person> query)
 		{
-			return Count(query.Filter);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return 0;
+			}
+
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(TranslateToDomQuery(query));
 		}
 
 		public IReadOnlyCollection<Person> Create(IEnumerable<Person> oToCreate)
@@ -296,7 +312,7 @@
 				return Enumerable.Empty<Person>();
 			}
 
-			var people = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(filterTranslator.Translate(filter));
+			var people = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(filterTranslator.TranslateFilter(filter));
 			return people.Select(x => new Person(x));
 		}
 
@@ -307,7 +323,13 @@
 				throw new ArgumentNullException(nameof(query));
 			}
 
-			return Read(query.Filter);
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<Person>();
+			}
+
+			var people = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeople(TranslateToDomQuery(query));
+			return people.Select(x => new Person(x));
 		}
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged()
@@ -327,7 +349,7 @@
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged(IQuery<Person> query)
 		{
-			return ReadPaged(query.Filter);
+			return ReadPaged(query, PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged(FilterElement<Person> filter, int pageSize)
@@ -347,7 +369,22 @@
 
 		public IEnumerable<IPagedResult<Person>> ReadPaged(IQuery<Person> query, int pageSize)
 		{
-			return ReadPaged(query.Filter, pageSize);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<IPagedResult<Person>>();
+			}
+
+			return ReadPagedIterator(query, pageSize);
 		}
 
 		public IReadOnlyCollection<Person> Update(IEnumerable<Person> oToUpdate)
@@ -396,7 +433,7 @@
 		private IEnumerable<IPagedResult<Person>> ReadPagedIterator(FilterElement<Person> filter, int pageSize)
 		{
 			var pageNumber = 0;
-			var paramFilter = filterTranslator.Translate(filter);
+			var paramFilter = filterTranslator.TranslateFilter(filter);
 			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeoplePaged(paramFilter, pageSize);
 			var enumerator = items.GetEnumerator();
 			var hasNext = enumerator.MoveNext();
@@ -407,6 +444,32 @@
 				hasNext = enumerator.MoveNext();
 				yield return new PagedResult<Person>(page.Select(x => new Person(x)), pageNumber++, pageSize, hasNext);
 			}
+		}
+
+		private IEnumerable<IPagedResult<Person>> ReadPagedIterator(IQuery<Person> query, int pageSize)
+		{
+			var pageNumber = 0;
+			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetPeoplePaged(TranslateToDomQuery(query), pageSize);
+			var enumerator = items.GetEnumerator();
+			var hasNext = enumerator.MoveNext();
+
+			while (hasNext)
+			{
+				var page = enumerator.Current;
+				hasNext = enumerator.MoveNext();
+				yield return new PagedResult<Person>(page.Select(x => new Person(x)), pageNumber++, pageSize, hasNext);
+			}
+		}
+
+		private IQuery<DomInstance> TranslateToDomQuery(IQuery<Person> query)
+		{
+			var domFilter = filterTranslator.TranslateFilter(query.Filter);
+			var domOrderBy = filterTranslator.TranslateFullOrderBy(query.Order);
+
+			return query
+				.WithFilter(domFilter)
+				.WithOrder(domOrderBy)
+				.WithLimit(query.Limit);
 		}
 	}
 }

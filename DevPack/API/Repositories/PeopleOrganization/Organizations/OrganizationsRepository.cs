@@ -5,6 +5,7 @@
 	using System.Linq;
 
 	using Skyline.DataMiner.Net.Jobs;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Utils.DOM.Extensions;
@@ -78,17 +79,32 @@
 
 		public long Count(FilterElement<Organization> filter)
 		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
 			if (filter.isEmpty())
 			{
 				return 0;
 			}
 
-			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.Translate(filter));
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(filterTranslator.TranslateFilter(filter));
 		}
 
 		public long Count(IQuery<Organization> query)
 		{
-			return Count(query.Filter);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return 0;
+			}
+
+			return Api.DomHelpers.SlcPeopleOrganizationHelper.CountPeopleOrganizationInstances(TranslateToDomQuery(query));
 		}
 
 		public IReadOnlyCollection<Organization> Create(IEnumerable<Organization> oToCreate)
@@ -296,7 +312,7 @@
 				return Enumerable.Empty<Organization>();
 			}
 
-			var organizations = Api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(filterTranslator.Translate(filter));
+			var organizations = Api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(filterTranslator.TranslateFilter(filter));
 			return organizations.Select(x => new Organization(x));
 		}
 
@@ -307,7 +323,13 @@
 				throw new ArgumentNullException(nameof(query));
 			}
 
-			return Read(query.Filter);
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<Organization>();
+			}
+
+			var organizations = Api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizations(TranslateToDomQuery(query));
+			return organizations.Select(x => new Organization(x));
 		}
 
 		public IEnumerable<IPagedResult<Organization>> ReadPaged()
@@ -327,7 +349,7 @@
 
 		public IEnumerable<IPagedResult<Organization>> ReadPaged(IQuery<Organization> query)
 		{
-			return ReadPaged(query.Filter);
+			return ReadPaged(query, PeopleAndOrganizationsApi.DefaultPageSize);
 		}
 
 		public IEnumerable<IPagedResult<Organization>> ReadPaged(FilterElement<Organization> filter, int pageSize)
@@ -347,7 +369,22 @@
 
 		public IEnumerable<IPagedResult<Organization>> ReadPaged(IQuery<Organization> query, int pageSize)
 		{
-			return ReadPaged(query.Filter, pageSize);
+			if (query == null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
+			}
+
+			if (query.Filter.isEmpty())
+			{
+				return Enumerable.Empty<IPagedResult<Organization>>();
+			}
+
+			return ReadPagedIterator(query, pageSize);
 		}
 
 		public IReadOnlyCollection<Organization> Update(IEnumerable<Organization> oToUpdate)
@@ -396,7 +433,7 @@
 		private IEnumerable<IPagedResult<Organization>> ReadPagedIterator(FilterElement<Organization> filter, int pageSize)
 		{
 			var pageNumber = 0;
-			var paramFilter = filterTranslator.Translate(filter);
+			var paramFilter = filterTranslator.TranslateFilter(filter);
 			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizationsPaged(paramFilter, pageSize);
 			var enumerator = items.GetEnumerator();
 			var hasNext = enumerator.MoveNext();
@@ -407,6 +444,32 @@
 				hasNext = enumerator.MoveNext();
 				yield return new PagedResult<Organization>(page.Select(x => new Organization(x)), pageNumber++, pageSize, hasNext);
 			}
+		}
+
+		private IEnumerable<IPagedResult<Organization>> ReadPagedIterator(IQuery<Organization> query, int pageSize)
+		{
+			var pageNumber = 0;
+			var items = Api.DomHelpers.SlcPeopleOrganizationHelper.GetOrganizationsPaged(TranslateToDomQuery(query), pageSize);
+			var enumerator = items.GetEnumerator();
+			var hasNext = enumerator.MoveNext();
+
+			while (hasNext)
+			{
+				var page = enumerator.Current;
+				hasNext = enumerator.MoveNext();
+				yield return new PagedResult<Organization>(page.Select(x => new Organization(x)), pageNumber++, pageSize, hasNext);
+			}
+		}
+
+		private IQuery<DomInstance> TranslateToDomQuery(IQuery<Organization> query)
+		{
+			var domFilter = filterTranslator.TranslateFilter(query.Filter);
+			var domOrderBy = filterTranslator.TranslateFullOrderBy(query.Order);
+
+			return query
+				.WithFilter(domFilter)
+				.WithOrder(domOrderBy)
+				.WithLimit(query.Limit);
 		}
 	}
 }

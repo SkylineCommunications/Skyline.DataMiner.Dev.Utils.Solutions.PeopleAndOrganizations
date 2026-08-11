@@ -11,5 +11,6 @@
   <Project Path="DevPack.Automation/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Automation.csproj" />
   <Project Path="DevPack.GQI/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.GQI.csproj" />
   <Project Path="DevPack.Protocol/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.Protocol.csproj" />
+  <Project Path="DevPack.UnitTesting/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting.csproj" />
   <Project Path="DevPack/Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
 </Solution>
