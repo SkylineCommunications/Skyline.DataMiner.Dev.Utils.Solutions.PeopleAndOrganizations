@@ -10,8 +10,10 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 	using Skyline.DataMiner.Net.AppPackages;
 	using Skyline.DataMiner.Net.AppPackages.Messages;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.Advanced;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Connection;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Stores;
 	using Skyline.DataMiner.Utils.DOM.UnitTesting;
@@ -26,8 +28,6 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 		private readonly ConcurrentBag<SimulatedConnection> _connections = new ConcurrentBag<SimulatedConnection>();
 		private readonly ConcurrentBag<InstalledAppInfo> _appPackages = new ConcurrentBag<InstalledAppInfo>();
 		private readonly ConcurrentBag<SimulatedElement> _elements = new ConcurrentBag<SimulatedElement>();
-		private readonly ConcurrentDictionary<DomDefinitionId, DomDefinition> _domDefinitions = new ConcurrentDictionary<DomDefinitionId, DomDefinition>();
-		private readonly ConcurrentDictionary<DomBehaviorDefinitionId, DomBehaviorDefinition> _domBehaviorDefinitions = new ConcurrentDictionary<DomBehaviorDefinitionId, DomBehaviorDefinition>();
 
 		private readonly DomSLNetMessageHandler _domSlNetMessageHandler = new DomSLNetMessageHandler(validateAgainstDefinition: false);
 		private readonly ProfileParameterStore _profileParameterStore = new ProfileParameterStore();
@@ -188,21 +188,8 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 				throw new ArgumentNullException(nameof(behaviorDefinitions));
 			}
 
-			var definitionList = definitions.ToList();
-			var behaviorList = behaviorDefinitions.ToList();
-
-			foreach (var definition in definitionList)
-			{
-				_domDefinitions[definition.ID] = definition;
-			}
-
-			foreach (var behavior in behaviorList)
-			{
-				_domBehaviorDefinitions[behavior.ID] = behavior;
-			}
-
-			_domSlNetMessageHandler.SetDefinitions(moduleId, definitionList);
-			_domSlNetMessageHandler.SetBehaviorDefinitions(moduleId, behaviorList);
+			_domSlNetMessageHandler.SetDefinitions(moduleId, definitions);
+			_domSlNetMessageHandler.SetBehaviorDefinitions(moduleId, behaviorDefinitions);
 		}
 
 		/// <summary>
@@ -254,34 +241,38 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 			switch (message)
 			{
 				case ManagerStoreCreateRequest<DomInstance> createRequest:
-					ApplyInitialStatus(createRequest.Object);
+					ApplyInitialStatus(createRequest.Object, createRequest.ModuleId);
 					break;
 
 				case ManagerStoreBulkCreateOrUpdateRequest<DomInstance> bulkRequest:
 					foreach (var instance in bulkRequest.Objects ?? Enumerable.Empty<DomInstance>())
 					{
-						ApplyInitialStatus(instance);
+						ApplyInitialStatus(instance, bulkRequest.ModuleId);
 					}
 
 					break;
 			}
 		}
 
-		private void ApplyInitialStatus(DomInstance instance)
+		private void ApplyInitialStatus(DomInstance instance, string moduleId)
 		{
 			if (instance is null || !String.IsNullOrEmpty(instance.StatusId) || instance.DomDefinitionId is null)
 			{
 				return;
 			}
 
-			if (!_domDefinitions.TryGetValue(instance.DomDefinitionId, out var definition)
-				|| definition.DomBehaviorDefinitionId is null
-				|| !_domBehaviorDefinitions.TryGetValue(definition.DomBehaviorDefinitionId, out var behavior))
+			var helper = new DomHelper(_domSlNetMessageHandler.HandleMessages, moduleId ?? instance.DomDefinitionId.ModuleId);
+			var definition = helper.DomDefinitions.Read(DomDefinitionExposers.Id.Equal(instance.DomDefinitionId)).SingleOrDefault();
+			if (definition?.DomBehaviorDefinitionId is null)
 			{
 				return;
 			}
 
-			instance.StatusId = behavior.InitialStatusId;
+			var behavior = helper.DomBehaviorDefinitions.Read(DomBehaviorDefinitionExposers.Id.Equal(definition.DomBehaviorDefinitionId)).SingleOrDefault();
+			if (behavior != null)
+			{
+				instance.StatusId = behavior.InitialStatusId;
+			}
 		}
 
 		internal void NotifySubscriptions(EventMessage eventMessage)
@@ -372,6 +363,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.UnitTesting.Simulat
 
 				case GetFunctionDefinitionsRequestMessage msg:
 					responses = HandleMessage(msg);
+					return true;
+
+				case ManagerStoreReinitializeCustomManagerRequest:
+					// The in-memory DOM store has no separate manager to reinitialize.
+					responses = new[] { new ManagerStoreReinitializeCustomManagerResponse { TraceData = new TraceData() } };
 					return true;
 
 				case SetParameterMessage _:

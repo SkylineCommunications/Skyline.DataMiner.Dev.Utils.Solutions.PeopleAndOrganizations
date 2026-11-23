@@ -161,6 +161,14 @@ api.SetLogger(myLogger);
 
 ## Installation and Setup
 
+### Installing the DOM schema
+
+Call `api.InstallDomModules()` explicitly from an installer to install or reconcile `(slc)people_organizations`. This requires DataMiner 10.6.11 or later and permission to configure DOM module settings. Install this schema before the Plan-owned modules when deploying MediaOps Plan.
+
+The DevPack overwrites differing module settings and declared behaviors. Fields and definition section links absent from the declarations are retained as soft-deleted metadata, including installed Collaboration links. Whole sections and definitions absent from the declarations are not removed. The DOM Manager is reinitialized after reconciliation. Errors propagate, and completed writes are not rolled back.
+
+This method does not deploy scripts, initialize or migrate DOM instances, or register the solution.
+
 ### Checking Installation Status
 
 Verify that the People and Organizations application is installed:
