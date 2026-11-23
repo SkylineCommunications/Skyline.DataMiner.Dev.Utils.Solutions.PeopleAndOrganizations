@@ -9,20 +9,20 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Interfaces;
 
-	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definitions.SlcPeopleOrganizations.SlcPeopleOrganizationsIds;
+	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds;
 
 	internal sealed class OrganizationsDefinition : IDomDefinitionInfo
 	{
 		public DomDefinition Definition { get; } = new DomDefinition("Organizations")
 		{
 			ID = Ids.Definitions.Organizations,
-			DomBehaviorDefinitionId = Ids.Behaviors.Organizations.Id,
+			DomBehaviorDefinitionId = Ids.Behaviors.Organizations_Behavior.Id,
 #pragma warning disable CS0612, CS0618 // Preserve the deployed schema's legacy visual metadata.
 			VisualStructure = new() { IsHidden = false, SectionDefinitionInfos = new() },
 #pragma warning restore CS0612, CS0618
 			ModuleSettingsOverrides = new ModuleSettingsOverrides
 			{
-				NameDefinition = new DomInstanceNameDefinition { ConcatenationItems = { new FieldValueConcatenationItem(Ids.Sections.OrganizationInformation.Name) } },
+				NameDefinition = new DomInstanceNameDefinition { ConcatenationItems = { new FieldValueConcatenationItem(Ids.Sections.OrganizationInformation.OrganizationName) } },
 			},
 			SectionDefinitionLinks =
 			{
@@ -38,7 +38,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			var section = new CustomSectionDefinition { ID = Ids.Sections.OrganizationInformation.Id, Name = "Organization information" };
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.OrganizationInformation.Name, Name = "Organization name", FieldType = typeof(string), IsOptional = false, Tooltip = "The name of this organization.",
+				ID = Ids.Sections.OrganizationInformation.OrganizationName, Name = "Organization name", FieldType = typeof(string), IsOptional = false, Tooltip = "The name of this organization.",
 			});
 			section.AddOrReplaceFieldDescriptor(new DomInstanceFieldDescriptor(Ids.ModuleId)
 			{

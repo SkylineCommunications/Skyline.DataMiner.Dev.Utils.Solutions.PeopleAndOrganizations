@@ -9,20 +9,20 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Interfaces;
 
-	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definitions.SlcPeopleOrganizations.SlcPeopleOrganizationsIds;
+	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds;
 
 	internal sealed class TeamsDefinition : IDomDefinitionInfo
 	{
 		public DomDefinition Definition { get; } = new DomDefinition("Teams")
 		{
 			ID = Ids.Definitions.Teams,
-			DomBehaviorDefinitionId = Ids.Behaviors.Teams.Id,
+			DomBehaviorDefinitionId = Ids.Behaviors.Team_Behavior.Id,
 #pragma warning disable CS0612, CS0618 // Preserve the deployed schema's legacy visual metadata.
 			VisualStructure = new() { IsHidden = false, SectionDefinitionInfos = new() },
 #pragma warning restore CS0612, CS0618
 			ModuleSettingsOverrides = new ModuleSettingsOverrides
 			{
-				NameDefinition = new DomInstanceNameDefinition { ConcatenationItems = { new FieldValueConcatenationItem(Ids.Sections.TeamInformation.Name) } },
+				NameDefinition = new DomInstanceNameDefinition { ConcatenationItems = { new FieldValueConcatenationItem(Ids.Sections.TeamInformation.TeamName) } },
 			},
 			SectionDefinitionLinks =
 			{
@@ -38,15 +38,15 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			var section = new CustomSectionDefinition { ID = Ids.Sections.TeamInformation.Id, Name = "Team information" };
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.TeamInformation.Name, Name = "Team name", FieldType = typeof(string), IsOptional = false, Tooltip = "This team's name.",
+				ID = Ids.Sections.TeamInformation.TeamName, Name = "Team name", FieldType = typeof(string), IsOptional = false, Tooltip = "This team's name.",
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.TeamInformation.Email, Name = "Team email", FieldType = typeof(string), IsOptional = true, Tooltip = "This team's email address.",
+				ID = Ids.Sections.TeamInformation.TeamEmail, Name = "Team email", FieldType = typeof(string), IsOptional = true, Tooltip = "This team's email address.",
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.TeamInformation.Description, Name = "Team description", FieldType = typeof(string), IsOptional = true, Tooltip = "A description of the team's functions and responsibilities.",
+				ID = Ids.Sections.TeamInformation.TeamDescription, Name = "Team description", FieldType = typeof(string), IsOptional = true, Tooltip = "A description of the team's functions and responsibilities.",
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
@@ -59,7 +59,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.TeamInformation.Skills, Name = "Team skills", FieldType = typeof(string), IsOptional = true, Tooltip = "All members within the team will inherit these skills.",
+				ID = Ids.Sections.TeamInformation.TeamSkills, Name = "Team skills", FieldType = typeof(string), IsOptional = true, Tooltip = "All members within the team will inherit these skills.",
 			});
 			return section;
 		}

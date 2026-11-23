@@ -3,7 +3,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 	using Skyline.DataMiner.Net.GenericEnums;
 	using Skyline.DataMiner.Net.Sections;
 
-	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definitions.SlcPeopleOrganizations.SlcPeopleOrganizationsIds;
+	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds;
 
 	internal static class BillingSectionDefinition
 	{

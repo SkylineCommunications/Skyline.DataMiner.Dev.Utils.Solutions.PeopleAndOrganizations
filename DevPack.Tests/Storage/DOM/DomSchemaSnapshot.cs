@@ -1,15 +1,12 @@
 namespace RT_PeopleAndOrganizations.Storage.DOM
 {
-	using System.Security.Cryptography;
-	using System.Text;
 	using System.Text.RegularExpressions;
 
-	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
 	internal static class DomSchemaSnapshot
 	{
-		internal static string Canonicalize(string json)
+		internal static JToken Canonicalize(string json)
 		{
 			var value = JObject.Parse(json);
 			// These belong to the platform, not the declared application schema.
@@ -18,13 +15,7 @@ namespace RT_PeopleAndOrganizations.Storage.DOM
 				value.Remove(name);
 			}
 
-			return Normalize(value).ToString(Formatting.None);
-		}
-
-		internal static string Hash(string json)
-		{
-			using var sha = SHA256.Create();
-			return BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(Canonicalize(json)))).Replace("-", String.Empty).ToLowerInvariant();
+			return Normalize(value);
 		}
 
 		private static JToken Normalize(JToken value)

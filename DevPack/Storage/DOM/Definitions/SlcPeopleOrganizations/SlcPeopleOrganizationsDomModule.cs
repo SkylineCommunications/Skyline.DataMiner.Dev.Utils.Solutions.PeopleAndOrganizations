@@ -6,10 +6,11 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 	using Skyline.DataMiner.Net.Apps.Modules;
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Interfaces;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations;
 
 	internal sealed class SlcPeopleOrganizationsDomModule
 	{
-		internal ModuleSettings ModuleSettings { get; } = new ModuleSettings(SlcPeopleOrganizationsIds.ModuleId);
+		internal ModuleSettings ModuleSettings { get; } = new ModuleSettings(SlcPeople_OrganizationsIds.ModuleId);
 
 		internal IEnumerable<IDomDefinitionInfo> Definitions { get; } = new IDomDefinitionInfo[]
 		{

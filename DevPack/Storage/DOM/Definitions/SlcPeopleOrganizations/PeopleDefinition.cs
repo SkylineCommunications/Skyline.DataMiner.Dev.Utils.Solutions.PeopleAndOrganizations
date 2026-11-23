@@ -10,14 +10,14 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Interfaces;
 
-	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definitions.SlcPeopleOrganizations.SlcPeopleOrganizationsIds;
+	using Ids = Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.SlcPeople_Organizations.SlcPeople_OrganizationsIds;
 
 	internal sealed class PeopleDefinition : IDomDefinitionInfo
 	{
 		public DomDefinition Definition { get; } = new DomDefinition("People")
 		{
 			ID = Ids.Definitions.People,
-			DomBehaviorDefinitionId = Ids.Behaviors.People.Id,
+			DomBehaviorDefinitionId = Ids.Behaviors.People_Behavior.Id,
 #pragma warning disable CS0612, CS0618 // Preserve the deployed schema's legacy visual metadata.
 			VisualStructure = new() { IsHidden = false, SectionDefinitionInfos = new() },
 #pragma warning restore CS0612, CS0618
@@ -56,7 +56,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.PeopleInformation.Skills, Name = "Personal skills", FieldType = typeof(string), IsOptional = false,
+				ID = Ids.Sections.PeopleInformation.PersonalSkills, Name = "Personal skills", FieldType = typeof(string), IsOptional = false,
 				Tooltip = "For example, Producer, Director, Video Editor, Audio Mixer, etc.",
 			});
 			return section;
@@ -88,7 +88,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			});
 			section.AddOrReplaceFieldDescriptor(new FieldDescriptor
 			{
-				ID = Ids.Sections.ContactInfo.Zip, Name = "ZIP", FieldType = typeof(string), IsOptional = true, Tooltip = "This contact's current ZIP code.",
+				ID = Ids.Sections.ContactInfo.ZIP, Name = "ZIP", FieldType = typeof(string), IsOptional = true, Tooltip = "This contact's current ZIP code.",
 			});
 			return section;
 		}
@@ -98,7 +98,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			var section = new CustomSectionDefinition { ID = Ids.Sections.Organization.Id, Name = "Organization" };
 			section.AddOrReplaceFieldDescriptor(new DomInstanceFieldDescriptor(Ids.ModuleId)
 			{
-				ID = Ids.Sections.Organization.OrganizationReference, Name = "Organization", FieldType = typeof(Guid), IsOptional = true,
+				ID = Ids.Sections.Organization.Organization_57695f03, Name = "Organization", FieldType = typeof(Guid), IsOptional = true,
 				DomDefinitionIds = { Ids.Definitions.Organizations }, Tooltip = "This contact's current organization.",
 			});
 			return section;
@@ -109,7 +109,7 @@ namespace Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Definit
 			var section = new CustomSectionDefinition { ID = Ids.Sections.Team.Id, Name = "Team" };
 			section.AddOrReplaceFieldDescriptor(new DomInstanceFieldDescriptor(Ids.ModuleId)
 			{
-				ID = Ids.Sections.Team.TeamReference, Name = "Team", FieldType = typeof(Guid), IsOptional = true,
+				ID = Ids.Sections.Team.Team_144d3379, Name = "Team", FieldType = typeof(Guid), IsOptional = true,
 				DomDefinitionIds = { Ids.Definitions.Teams }, Tooltip = "This contact's team membership.",
 			});
 			section.AddOrReplaceFieldDescriptor(new DomInstanceFieldDescriptor(Ids.ModuleId)

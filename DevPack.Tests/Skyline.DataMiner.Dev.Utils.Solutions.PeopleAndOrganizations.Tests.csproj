@@ -26,5 +26,8 @@
 		<ProjectReference Include="..\DevPack\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.csproj" />
 		<ProjectReference Include="..\DevPack.UnitTesting\Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations.UnitTesting.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Storage\DOM\PeopleAndOrganizationsSchema.snapshot.json" />
+	</ItemGroup>
 
 </Project>

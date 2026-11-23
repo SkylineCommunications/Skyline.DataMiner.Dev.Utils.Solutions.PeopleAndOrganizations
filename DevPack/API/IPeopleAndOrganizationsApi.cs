@@ -43,18 +43,6 @@
 		ISkillsRepository Skills { get; }
 
 		/// <summary>
-		/// Installs or reconciles the DOM schema owned by People and Organizations.
-		/// </summary>
-		/// <remarks>
-		/// Requires DataMiner 10.6.11 or later and permission to manage DOM module settings.
-		/// Module settings and declared behaviors are authoritative. Fields and section links missing
-		/// from the declarations are retained as soft-deleted metadata.
-		/// This method does not create or migrate DOM instances or register the solution.
-		/// Completed writes are not rolled back if reconciliation or DOM Manager reinitialization fails.
-		/// </remarks>
-		void InstallDomModules();
-
-		/// <summary>
 		/// Determines whether the People and Organizations application is installed on the DataMiner System.
 		/// </summary>
 		/// <returns>

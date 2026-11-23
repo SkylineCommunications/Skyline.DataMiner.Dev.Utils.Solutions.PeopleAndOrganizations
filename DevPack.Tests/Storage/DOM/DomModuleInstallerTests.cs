@@ -69,7 +69,7 @@ namespace RT_PeopleAndOrganizations.Storage.DOM
 			var helper = new DomHelper(handleMessages, ModuleId);
 			var settings = new ModuleSettingsHelper(handleMessages);
 			var installedSettings = settings.ModuleSettings.ReadAll().Single();
-			var expectedSettings = DomSchemaSnapshot.Hash(installedSettings.ToJson());
+			var expectedSettings = DomSchemaSnapshot.Canonicalize(installedSettings.ToJson()).ToString();
 			installedSettings.DomManagerSettings.InformationEventSettings.Enable = !installedSettings.DomManagerSettings.InformationEventSettings.Enable;
 			settings.ModuleSettings.Update(installedSettings);
 
@@ -78,7 +78,7 @@ namespace RT_PeopleAndOrganizations.Storage.DOM
 			var collaboration = new CustomSectionDefinition { ID = collaborationId, Name = "Collaboration" };
 			collaboration.AddOrReplaceFieldDescriptor(new FieldDescriptor { ID = collaborationFieldId, Name = "Create Teams channel", FieldType = typeof(bool) });
 			helper.SectionDefinitions.Create(collaboration);
-			var previousCollaboration = DomSchemaSnapshot.Hash(collaboration.ToJson());
+			var previousCollaboration = DomSchemaSnapshot.Canonicalize(collaboration.ToJson()).ToString();
 
 			var teamInfoId = SlcPeople_OrganizationsIds.Sections.TeamInformation.Id;
 			var teamInfo = (CustomSectionDefinition)helper.SectionDefinitions.ReadAll().Single(x => x.GetID().Equals(teamInfoId));
@@ -91,7 +91,7 @@ namespace RT_PeopleAndOrganizations.Storage.DOM
 			team.SectionDefinitionLinks.Add(new SectionDefinitionLink(collaborationId) { IsOptional = true });
 			helper.DomDefinitions.Update(team);
 			var behavior = helper.DomBehaviorDefinitions.ReadAll().Single(x => x.ID.Equals(team.DomBehaviorDefinitionId));
-			var expectedBehavior = DomSchemaSnapshot.Hash(behavior.ToJson());
+			var expectedBehavior = DomSchemaSnapshot.Canonicalize(behavior.ToJson()).ToString();
 			behavior.Name = "Old team behavior";
 			behavior.StatusSectionDefinitionLinks.Add(new DomStatusSectionDefinitionLink(new DomStatusSectionDefinitionLinkId(behavior.InitialStatusId, collaborationId))
 			{
@@ -113,10 +113,10 @@ namespace RT_PeopleAndOrganizations.Storage.DOM
 			var field = sections.Single(x => x.GetID().Equals(teamInfoId)).GetAllFieldDescriptors().Single(x => x.ID.Equals(removedFieldId));
 			Assert.IsTrue(field.IsSoftDeleted);
 			Assert.AreEqual("Keep this metadata.", field.Tooltip);
-			Assert.AreEqual(previousCollaboration, DomSchemaSnapshot.Hash(sections.Single(x => x.GetID().Equals(collaborationId)).ToJson()));
+			Assert.AreEqual(previousCollaboration, DomSchemaSnapshot.Canonicalize(sections.Single(x => x.GetID().Equals(collaborationId)).ToJson()).ToString());
 			var installedBehavior = helper.DomBehaviorDefinitions.ReadAll().Single(x => x.ID.Equals(behavior.ID));
-			Assert.AreEqual(expectedBehavior, DomSchemaSnapshot.Hash(installedBehavior.ToJson()));
-			Assert.AreEqual(expectedSettings, DomSchemaSnapshot.Hash(settings.ModuleSettings.ReadAll().Single().ToJson()));
+			Assert.AreEqual(expectedBehavior, DomSchemaSnapshot.Canonicalize(installedBehavior.ToJson()).ToString());
+			Assert.AreEqual(expectedSettings, DomSchemaSnapshot.Canonicalize(settings.ModuleSettings.ReadAll().Single().ToJson()).ToString());
 		}
 
 		[TestMethod]

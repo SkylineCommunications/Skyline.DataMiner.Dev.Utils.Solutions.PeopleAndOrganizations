@@ -9,7 +9,6 @@
 	using Skyline.DataMiner.Solutions.MediaOps.Plan.API;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Logging;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.Storage.DOM.Tools;
 
 	/// <summary>
 	/// Provides the main entry point for interacting with the People and Organizations API.
@@ -84,12 +83,6 @@
 		internal IMediaOpsPlanApi PlanApi => lazyPlanApi.Value;
 
 		internal PeopleAndOrganizations.Tools.LockManager LockManager => lazyLockManager.Value;
-
-		/// <inheritdoc/>
-		public void InstallDomModules()
-		{
-			DomModuleInstaller.Install(Connection.HandleMessages, message => Logger.Information(message));
-		}
 
 		/// <inheritdoc/>
 		public bool IsInstalled(out string version)
