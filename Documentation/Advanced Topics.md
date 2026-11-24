@@ -161,6 +161,17 @@ api.SetLogger(myLogger);
 
 ## Installation and Setup
 
+### Installing the DOM schema
+
+Call `api.InstallDomModules()` explicitly on a client created by the DevPack to install or reconcile `(slc)people_organizations`. The extension method is in the `Skyline.DataMiner.Solutions.PeopleAndOrganizations.API` namespace and requires permission to configure DOM module settings. Install this schema before the Plan-owned modules when deploying MediaOps Plan.
+
+- **Module settings and behaviors:** Differing settings and declared behaviors are replaced in full. Custom statuses, transitions, actions, buttons, and status-specific section or field rules in those behaviors are not merged into the shipped definitions.
+- **Fields and definition section links:** Entries absent from the declarations are retained as soft-deleted metadata. This includes Collaboration links if they are not in the shipped schema. Entire sections and definitions absent from the declarations are not removed.
+
+The installer reinitializes the DOM Manager after writing the schema. If reconciliation fails, completed writes are not rolled back. If reinitialization fails, the schema writes have already completed, but the reload was not confirmed. In MediaOps Plan, the `DOM Setup` script stops before installing the Plan-owned modules. Check the installation log, fix the cause, and retry with the same package.
+
+This method does not deploy scripts, initialize or migrate DOM instances, or register the solution.
+
 ### Checking Installation Status
 
 Verify that the People and Organizations application is installed:

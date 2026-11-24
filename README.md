@@ -20,6 +20,10 @@ Depending on your project type, one of the following additional packages is also
 > [!NOTE]
 > This library targets `.NET Framework 4.8`.
 
+Adding the NuGet package or creating an API client does not install the DOM schema. Deployment code calls the `InstallDomModules()` extension from `Skyline.DataMiner.Solutions.PeopleAndOrganizations.API` on a client created by the DevPack. It reconciles only `(slc)people_organizations`. When deploying MediaOps Plan, run it before the Plan installer.
+
+See [Installing the DOM schema](Documentation/Advanced%20Topics.md#installing-the-dom-schema) for upgrade behavior and how to retry a failed installation.
+
 ## Documentation
 
 | Document | Description |
